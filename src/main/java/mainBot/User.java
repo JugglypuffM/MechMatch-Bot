@@ -93,7 +93,7 @@ public class User{
      * @return true if {@link User#age} filled successfully and false if not.
      */
     public boolean setAge(int m_age) {
-        if ((m_age > 14) && (m_age < 120)){
+        if ((m_age > 15) && (m_age < 121)){
             this.age = m_age;
             return true;
         }
@@ -110,7 +110,7 @@ public class User{
      * @return true if {@link User#minExpectedAge} filled successfully and false if not.
      */
     public boolean setMinExpectedAge(int m_minExpectedAge) {
-        if ((m_minExpectedAge > 14) && (m_minExpectedAge < 120)){
+        if ((m_minExpectedAge > 15) && (m_minExpectedAge < 121)){
             this.age = m_minExpectedAge;
             return true;
         }
@@ -127,7 +127,7 @@ public class User{
      * @return true if {@link User#maxExpectedAge} filled successfully and false if not.
      */
     public boolean setMaxExpectedAge(int m_maxExpectedAge) {
-        if ((m_maxExpectedAge > 14) && (m_maxExpectedAge < 120)){
+        if ((m_maxExpectedAge > 15) && (m_maxExpectedAge < 121)){
             this.age = m_maxExpectedAge;
             return true;
         }
