@@ -7,13 +7,13 @@ public class UserTests {
     @Test
     public void sexVerificationTest(){
         User user = new User("0");
-        boolean lastSex = user.getSex();
+        String lastSex = user.getSex();
         Assertions.assertFalse(user.setSex("asdfasdf"));
         Assertions.assertEquals(lastSex, user.getSex());
         Assertions.assertTrue(user.setSex("Парень"));
-        Assertions.assertFalse(user.getSex());
+        Assertions.assertEquals("парень", user.getSex());
         Assertions.assertTrue(user.setSex("Девушка"));
-        Assertions.assertTrue(user.getSex());
+        Assertions.assertEquals("девушка", user.getSex());
         lastSex = user.getSex();
         Assertions.assertFalse(user.setSex("asdfasdf"));
         Assertions.assertEquals(lastSex, user.getSex());
