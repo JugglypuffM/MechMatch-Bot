@@ -33,6 +33,12 @@ public class UserStorage {
         }
         return userDict.get(id);
     }
+
+    /**
+     * Modified getter of {@link UserStorage#otherProfilesList}
+     * @param id id of user which will be removed from returned copy
+     * @return a copy of {@link UserStorage#otherProfilesList} without user with given id
+     */
     public List<String> getOtherProfilesList(String id){
         List<String> tmpList = new ArrayList<>(otherProfilesList);
         tmpList.remove(id);
