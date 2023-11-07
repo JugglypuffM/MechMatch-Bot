@@ -94,6 +94,8 @@ public class MessageProcessor {
         stateDict.put("8", "pe_ESEX");
         stateDict.put("город собеседника", "pe_ECITY");
         stateDict.put("9", "pe_ECITY");
+        stateDict.put("фото", "pe_PHOTO");
+        stateDict.put("10", "pe_PHOTO");
         return stateDict;
     }
 
@@ -103,8 +105,8 @@ public class MessageProcessor {
      * @param message user message
      * @return reply to user message
      */
-    public String[] processMessage(String id, String message){
-        String[] answer = new String[12];
+    public String[] processMessage(String id, String message, String picture){
+        String[] answer = new String[24];
         if (storage.getUser(id) == null){
             storage.addUser(id);
         }
@@ -158,7 +160,9 @@ public class MessageProcessor {
                                 ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
                                 ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
                                 ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
-                                ")\n9 - Город собеседника(" + sender.getExpectedCity() + ")";
+                                ")\n9 - Город собеседника(" + sender.getExpectedCity() +
+                                ")\n10 - Фото";
+                        answer[13] = sender.getPictureID();
                         sender.setGlobalState("profile_edit");
                         sender.setLocalState("pe_START");
                         return answer;
@@ -172,6 +176,7 @@ public class MessageProcessor {
                         return answer;
                     case "/myProfile":
                         answer[0] = profileData(id);
+                        answer[13] = sender.getPictureID();
                         return answer;
                 }
             case "profile_fill":
@@ -257,9 +262,19 @@ public class MessageProcessor {
                         break;
                     case "pf_ECITY":
                         sender.setExpectedCity(message);
-                        answer[0] = "Посмотри свою анкету еще раз, всё ли верно? Ответь да или нет.";
-                        answer[2] = profileData(id);
-                        sender.setLocalState("pf_FINISH");
+                        answer[0] = "Теперь отправь обложку для профиля";
+                        sender.setLocalState("pf_PHOTO");
+                        break;
+                    case "pf_PHOTO":
+                        if (picture == null){
+                            answer[0] = "Пожалуйста, отправь картинку";
+                        }
+                        else{
+                            answer[0] = "Посмотри свою анкету еще раз, всё ли верно? Ответь да или нет.";
+                            answer[2] = profileData(id);
+                            answer[14] = sender.getPictureID();
+                            sender.setLocalState("pf_FINISH");
+                        }
                         break;
                     case "pf_FINISH":
                         if (message.equalsIgnoreCase("да")){
@@ -278,8 +293,10 @@ public class MessageProcessor {
                                     ")\n5 - Информация о себе(" + sender.getInformation() +
                                     ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
                                     ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
-                                    ")\n8 - Город собеседника(" + sender.getExpectedCity() +
-                                    ")\n9 - Пол собеседника(" + sender.getExpectedSex() + ")";
+                                    ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
+                                    ")\n9 - Город собеседника(" + sender.getExpectedCity() +
+                                    ")\n10 - Фото";
+                            answer[13] = sender.getPictureID();
                             sender.setGlobalState("profile_edit");
                             sender.setLocalState("pe_START");
                             break;
@@ -383,6 +400,15 @@ public class MessageProcessor {
                         answer[2] = profileData(id);
                         sender.setGlobalState("default");
                         storage.addToOPL(id);
+                        break;
+                    case "pe_PHOTO":
+                        if (picture == null){
+                            answer[0] = "Пожалуйста, отправь картинку";
+                        }
+                        else{
+                            answer[0] = "Посмотри свою анкету еще раз, всё ли верно? Ответь да или нет.";
+                            sender.setLocalState("default");
+                        }
                         break;
                 }
                 break;

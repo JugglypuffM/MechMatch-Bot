@@ -7,7 +7,7 @@ package mainBot;
  */
 public class User{
     private final String id;
-    private String name, city, expectedCity, sex, expectedSex, globalState, localState, information;
+    private String name, city, expectedCity, sex, expectedSex, globalState, localState, information, pictureID;
     private int age, minExpectedAge, maxExpectedAge;
     public User(String m_id){
         this.id = m_id;
@@ -132,5 +132,11 @@ public class User{
     }
     public void setInformation(String m_information){
         this.information = m_information;
+    }
+    public String getPictureID(){
+        return pictureID;
+    }
+    public void setPictureID(String m_pictureID){
+        this.pictureID = m_pictureID;
     }
 }
