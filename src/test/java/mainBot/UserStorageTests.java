@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class UserStorageTests {
+    /**
+     * Test of user addition
+     */
     @Test
     public void addUserTest(){
         UserStorage storage = new UserStorage();
@@ -11,6 +14,10 @@ public class UserStorageTests {
         storage.addUser("0");
         Assertions.assertTrue(storage.getUserDict().containsKey("0"));
     }
+
+    /**
+     * Test of user extraction
+     */
     @Test
     public void getUserTest(){
         UserStorage storage = new UserStorage();
