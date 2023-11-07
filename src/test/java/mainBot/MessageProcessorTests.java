@@ -4,6 +4,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class MessageProcessorTests {
+    /**
+     * Utility method to fill all profile data at once
+     * @param id user id
+     * @param processor instance of {@link MessageProcessor}
+     */
     public void fillProfile(String id, MessageProcessor processor){
         processor.processMessage(id, "/start");
         processor.processMessage(id, "Стас");
@@ -18,6 +23,10 @@ public class MessageProcessorTests {
         processor.processMessage(id, "Екатеринбург");
         processor.processMessage(id, "да");
     }
+
+    /**
+     * Test of profile filling procedure, tests if states switch correctly and data stores appropriately
+     */
     @Test
     public void profileFillTest(){
         MessageProcessor processor = new MessageProcessor();
@@ -60,6 +69,10 @@ public class MessageProcessorTests {
         processor.processMessage(id, "да");
         Assertions.assertEquals("default", processor.storage.getUser(id).getGlobalState());
     }
+
+    /**
+     * Test of profile editing procedure, tests state switching and appropriate data storage
+     */
     @Test
     public void profileEditTest(){
         MessageProcessor processor = new MessageProcessor();
@@ -77,13 +90,15 @@ public class MessageProcessorTests {
         Assertions.assertEquals(18, processor.storage.getUser(id).getAge());
     }
 
+    /**
+     * Test of matching procedure, tests if all pages can be accessed
+     */
     @Test
     public void MatchingTest(){
         MessageProcessor processor = new MessageProcessor();
-//        for (int i = 0; i < 16; i++){
-//            fillProfile("" + i, processor);
-//        }
-        fillProfile("0", processor);
+        for (int i = 0; i < 16; i++){
+            fillProfile("" + i, processor);
+        }
         for (int i = 1; i < processor.storage.getOtherProfilesList("0").size()/10 + 2; i++){
             processor.processMessage("0", "/match");
             Assertions.assertEquals("matching", processor.storage.getUser("0").getGlobalState());

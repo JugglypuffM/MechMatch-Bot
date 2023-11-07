@@ -278,8 +278,8 @@ public class MessageProcessor {
                                     ")\n5 - Информация о себе(" + sender.getInformation() +
                                     ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
                                     ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
-                                    ")\n8 - Город собеседника(" + sender.getExpectedCity() +
-                                    ")\n9 - Пол собеседника(" + sender.getExpectedSex() + ")";
+                                    ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
+                                    ")\n9 - Город собеседника(" + sender.getExpectedCity() + ")";
                             sender.setGlobalState("profile_edit");
                             sender.setLocalState("pe_START");
                             break;

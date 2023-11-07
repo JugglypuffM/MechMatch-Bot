@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class UserTests {
+    /**
+     * Test of sex verification, tests if there are only two acceptable options
+     */
     @Test
     public void sexVerificationTest(){
         User user = new User("0");
@@ -19,6 +22,9 @@ public class UserTests {
         Assertions.assertEquals(lastSex, user.getSex());
     }
 
+    /**
+     * Test of age verification, tests if only a range from 15 to 119 is accepted
+     */
     @Test
     public void ageVerificationTest(){
         User user = new User("0");
