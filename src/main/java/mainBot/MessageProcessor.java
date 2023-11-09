@@ -1,11 +1,15 @@
 package mainBot;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MessageProcessor {
-    public final UserStorage storage = new UserStorage();
+    Utility util = new Utility();
+    private final UserStorage storage = new UserStorage();
+    private final Map<String, LocalState> stateDict = util.getStateDict();
+    private final Map<LocalState, LocalState> nextDict = util.getNextDict();
+    private final Map<LocalState, String> rightReplies = util.getRightReplies();
+    private final Map<LocalState, String> wrongReplies = util.getWrongReplies();
     /**
      * Simple help method
      * @return a description of the commands
@@ -44,12 +48,12 @@ public class MessageProcessor {
     private void eraseProfileData(String id){
         User user = storage.getUser(id);
         user.setName(null);
-        user.setAge(0);
+        user.setAge("0");
         user.setSex("");
         user.setCity(null);
         user.setInformation(null);
-        user.setMinExpectedAge(0);
-        user.setMaxExpectedAge(999);
+        user.setMinExpectedAge("0");
+        user.setMaxExpectedAge("999");
         user.setExpectedSex("");
         user.setExpectedCity(null);
     }
@@ -74,29 +78,149 @@ public class MessageProcessor {
      * Getter for stateDict from {@link MessageProcessor#processMessage}
      * @return map of local states
      */
-    private Map<String, String> getStateDict() {
-        Map<String, String> stateDict = new HashMap<>();
-        stateDict.put("имя", "pe_NAME");
-        stateDict.put("1", "pe_NAME");
-        stateDict.put("возраст", "pe_AGE");
-        stateDict.put("2", "pe_AGE");
-        stateDict.put("пол", "pe_SEX");
-        stateDict.put("3", "pe_SEX");
-        stateDict.put("город", "pe_CITY");
-        stateDict.put("4", "pe_CITY");
-        stateDict.put("информация о себе", "pe_ABOUT");
-        stateDict.put("5", "pe_ABOUT");
-        stateDict.put("нижний порог возраста собеседника", "pe_EAGEMIN");
-        stateDict.put("6", "pe_EAGEMIN");
-        stateDict.put("верхний порог возраста собеседника", "pe_EAGEMAX");
-        stateDict.put("7", "pe_EAGEMAX");
-        stateDict.put("пол собеседника", "pe_ESEX");
-        stateDict.put("8", "pe_ESEX");
-        stateDict.put("город собеседника", "pe_ECITY");
-        stateDict.put("9", "pe_ECITY");
-        return stateDict;
+    private void caseDefault(String id, String message, User sender, String[] answer){
+        if (storage.getUser(id).getExpectedCity() == null){
+            message = "/start";
+        }
+        if (!(message.charAt(0) == '/')){
+            answer[0] = "Что-то я тебя не понимаю, если не знаешь что я умею - введи /help";
+            return;
+        }
+        switch (message){
+            default:
+                answer[0] = "Такой команды нет, введи /help, чтобы увидеть список всех команд";
+                break;
+            case "/start":
+                if (storage.getUser(id).getExpectedCity() != null){
+                    answer[0] = giveHelp();
+                    break;
+                }
+                answer[0] = "Привет! Ты попал на MechMatch - место, где тебе помогут найти твою вторую половинку или просто хорошего друга :)  ";
+                answer[1] = """
+                        Перед началом хочется тебя предупредить, что бот никак не идентифицирует пользователя по документам, поэтому будь осторожен!\s
+                        Отправь любое сообщение, чтобы подтвердить прочтение предупреждения.
+                        """;
+                sender.setGlobalState(GlobalState.PROFILE_FILL);
+                sender.setLocalState(LocalState.START);
+                break;
+            case "/help":
+                answer[0] = giveHelp();
+                break;
+            case "/changeProfile":
+                eraseProfileData(id);
+                storage.deleteFromOPL(id);
+                answer[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
+                sender.setGlobalState(GlobalState.PROFILE_FILL);
+                sender.setLocalState(LocalState.START);
+                break;
+            case "/editProfile":
+                storage.deleteFromOPL(id);
+                answer[0] = "Что хочешь изменить?";
+                answer[1] = "Вот список полей доступных для изменения:" +
+                        " \n1 - Имя(" + sender.getName() +
+                        ")\n2 - Возраст(" + sender.getAge() +
+                        ")\n3 - Пол(" + sender.getSex() +
+                        ")\n4 - Город(" + sender.getCity() +
+                        ")\n5 - Информация о себе(" + sender.getInformation() +
+                        ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
+                        ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
+                        ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
+                        ")\n9 - Город собеседника(" + sender.getExpectedCity() + ")";
+                sender.setGlobalState(GlobalState.PROFILE_EDIT);
+                sender.setLocalState(LocalState.START);
+                break;
+            case "/match":
+                if (storage.getOtherProfilesList(id).isEmpty()){
+                    answer[0] = "Кроме тебя пока никого нет ;(";
+                    break;
+                }
+                answer[0] = "Какую страницу анкет вывести(Всего: " + (storage.getOtherProfilesList(id).size()/10 + 1) + ")?";
+                sender.setGlobalState(GlobalState.MATCHING);
+                break;
+            case "/myProfile":
+                answer[0] = profileData(id);
+                break;
+        }
     }
-
+    private void caseProfileFill(String id, String message, User sender, String[] answer) {
+        switch (sender.getLocalState()) {
+            case START:
+                answer[0] = "А теперь перейдем к заполнению анкеты.";
+                answer[1] = "Введи свое имя";
+                sender.setLocalState(LocalState.NAME);
+                break;
+            case FINISH:
+                if (message.equalsIgnoreCase("да")) {
+                    storage.addToOPL(id);
+                    answer[0] = "Отлично, теперь можно переходить к использованию.";
+                    answer[1] = giveHelp();
+                    sender.setGlobalState(GlobalState.DEFAULT);
+                } else if (message.equalsIgnoreCase("нет")) {
+                    answer[0] = "Что хочешь изменить?";
+                    answer[1] = "Вот список полей доступных для изменения:" +
+                            " \n1 - Имя(" + sender.getName() +
+                            ")\n2 - Возраст(" + sender.getAge() +
+                            ")\n3 - Пол(" + sender.getSex() +
+                            ")\n4 - Город(" + sender.getCity() +
+                            ")\n5 - Информация о себе(" + sender.getInformation() +
+                            ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
+                            ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
+                            ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
+                            ")\n9 - Город собеседника(" + sender.getExpectedCity() + ")";
+                    sender.setGlobalState(GlobalState.PROFILE_EDIT);
+                    sender.setLocalState(LocalState.START);
+                    break;
+                } else {
+                    answer[0] = "Пожалуйста, напиши либо да, либо нет";
+                }
+                break;
+            default:
+                if (sender.setField(message)) {
+                    answer[0] = rightReplies.get(sender.getLocalState());
+                    if (sender.getLocalState().equals(LocalState.ECITY)) {
+                        answer[2] = profileData(id);
+                    }
+                    sender.setLocalState(nextDict.get(sender.getLocalState()));
+                } else {
+                    answer[0] = wrongReplies.get(sender.getLocalState());
+                }
+                break;
+        }
+    }
+    private void caseProfileEdit(String id, String message, User sender, String[] answer){
+        answer[0] = "Изменение внесено.";
+        if (sender.getLocalState().equals(LocalState.START)) {
+            answer[0] = "Введи новое значение.";
+            if (!stateDict.containsKey(message)) {
+                answer[0] = "Напиши либо цифру соответствующую полю, либо название поля.";
+                return;
+            }
+            sender.setLocalState(stateDict.get(message));
+        } else {
+            if (sender.setField(message)) {
+                sender.setGlobalState(GlobalState.DEFAULT);
+                storage.addToOPL(id);
+            } else {
+                answer[0] = wrongReplies.get(sender.getLocalState());
+            }
+        }
+    }
+    private void caseMatching(String id, String message, User sender, String[] answer){
+        int page;
+        try {
+            page = Integer.parseInt(message);
+        } catch (NumberFormatException e) {
+            answer[0] = "Пожалуйста, введи ответ цифрами.";
+            return;
+        }
+        if ((page < 1) || (page > storage.getOtherProfilesList(id).size() / 10 + 1)) {
+            answer[0] = "Нет страницы с таким номером.";
+            return;
+        }
+        answer[0] = "Профили на странице " + message + ":";
+        getTenProfiles(answer, page - 1, id);
+        sender.setGlobalState(GlobalState.DEFAULT);
+    }
     /**
      * Main message processing method
      * @param id string presentation of user id
@@ -109,299 +233,11 @@ public class MessageProcessor {
             storage.addUser(id);
         }
         User sender = storage.getUser(id);
-        int age;
         switch (sender.getGlobalState()){
-            case "default":
-                if (storage.getUser(id).getExpectedCity() == null){
-                    message = "/start";
-                }
-                if (!(message.charAt(0) == '/')){
-                    answer[0] = "Что-то я тебя не понимаю, если не знаешь что я умею - введи /help";
-                    return answer;
-                }
-                switch (message){
-                    default:
-                        answer[0] = "Такой команды нет, введи /help, чтобы увидеть список всех команд";
-                        return answer;
-                    case "/start":
-                        if (storage.getUser(id).getExpectedCity() != null){
-                            answer[0] = giveHelp();
-                            return answer;
-                        }
-                        answer[0] = "Привет! Ты попал на MechMatch - место, где тебе помогут найти твою вторую половинку или просто хорошего друга :)  ";
-                        answer[1] = """
-                        Перед началом хочется тебя предупредить, что бот никак не идентифицирует пользователя по документам, поэтому будь осторожен!\s
-                        Отправь любое сообщение, чтобы подтвердить прочтение предупреждения.
-                        """;
-                        sender.setGlobalState("profile_fill");
-                        sender.setLocalState("pf_START");
-                        return answer;
-                    case "/help":
-                        answer[0] = giveHelp();
-                        return answer;
-                    case "/changeProfile":
-                        eraseProfileData(id);
-                        storage.deleteFromOPL(id);
-                        answer[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
-                        sender.setGlobalState("profile_fill");
-                        sender.setLocalState("pf_START");
-                        return answer;
-                    case "/editProfile":
-                        storage.deleteFromOPL(id);
-                        answer[0] = "Что хочешь изменить?";
-                        answer[1] = "Вот список полей доступных для изменения:" +
-                                " \n1 - Имя(" + sender.getName() +
-                                ")\n2 - Возраст(" + sender.getAge() +
-                                ")\n3 - Пол(" + sender.getSex() +
-                                ")\n4 - Город(" + sender.getCity() +
-                                ")\n5 - Информация о себе(" + sender.getInformation() +
-                                ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
-                                ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
-                                ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
-                                ")\n9 - Город собеседника(" + sender.getExpectedCity() + ")";
-                        sender.setGlobalState("profile_edit");
-                        sender.setLocalState("pe_START");
-                        return answer;
-                    case "/match":
-                        if (storage.getOtherProfilesList(id).isEmpty()){
-                            answer[0] = "Кроме тебя пока никого нет ;(";
-                            return answer;
-                        }
-                        answer[0] = "Какую страницу анкет вывести(Всего: " + (storage.getOtherProfilesList(id).size()/10 + 1) + ")?";
-                        sender.setGlobalState("matching");
-                        return answer;
-                    case "/myProfile":
-                        answer[0] = profileData(id);
-                        return answer;
-                }
-            case "profile_fill":
-                switch (sender.getLocalState()){
-                    case "pf_START":
-                        answer[0] = "А теперь перейдем к заполнению анкеты.";
-                        answer[1] = "Введи свое имя";
-                        sender.setLocalState("pf_NAME");
-                        break;
-                    case "pf_NAME":
-                        sender.setName(message);
-                        answer[0] = "Отлично, теперь напиши цифрами, сколько тебе лет.";
-                        sender.setLocalState("pf_AGE");
-                        break;
-                    case "pf_AGE":
-                        try {
-                            age = Integer.parseInt(message);
-                        }catch (NumberFormatException e){
-                            answer[0] = "Пожалуйста, введи ответ цифрами.";
-                            return answer;
-                        }
-                        if (sender.setAge(age)){
-                            answer[0] = "Теперь укажи свой пол(Парень/Девушка).";
-                            sender.setLocalState("pf_SEX");
-                        }else {
-                            answer[0] = "Этот возраст выглядит неправдоподобно, введи значение между 15 и 119.";
-                        }
-                        break;
-                    case "pf_SEX":
-                        if (sender.setSex(message)){
-                            answer[0] = "Хорошо, напиши название города, в котором живешь.";
-                            sender.setLocalState("pf_CITY");
-                        }
-                        else {
-                            answer[0] = "Ввведи один из двух ответов: парень или девушка.";
-                        }
-                        break;
-                    case "pf_CITY":
-                        sender.setCity(message);
-                        answer[0] = "Расскажи о себе в одном сообщении, возможно это поможет подобрать тебе наиболее интересного собеседника.";
-                        sender.setLocalState("pf_ABOUT");
-                        break;
-                    case "pf_ABOUT":
-                        sender.setInformation(message);
-                        answer[0] = "Теперь напиши минимальный возраст твоего потенциального собеседника.";
-                        sender.setLocalState("pf_EAGEMIN");
-                        break;
-                    case "pf_EAGEMIN":
-                        try {
-                            age = Integer.parseInt(message);
-                        }catch (NumberFormatException e){
-                            answer[0] = "Пожалуйста, введи ответ цифрами.";
-                            return answer;
-                        }
-                        if (sender.setMinExpectedAge(age)){
-                            answer[0] = "Теперь напиши максимальный возраст твоего потенциального собеседника.";
-                            sender.setLocalState("pf_EAGEMAX");
-                        }else {
-                            answer[0] = "Этот возраст выглядит неправдоподобно, введи значение между 15 и 119, а еще оно должно быть не больше максимального.";
-                        }
-                        break;
-                    case "pf_EAGEMAX":
-                        try {
-                            age = Integer.parseInt(message);
-                        }catch (NumberFormatException e){
-                            answer[0] = "Пожалуйста, введи ответ цифрами.";
-                            return answer;
-                        }
-                        if (sender.setMaxExpectedAge(age)){
-                            answer[0] = "Теперь укажи пол твоего потенциального собеседника(Парень/Девушка/Без разницы).";
-                            sender.setLocalState("pf_ESEX");
-                        }else {
-                            answer[0] = "Этот возраст выглядит неправдоподобно, введи значение между 15 и 119, а еще оно должно быть не меньше минимального.";
-                        }
-                        break;
-                    case "pf_ESEX":
-                        if (sender.setExpectedSex(message)){
-                            answer[0] = "Хорошо, напиши название города, в котором хочешь найти собеседника.";
-                            sender.setLocalState("pf_ECITY");
-                        }else {
-                            answer[0] = "Ввведи один из трех ответов: парень, девушка или без разницы.";
-                        }
-                        break;
-                    case "pf_ECITY":
-                        sender.setExpectedCity(message);
-                        answer[0] = "Посмотри свою анкету еще раз, всё ли верно? Ответь да или нет.";
-                        answer[2] = profileData(id);
-                        sender.setLocalState("pf_FINISH");
-                        break;
-                    case "pf_FINISH":
-                        if (message.equalsIgnoreCase("да")){
-                            storage.addToOPL(id);
-                            answer[0] = "Отлично, теперь можно переходить к использованию.";
-                            answer[1] = giveHelp();
-                            sender.setGlobalState("default");
-                        }
-                        else if (message.equalsIgnoreCase("нет")){
-                            answer[0] = "Что хочешь изменить?";
-                            answer[1] = "Вот список полей доступных для изменения:" +
-                                    " \n1 - Имя(" + sender.getName() +
-                                    ")\n2 - Возраст(" + sender.getAge() +
-                                    ")\n3 - Пол(" + sender.getSex() +
-                                    ")\n4 - Город(" + sender.getCity() +
-                                    ")\n5 - Информация о себе(" + sender.getInformation() +
-                                    ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
-                                    ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
-                                    ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
-                                    ")\n9 - Город собеседника(" + sender.getExpectedCity() + ")";
-                            sender.setGlobalState("profile_edit");
-                            sender.setLocalState("pe_START");
-                            break;
-                        }
-                        else{
-                            answer[0] = "Пожалуйста, напиши либо да, либо нет";
-                        }
-                        break;
-                }
-                break;
-            case "profile_edit":
-                answer[0] = "Изменение внесено.";
-                switch (sender.getLocalState()){
-                    case "pe_START":
-                        Map<String, String> stateDict = getStateDict();
-                        answer[0] = "Введи новое значение.";
-                        if (!stateDict.containsKey(message)){
-                            answer[0] = "Напиши либо цифру соответствующую полю, либо название поля";
-                            return answer;
-                        }
-                        sender.setLocalState(stateDict.get(message));
-                        break;
-                    case "pe_NAME":
-                        sender.setName(message);
-                        sender.setGlobalState("default");
-                        storage.addToOPL(id);
-                        break;
-                    case "pe_AGE":
-                        try {
-                            age = Integer.parseInt(message);
-                        }
-                        catch (NumberFormatException e){
-                            answer[0] = "Пожалуйста, введи ответ цифрами.";
-                            return answer;
-                        }
-                        if (sender.setAge(age)){
-                            sender.setGlobalState("default");
-                            storage.addToOPL(id);
-                        }
-                        else {
-                            answer[0] = "Этот возраст выглядит неправдоподобно, введи значение между 15 и 119.";
-                        }
-                        break;
-                    case "pe_SEX":
-                        if (sender.setSex(message)){
-                            sender.setGlobalState("default");
-                            storage.addToOPL(id);
-                        }
-                        else {
-                            answer[0] = "Ввведи один из двух ответов: парень или девушка.";
-                        }
-                        break;
-                    case "pe_CITY":
-                        sender.setCity(message);
-                        sender.setGlobalState("default");
-                        storage.addToOPL(id);
-                        break;
-                    case "pe_ABOUT":
-                        sender.setInformation(message);
-                        sender.setGlobalState("default");
-                        storage.addToOPL(id);
-                        break;
-                    case "pe_EAGEMIN":
-                        try {
-                            age = Integer.parseInt(message);
-                        }catch (NumberFormatException e){
-                            answer[0] = "Пожалуйста, введи ответ цифрами.";
-                            return answer;
-                        }
-                        if (sender.setMinExpectedAge(age)){
-                            sender.setGlobalState("default");
-                            storage.addToOPL(id);
-                        }else {
-                            answer[0] = "Этот возраст выглядит неправдоподобно, введи значение между 15 и 119.";
-                        }
-                        break;
-                    case "pe_EAGEMAX":
-                        try {
-                            age = Integer.parseInt(message);
-                        }catch (NumberFormatException e){
-                            answer[0] = "Пожалуйста, введи ответ цифрами.";
-                            return answer;
-                        }
-                        if (sender.setMaxExpectedAge(age)){
-                            sender.setGlobalState("default");
-                            storage.addToOPL(id);
-                        }else {
-                            answer[0] = "Этот возраст выглядит неправдоподобно, введи значение между 15 и 119.";
-                        }
-                        break;
-                    case "pe_ESEX":
-                        if (sender.setExpectedSex(message)){
-                            sender.setGlobalState("default");
-                            storage.addToOPL(id);
-                        }else {
-                            answer[0] = "Ввведи один из трех ответов: парень, девушка или без разницы.";
-                        }
-                        break;
-                    case "pe_ECITY":
-                        sender.setExpectedCity(message);
-                        answer[2] = profileData(id);
-                        sender.setGlobalState("default");
-                        storage.addToOPL(id);
-                        break;
-                }
-                break;
-            case "matching":
-                int page;
-                try {
-                    page = Integer.parseInt(message);
-                }catch (NumberFormatException e){
-                    answer[0] = "Пожалуйста, введи ответ цифрами.";
-                    return answer;
-                }
-                if ((page < 1) || (page > storage.getOtherProfilesList(id).size()/10 + 1)){
-                    answer[0] = "Нет страницы с таким номером.";
-                    return answer;
-                }
-                answer[0] = "Профили на странице " + message + ":";
-                getTenProfiles(answer, page - 1, id);
-                sender.setGlobalState("default");
-                break;
+            case DEFAULT -> caseDefault(id, message, sender, answer);
+            case PROFILE_FILL -> caseProfileFill(id, message, sender, answer);
+            case PROFILE_EDIT -> caseProfileEdit(id, message, sender, answer);
+            case MATCHING ->  caseMatching(id, message, sender, answer);
         }
         return answer;
     }
