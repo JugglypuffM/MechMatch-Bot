@@ -1,9 +1,5 @@
 package mainBot;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
 /**
  * Main user class. Contains all data fields required for matching.<p>
  * {@link User#id} is unique for every user.<p>
@@ -17,7 +13,7 @@ public class User{
     private int age, minExpectedAge, maxExpectedAge;
     public User(String m_id){
         this.id = m_id;
-        this.globalState = GlobalState.DEFAULT;
+        this.globalState = GlobalState.COMMAND;
         this.localState = LocalState.START;
         this.minExpectedAge = 0;
         this.maxExpectedAge = 999;

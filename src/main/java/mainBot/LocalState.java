@@ -1,6 +1,6 @@
 package mainBot;
 
-enum LocalState{
+public enum LocalState {
     START,
     NAME,
     AGE,

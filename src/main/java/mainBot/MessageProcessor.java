@@ -5,10 +5,29 @@ import java.util.Map;
 
 public class MessageProcessor {
     Utility util = new Utility();
+    /**
+     * Storage of users, which are represented by {@link User} class and can be accessed by id.
+     */
     private final UserStorage storage = new UserStorage();
+    /**
+     * Dictionary with field names and states, in which this fields changed
+     * Key - field name(or number), Value - state
+     */
     private final Map<String, LocalState> stateDict = util.getStateDict();
+    /**
+     * Dictionary with state sequences.
+     * Key - current state, Value - next state after current
+     */
     private final Map<LocalState, LocalState> nextDict = util.getNextDict();
+    /**
+     * Dictionary with replies for case, when user gave valid data
+     * Key - state, Value - reply text
+     */
     private final Map<LocalState, String> rightReplies = util.getRightReplies();
+    /**
+     * Dictionary with replies for case, when user gave invalid data
+     * Key - state, Value - reply text
+     */
     private final Map<LocalState, String> wrongReplies = util.getWrongReplies();
     /**
      * Simple help method
@@ -42,8 +61,8 @@ public class MessageProcessor {
                 "\nГород собеседника: " + user.getExpectedCity();
     }
     /**
-     * Delete data
-     * @param id initial state
+     * Erase all profile data to fill it again
+     * @param id string representation of user id
      */
     private void eraseProfileData(String id){
         User user = storage.getUser(id);
@@ -75,28 +94,33 @@ public class MessageProcessor {
         }
     }
     /**
-     * Getter for stateDict from {@link MessageProcessor#processMessage}
-     * @return map of local states
+     * Command handler.
+     * Changes state depending on command.
+     * If message does not start with '/' or is not a supported command - offers to watch command list
+     * @param id string representation of user id
+     * @param message user message
+     * @param sender instance of {@link User} class representing a sender
+     * @param reply array of strings with size of 12, where every string is a separate message
      */
-    private void caseDefault(String id, String message, User sender, String[] answer){
+    private void caseCommand(String id, String message, User sender, String[] reply){
         if (storage.getUser(id).getExpectedCity() == null){
             message = "/start";
         }
         if (!(message.charAt(0) == '/')){
-            answer[0] = "Что-то я тебя не понимаю, если не знаешь что я умею - введи /help";
+            reply[0] = "Что-то я тебя не понимаю, если не знаешь что я умею - введи /help";
             return;
         }
         switch (message){
             default:
-                answer[0] = "Такой команды нет, введи /help, чтобы увидеть список всех команд";
+                reply[0] = "Такой команды нет, введи /help, чтобы увидеть список всех команд";
                 break;
             case "/start":
                 if (storage.getUser(id).getExpectedCity() != null){
-                    answer[0] = giveHelp();
+                    reply[0] = giveHelp();
                     break;
                 }
-                answer[0] = "Привет! Ты попал на MechMatch - место, где тебе помогут найти твою вторую половинку или просто хорошего друга :)  ";
-                answer[1] = """
+                reply[0] = "Привет! Ты попал на MechMatch - место, где тебе помогут найти твою вторую половинку или просто хорошего друга :)  ";
+                reply[1] = """
                         Перед началом хочется тебя предупредить, что бот никак не идентифицирует пользователя по документам, поэтому будь осторожен!\s
                         Отправь любое сообщение, чтобы подтвердить прочтение предупреждения.
                         """;
@@ -104,19 +128,19 @@ public class MessageProcessor {
                 sender.setLocalState(LocalState.START);
                 break;
             case "/help":
-                answer[0] = giveHelp();
+                reply[0] = giveHelp();
                 break;
             case "/changeProfile":
                 eraseProfileData(id);
                 storage.deleteFromOPL(id);
-                answer[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
+                reply[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
             case "/editProfile":
                 storage.deleteFromOPL(id);
-                answer[0] = "Что хочешь изменить?";
-                answer[1] = "Вот список полей доступных для изменения:" +
+                reply[0] = "Что хочешь изменить?";
+                reply[1] = "Вот список полей доступных для изменения:" +
                         " \n1 - Имя(" + sender.getName() +
                         ")\n2 - Возраст(" + sender.getAge() +
                         ")\n3 - Пол(" + sender.getSex() +
@@ -131,33 +155,42 @@ public class MessageProcessor {
                 break;
             case "/match":
                 if (storage.getOtherProfilesList(id).isEmpty()){
-                    answer[0] = "Кроме тебя пока никого нет ;(";
+                    reply[0] = "Кроме тебя пока никого нет ;(";
                     break;
                 }
-                answer[0] = "Какую страницу анкет вывести(Всего: " + (storage.getOtherProfilesList(id).size()/10 + 1) + ")?";
+                reply[0] = "Какую страницу анкет вывести(Всего: " + (storage.getOtherProfilesList(id).size()/10 + 1) + ")?";
                 sender.setGlobalState(GlobalState.MATCHING);
                 break;
             case "/myProfile":
-                answer[0] = profileData(id);
+                reply[0] = profileData(id);
                 break;
         }
     }
-    private void caseProfileFill(String id, String message, User sender, String[] answer) {
+
+    /**
+     * Profile filling procedure handler.
+     * Fills the exact profile data fields of given user depending on its state
+     * @param id string representation of user id
+     * @param message user message
+     * @param sender instance of {@link User} class representing a sender
+     * @param reply array of strings with size of 12, where every string is a separate message
+     */
+    private void caseProfileFill(String id, String message, User sender, String[] reply) {
         switch (sender.getLocalState()) {
             case START:
-                answer[0] = "А теперь перейдем к заполнению анкеты.";
-                answer[1] = "Введи свое имя";
+                reply[0] = "А теперь перейдем к заполнению анкеты.";
+                reply[1] = "Введи свое имя";
                 sender.setLocalState(LocalState.NAME);
                 break;
             case FINISH:
                 if (message.equalsIgnoreCase("да")) {
                     storage.addToOPL(id);
-                    answer[0] = "Отлично, теперь можно переходить к использованию.";
-                    answer[1] = giveHelp();
-                    sender.setGlobalState(GlobalState.DEFAULT);
+                    reply[0] = "Отлично, теперь можно переходить к использованию.";
+                    reply[1] = giveHelp();
+                    sender.setGlobalState(GlobalState.COMMAND);
                 } else if (message.equalsIgnoreCase("нет")) {
-                    answer[0] = "Что хочешь изменить?";
-                    answer[1] = "Вот список полей доступных для изменения:" +
+                    reply[0] = "Что хочешь изменить?";
+                    reply[1] = "Вот список полей доступных для изменения:" +
                             " \n1 - Имя(" + sender.getName() +
                             ")\n2 - Возраст(" + sender.getAge() +
                             ")\n3 - Пол(" + sender.getSex() +
@@ -171,74 +204,95 @@ public class MessageProcessor {
                     sender.setLocalState(LocalState.START);
                     break;
                 } else {
-                    answer[0] = "Пожалуйста, напиши либо да, либо нет";
+                    reply[0] = "Пожалуйста, напиши либо да, либо нет";
                 }
                 break;
             default:
                 if (sender.setField(message)) {
-                    answer[0] = rightReplies.get(sender.getLocalState());
+                    reply[0] = rightReplies.get(sender.getLocalState());
                     if (sender.getLocalState().equals(LocalState.ECITY)) {
-                        answer[2] = profileData(id);
+                        reply[2] = profileData(id);
                     }
                     sender.setLocalState(nextDict.get(sender.getLocalState()));
                 } else {
-                    answer[0] = wrongReplies.get(sender.getLocalState());
+                    reply[0] = wrongReplies.get(sender.getLocalState());
                 }
                 break;
         }
     }
-    private void caseProfileEdit(String id, String message, User sender, String[] answer){
-        answer[0] = "Изменение внесено.";
+    /**
+     * Profile editing procedure handler.
+     * Fills the exact profile data field of given user depending on the user's choice
+     * @param id string representation of user id
+     * @param message user message
+     * @param sender instance of {@link User} class representing a sender
+     * @param reply array of strings with size of 12, where every string is a separate message
+     */
+    private void caseProfileEdit(String id, String message, User sender, String[] reply){
+        reply[0] = "Изменение внесено.";
         if (sender.getLocalState().equals(LocalState.START)) {
-            answer[0] = "Введи новое значение.";
+            reply[0] = "Введи новое значение.";
             if (!stateDict.containsKey(message)) {
-                answer[0] = "Напиши либо цифру соответствующую полю, либо название поля.";
+                reply[0] = "Напиши либо цифру соответствующую полю, либо название поля.";
                 return;
             }
             sender.setLocalState(stateDict.get(message));
         } else {
             if (sender.setField(message)) {
-                sender.setGlobalState(GlobalState.DEFAULT);
+                sender.setGlobalState(GlobalState.COMMAND);
                 storage.addToOPL(id);
             } else {
-                answer[0] = wrongReplies.get(sender.getLocalState());
+                reply[0] = wrongReplies.get(sender.getLocalState());
             }
         }
     }
-    private void caseMatching(String id, String message, User sender, String[] answer){
+
+    /**
+     * Matching procedure handler.
+     * Fills reply with decade of profiles on given page.
+     * Data of each profile will be placed in separate array cell
+     * @param id string representation of user id
+     * @param message user message
+     * @param sender instance of {@link User} class representing a sender
+     * @param reply array of strings with size of 12, where every string is a separate message
+     */
+    private void caseMatching(String id, String message, User sender, String[] reply){
         int page;
         try {
             page = Integer.parseInt(message);
         } catch (NumberFormatException e) {
-            answer[0] = "Пожалуйста, введи ответ цифрами.";
+            reply[0] = "Пожалуйста, введи ответ цифрами.";
             return;
         }
         if ((page < 1) || (page > storage.getOtherProfilesList(id).size() / 10 + 1)) {
-            answer[0] = "Нет страницы с таким номером.";
+            reply[0] = "Нет страницы с таким номером.";
             return;
         }
-        answer[0] = "Профили на странице " + message + ":";
-        getTenProfiles(answer, page - 1, id);
-        sender.setGlobalState(GlobalState.DEFAULT);
+        reply[0] = "Профили на странице " + message + ":";
+        getTenProfiles(reply, page - 1, id);
+        sender.setGlobalState(GlobalState.COMMAND);
     }
     /**
-     * Main message processing method
+     * Main message processing method.
+     * Initializes reply variable as an array of strings with size 12.
+     * Every string in this array is a separate message, which will be sent further.
+     * Checks if user with given id exists and creates new one if not.
      * @param id string presentation of user id
      * @param message user message
      * @return reply to user message
      */
     public String[] processMessage(String id, String message){
-        String[] answer = new String[12];
+        String[] reply = new String[12];
         if (storage.getUser(id) == null){
             storage.addUser(id);
         }
         User sender = storage.getUser(id);
         switch (sender.getGlobalState()){
-            case DEFAULT -> caseDefault(id, message, sender, answer);
-            case PROFILE_FILL -> caseProfileFill(id, message, sender, answer);
-            case PROFILE_EDIT -> caseProfileEdit(id, message, sender, answer);
-            case MATCHING ->  caseMatching(id, message, sender, answer);
+            case COMMAND -> caseCommand(id, message, sender, reply);
+            case PROFILE_FILL -> caseProfileFill(id, message, sender, reply);
+            case PROFILE_EDIT -> caseProfileEdit(id, message, sender, reply);
+            case MATCHING ->  caseMatching(id, message, sender, reply);
         }
-        return answer;
+        return reply;
     }
 }
