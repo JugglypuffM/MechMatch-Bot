@@ -9,6 +9,9 @@ import java.util.Map;
  * Class crated to store users in memory using {@link UserStorage#userDict} dictionary.
  */
 public class UserStorage {
+    /**
+     * Dictionary of users, where user id is key and the instance of {@link User} is value
+     */
     private final Map<String, User> userDict = new HashMap<>();
     private final List<String> otherProfilesList = new ArrayList<>();
     public Map<String, User> getUserDict() {
