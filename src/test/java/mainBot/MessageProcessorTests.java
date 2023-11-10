@@ -106,6 +106,39 @@ public class MessageProcessorTests {
     }
 
     /**
+     * Test for profile change procedure.
+     * Edit added just in case it may work wrong.
+     */
+    @Test
+    public void changeProfileTest(){
+        processor.processMessage(id, "да");
+        processor.processMessage(id, "/editProfile");
+        processor.processMessage(id, "2");
+        processor.processMessage(id, "18");
+        processor.processMessage(id, "/changeProfile");
+        processor.processMessage(id, "Стас");
+        processor.processMessage(id, "сатС");
+        processor.processMessage(id, "91");
+        processor.processMessage(id, "Девушка");
+        processor.processMessage(id, "грубниретакЕ");
+        processor.processMessage(id, "дурк отсорп");
+        processor.processMessage(id, "71");
+        processor.processMessage(id, "82");
+        processor.processMessage(id, "Парень");
+        processor.processMessage(id, "грубниретакЕ");
+        processor.processMessage(id, "да");
+        Assertions.assertEquals("""
+                Имя: сатС
+                Возраст: 91
+                Пол: девушка
+                Город: грубниретакЕ
+                Информация о себе: дурк отсорп
+                Диапазон возраста собеседника: 71 - 82
+                Пол собеседника: парень
+                Город собеседника: грубниретакЕ""", processor.processMessage(id, "/myProfile")[0]);
+    }
+
+    /**
      * Test of matching procedure.
      */
     @Test
