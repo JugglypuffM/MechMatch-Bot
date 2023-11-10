@@ -1,9 +1,12 @@
 package mainBot;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MessageProcessorTests {
+    MessageProcessor processor;
+    String id;
     /**
      * Utility method to fill all profile data at once
      * @param id user id
@@ -23,13 +26,14 @@ public class MessageProcessorTests {
         processor.processMessage(id, "Екатеринбург");
         processor.processMessage(id, "да");
     }
+
     /**
-     * Test of profile filling procedure, tests if states switch correctly and data stores appropriately
+     * Initialization of {@link MessageProcessor} and basic user with id 0
      */
-    @Test
-    public void profileFillTest(){
-        MessageProcessor processor = new MessageProcessor();
-        String id = "0";
+    @BeforeEach
+    public void initialize(){
+        this.processor = new MessageProcessor();
+        this.id = "0";
         processor.processMessage(id, "/start");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "Стас");
@@ -41,6 +45,13 @@ public class MessageProcessorTests {
         processor.processMessage(id, "23");
         processor.processMessage(id, "Девушка");
         processor.processMessage(id, "Екатеринбург");
+    }
+    /**
+     * Test of profile filling procedure.
+     * Tests if states switch correctly and data stores appropriately
+     */
+    @Test
+    public void profileFillTest(){
         processor.processMessage(id, "да");
         Assertions.assertEquals("""
                 Имя: Стас
@@ -54,13 +65,31 @@ public class MessageProcessorTests {
     }
 
     /**
-     * Test of profile editing procedure, tests state switching and appropriate data storage
+     * Test of transition from fill to edit
+     */
+    @Test
+    public void editAfterFillTest(){
+        String[] reply = processor.processMessage(id, "нет");
+        Assertions.assertEquals("Что хочешь изменить?", reply[0]);
+        Assertions.assertEquals("Вот список полей доступных для изменения: \n" +
+                "1 - Имя(Стас)\n" +
+                "2 - Возраст(19)\n" +
+                "3 - Пол(парень)\n" +
+                "4 - Город(Екатеринбург)\n" +
+                "5 - Информация о себе(просто круд)\n" +
+                "6 - Нижний порог возраста собеседника(17)\n" +
+                "7 - Верхний порог возраста собеседника(23)\n" +
+                "8 - Пол собеседника(девушка)\n" +
+                "9 - Город собеседника(Екатеринбург)", reply[1]);
+    }
+
+    /**
+     * Test of profile editing procedure.
+     * Tests state switching and appropriate data storage
      */
     @Test
     public void profileEditTest(){
-        MessageProcessor processor = new MessageProcessor();
-        String id = "0";
-        fillProfile(id, processor);
+        processor.processMessage(id, "да");
         processor.processMessage(id, "/editProfile");
         Assertions.assertEquals("Напиши либо цифру соответствующую полю, либо название поля.", processor.processMessage(id, "svfand")[0]);
         Assertions.assertEquals("Введи новое значение.", processor.processMessage(id, "2")[0]);
@@ -77,14 +106,37 @@ public class MessageProcessorTests {
     }
 
     /**
-     * Test of matching procedure, tests if all pages can be accessed
+     * Test of matching procedure.
      */
     @Test
-    public void MatchingTest(){
-        MessageProcessor processor = new MessageProcessor();
-        for (int i = 0; i < 16; i++){
-            fillProfile("" + i, processor);
-        }
-
+    public void matchingTest(){
+        processor.processMessage(id, "да");
+        Assertions.assertEquals("Кроме тебя пока никого нет ;(", processor.processMessage(id, "/match")[0]);
+        fillProfile("1", processor);
+        Assertions.assertEquals("Какую страницу анкет вывести(Всего: 1)?", processor.processMessage(id, "/match")[0]);
+        Assertions.assertEquals("Пожалуйста, введи ответ цифрами.", processor.processMessage(id, "/match")[0]);
+        Assertions.assertEquals("Нет страницы с таким номером.", processor.processMessage(id, "2")[0]);
+        Assertions.assertEquals("""
+                Имя: Стас
+                Возраст: 19
+                Пол: парень
+                Город: Екатеринбург
+                Информация о себе: просто круд
+                Диапазон возраста собеседника: 17 - 23
+                Пол собеседника: девушка
+                Город собеседника: Екатеринбург""", processor.processMessage(id, "1")[2]);
+        processor.processMessage("1", "/editProfile");
+        processor.processMessage("1", "1");
+        processor.processMessage("1", "Тсас");
+        processor.processMessage(id, "/match");
+        Assertions.assertEquals("""
+                Имя: Тсас
+                Возраст: 19
+                Пол: парень
+                Город: Екатеринбург
+                Информация о себе: просто круд
+                Диапазон возраста собеседника: 17 - 23
+                Пол собеседника: девушка
+                Город собеседника: Екатеринбург""", processor.processMessage(id, "1")[2]);
     }
 }
