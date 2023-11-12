@@ -11,5 +11,7 @@ public enum LocalState {
     EAGEMAX,
     ESEX,
     ECITY,
-    FINISH
+    FINISH,
+    ALL,
+    MATCHES
 }
