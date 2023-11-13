@@ -7,7 +7,7 @@ package mainBot;
  */
 public class User{
     private final String id;
-    private String name, city, expectedCity, sex, expectedSex, information;
+    private String name, city, expectedCity, sex, expectedSex, information, photoID;
     private GlobalState globalState;
     private LocalState localState;
     private int age, minExpectedAge, maxExpectedAge;
@@ -18,11 +18,15 @@ public class User{
         this.minExpectedAge = 0;
         this.maxExpectedAge = 999;
     }
+
+    /**
+     * Method to unify field filling.
+     * Uses different setters depending on current {@link User#localState}.
+     * @param value user's message
+     * @return true if field was filled successfully and false if not
+     */
     public boolean setField(String value){
         switch (this.getLocalState()){
-            default:
-                System.out.println("Trouble with setField on " + this.getLocalState());
-                System.exit(1);
             case NAME:
                 this.setName(value);
                 return true;
@@ -45,7 +49,10 @@ public class User{
             case ECITY:
                 this.setExpectedCity(value);
                 return true;
+            case PHOTO:
+                return false;
         }
+        return false;
     }
     public String getId(){
         return id;
@@ -181,5 +188,11 @@ public class User{
     }
     public void setInformation(String m_information){
         this.information = m_information;
+    }
+    public String getPhotoID(){
+        return photoID;
+    }
+    public void setPhotoID(String m_pictureID){
+        this.photoID = m_pictureID;
     }
 }

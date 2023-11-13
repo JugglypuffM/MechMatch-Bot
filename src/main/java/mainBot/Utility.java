@@ -24,6 +24,8 @@ public class Utility {
         stateDict.put("8", LocalState.ESEX);
         stateDict.put("город собеседника", LocalState.ECITY);
         stateDict.put("9", LocalState.ECITY);
+        stateDict.put("фото", LocalState.PHOTO);
+        stateDict.put("10", LocalState.PHOTO);
         return stateDict;
     }
     public Map<LocalState, LocalState> getNextDict(){
@@ -36,7 +38,8 @@ public class Utility {
         nextDict.put(LocalState.EAGEMIN, LocalState.EAGEMAX);
         nextDict.put(LocalState.EAGEMAX, LocalState.ESEX);
         nextDict.put(LocalState.ESEX, LocalState.ECITY);
-        nextDict.put(LocalState.ECITY, LocalState.FINISH);
+        nextDict.put(LocalState.ECITY, LocalState.PHOTO);
+        nextDict.put(LocalState.PHOTO, LocalState.FINISH);
         return nextDict;
     }
     public Map<LocalState, String> getRightReplies(){
@@ -49,7 +52,8 @@ public class Utility {
         rightAnswers.put(LocalState.EAGEMIN, "Теперь напиши максимальный возраст твоего потенциального собеседника.");
         rightAnswers.put(LocalState.EAGEMAX, "Теперь укажи пол твоего потенциального собеседника(Парень/Девушка/Без разницы).");
         rightAnswers.put(LocalState.ESEX, "Хорошо, напиши название города, в котором хочешь найти собеседника.");
-        rightAnswers.put(LocalState.ECITY, "Посмотри свою анкету еще раз, всё ли верно? Ответь да или нет.");
+        rightAnswers.put(LocalState.ECITY, "Теперь отправь обложку для профиля.");
+        rightAnswers.put(LocalState.PHOTO, "Посмотри свою анкету еще раз, всё ли верно? Ответь да или нет.");
         return rightAnswers;
     }
     public Map<LocalState, String> getWrongReplies(){
@@ -63,6 +67,7 @@ public class Utility {
         wrongReplies.put(LocalState.EAGEMAX, "Этот возраст выглядит неправдоподобно, введи значение между 15 и 119, а еще оно должно быть не меньше минимального.");
         wrongReplies.put(LocalState.ESEX, "Ввведи один из трех ответов: парень, девушка или без разницы.)");
         wrongReplies.put(LocalState.ECITY, "");
+        wrongReplies.put(LocalState.PHOTO, "Пожалуйста, отправь картинку.");
         return wrongReplies;
     }
 }

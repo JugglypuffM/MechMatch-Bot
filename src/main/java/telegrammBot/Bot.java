@@ -20,9 +20,11 @@ public class Bot extends TelegramLongPollingBot {
         System.out.println(tgMessage.getChatId());
         System.out.println(tgMessage.getFrom().getUserName());
         System.out.println(tgMessage.getText());
+        System.out.println(tgMessage.hasPhoto());
         for (int i = 0; i < 12; i++){
             if (reply[i] != null){
                 System.out.println(reply[i]);
+                System.out.println(reply[i+12]);
             }
         }
         System.out.println("-----------------------------------------------------------------------");
@@ -42,11 +44,12 @@ public class Bot extends TelegramLongPollingBot {
             l = message.length();
         }
         if (l <= 150){
-            String pictureID = null;
+            String[] reply;
             if (update.getMessage().hasPhoto()){
-                pictureID = update.getMessage().getPhoto().get(0).getFileId();
+                reply = processor.processPhoto(chatId, update.getMessage().getPhoto().get(0).getFileId());
+            }else {
+                reply = processor.processMessage(chatId, message);
             }
-            String[] reply = processor.processMessage(chatId, message, pictureID);
             for (int i = 0; i < 12; i++){
                 if (reply[i] != null){
                     if (reply[i+12] != null){
