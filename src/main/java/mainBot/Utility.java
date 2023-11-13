@@ -70,4 +70,28 @@ public class Utility {
         wrongReplies.put(LocalState.PHOTO, "Пожалуйста, отправь картинку.");
         return wrongReplies;
     }
+    public Map<String, GlobalState> getGlobalStateMap(){
+        Map<String, GlobalState> globalStateMap = new HashMap<>();
+        globalStateMap.put("COMMAND", GlobalState.COMMAND);
+        globalStateMap.put("PROFILE_FILL", GlobalState.PROFILE_FILL);
+        globalStateMap.put("PROFILE_EDIT", GlobalState.PROFILE_EDIT);
+        globalStateMap.put("MATCHING", GlobalState.MATCHING);
+        return globalStateMap;
+    }
+    public Map<String, LocalState> getLocalStateMap(){
+        Map<String, LocalState> localStateMap = new HashMap<>();
+        localStateMap.put("START", LocalState.START);
+        localStateMap.put("NAME", LocalState.NAME);
+        localStateMap.put("AGE", LocalState.AGE);
+        localStateMap.put("SEX", LocalState.SEX);
+        localStateMap.put("CITY", LocalState.CITY);
+        localStateMap.put("ABOUT", LocalState.ABOUT);
+        localStateMap.put("EAGEMIN", LocalState.EAGEMIN);
+        localStateMap.put("EAGEMAX", LocalState.EAGEMAX);
+        localStateMap.put("ESEX", LocalState.ESEX);
+        localStateMap.put("ECITY", LocalState.ECITY);
+        localStateMap.put("PHOTO", LocalState.PHOTO);
+        localStateMap.put("FINISH", LocalState.FINISH);
+        return localStateMap;
+    }
 }

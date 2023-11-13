@@ -1,18 +1,19 @@
 package database;
 
 
+import mainBot.User;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import java.util.List;
 
 
 public class UserDao {
-    private final HSFU sessionFactory = new HSFU();
-    public UserObject findById(int id) {
-        return sessionFactory.getSessionFactory().openSession().get(UserObject.class, id);
+    private final HibernateSessionFactory sessionFactory = new HibernateSessionFactory();
+    public User getUser(String id) {
+        return sessionFactory.getSessionFactory().openSession().get(User.class, id);
     }
 
-    public void save(UserObject user) {
+    public void createUser(User user) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.persist(user);
@@ -20,7 +21,7 @@ public class UserDao {
         session.close();
     }
 
-    public void update(UserObject user) {
+    public void update(User user) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.merge(user);
@@ -28,7 +29,7 @@ public class UserDao {
         session.close();
     }
 
-    public void delete(UserObject user) {
+    public void delete(User user) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.remove(user);
@@ -36,8 +37,12 @@ public class UserDao {
         session.close();
     }
 
-    public List<UserObject> findAll() {
-        List<UserObject> users = (List<UserObject>)  sessionFactory.getSessionFactory().openSession().createQuery("From UserObject").list();
+    public List<User> getAllUsers() {
+        List<User> users = (List<User>)  sessionFactory.getSessionFactory().openSession().createQuery("From User").list();
+        return users;
+    }
+    public List<User> getProfileFilledUsers(){
+        List<User> users = (List<User>)  sessionFactory.getSessionFactory().openSession().createQuery("From User WHERE profileFilled").list();
         return users;
     }
 }

@@ -5,9 +5,9 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
-public class HSFU {
+public class HibernateSessionFactory {
     private SessionFactory sessionFactory;
-    public HSFU() {}
+    public HibernateSessionFactory() {}
     public SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             try {
