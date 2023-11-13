@@ -17,7 +17,7 @@ public class HSFU {
                 sessionFactory = configuration.buildSessionFactory(builder.build());
 
             } catch (Exception e) {
-                System.out.println("Исключение!" + e);
+                System.out.println("Исключение!\n" + e);
             }
         }
         return sessionFactory;
