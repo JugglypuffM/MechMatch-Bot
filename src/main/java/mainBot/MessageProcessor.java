@@ -215,10 +215,6 @@ public class MessageProcessor {
             default:
                 if (sender.setField(message)) {
                     reply[0] = rightReplies.get(sender.getLocalState());
-                    if (sender.getLocalState() == LocalState.PHOTO) {
-                        reply[2] = profileData(id);
-                        reply[14] = sender.getPhotoID();
-                    }
                     sender.setLocalState(nextDict.get(sender.getLocalState()));
                 } else {
                     reply[0] = wrongReplies.get(sender.getLocalState());
@@ -319,11 +315,15 @@ public class MessageProcessor {
         }
         sender.setPhotoID(photoID);
         sender.setLocalState(nextDict.get(LocalState.PHOTO));
-        reply[0] = rightReplies.get(LocalState.PHOTO);
         if (sender.getGlobalState() == GlobalState.PROFILE_EDIT){
             reply[0] = "Изменение внесено.";
             sender.setGlobalState(GlobalState.COMMAND);
             storage.addToOPL(id);
+        }
+        else{
+            reply[0] = rightReplies.get(LocalState.PHOTO);
+            reply[2] = profileData(id);
+            reply[14] = sender.getPhotoID();
         }
         return reply;
     }
