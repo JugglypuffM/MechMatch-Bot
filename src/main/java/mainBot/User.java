@@ -1,23 +1,77 @@
 package mainBot;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Main user class. Contains all data fields required for matching.<p>
  * {@link User#id} is unique for every user.<p>
  * {@link User#sex} and {@link User#expectedSex} are boolean, where false is male and true is female.
  */
 public class User{
-    private final String id;
-    private String name, city, expectedCity, sex, expectedSex, globalState, localState, information;
+    private final String id, username;
+    private final List<String> liked;
+    private String name, city, expectedCity, sex, expectedSex, information;
+    private GlobalState globalState;
+    private LocalState localState;
     private int age, minExpectedAge, maxExpectedAge;
-    public User(String m_id){
+    public User(String m_id, String m_username){
         this.id = m_id;
-        this.globalState = "default";
-        this.localState = "";
-        minExpectedAge = 0;
-        maxExpectedAge = 999;
+        this.username = m_username;
+        this.globalState = GlobalState.COMMAND;
+        this.localState = LocalState.START;
+        this.minExpectedAge = 0;
+        this.maxExpectedAge = 999;
+        this.liked = new ArrayList<>();
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+    public boolean setField(String value){
+        switch (this.getLocalState()){
+            default:
+                System.out.println("Trouble with setField on " + this.getLocalState());
+                System.exit(1);
+            case NAME:
+                this.setName(value);
+                return true;
+            case AGE:
+                return this.setAge(value);
+            case SEX:
+                return this.setSex(value);
+            case CITY:
+                this.setCity(value);
+                return true;
+            case ABOUT:
+                this.setInformation(value);
+                return true;
+            case EAGEMIN:
+                return this.setMinExpectedAge(value);
+            case EAGEMAX:
+                return this.setMaxExpectedAge(value);
+            case ESEX:
+                return this.setExpectedSex(value);
+            case ECITY:
+                this.setExpectedCity(value);
+                return true;
+        }
     }
     public String getId(){
         return id;
+    }
+    public String getUsername() {
+        return username;
     }
     public String getName() {
         return name;
@@ -78,9 +132,15 @@ public class User{
      * @param m_age integer, which should be between 14 and 120.
      * @return true if {@link User#age} filled successfully and false if not.
      */
-    public boolean setAge(int m_age) {
-        if ((m_age > 14) && (m_age < 120)){
-            this.age = m_age;
+    public boolean setAge(String  m_age) {
+        int n_age;
+        try {
+            n_age = Integer.parseInt(m_age);
+        }catch (NumberFormatException e){
+            return false;
+        }
+        if ((n_age > 14) && (n_age < 120)){
+            this.age = n_age;
             return true;
         }
         return false;
@@ -93,9 +153,15 @@ public class User{
      * @param m_minExpectedAge integer, which should be between 14 and 120.
      * @return true if {@link User#minExpectedAge} filled successfully and false if not.
      */
-    public boolean setMinExpectedAge(int m_minExpectedAge) {
-        if ((m_minExpectedAge > 14) && (m_minExpectedAge < 120) && (maxExpectedAge >= m_minExpectedAge)){
-            this.minExpectedAge = m_minExpectedAge;
+    public boolean setMinExpectedAge(String  m_minExpectedAge) {
+        int n_age;
+        try {
+            n_age = Integer.parseInt(m_minExpectedAge);
+        }catch (NumberFormatException e){
+            return false;
+        }
+        if ((n_age > 14) && (n_age < 120)){
+            this. minExpectedAge = n_age;
             return true;
         }
         return false;
@@ -108,23 +174,29 @@ public class User{
      * @param m_maxExpectedAge integer, which should be between 14 and 120.
      * @return true if {@link User#maxExpectedAge} filled successfully and false if not.
      */
-    public boolean setMaxExpectedAge(int m_maxExpectedAge) {
-        if ((m_maxExpectedAge > 14) && (m_maxExpectedAge < 120) && (m_maxExpectedAge >= minExpectedAge)){
-            this.maxExpectedAge = m_maxExpectedAge;
+    public boolean setMaxExpectedAge(String  m_maxExpectedAge) {
+        int n_age;
+        try {
+            n_age = Integer.parseInt(m_maxExpectedAge);
+        }catch (NumberFormatException e){
+            return false;
+        }
+        if ((n_age > 14) && (n_age < 120)){
+            this. maxExpectedAge = n_age;
             return true;
         }
         return false;
     }
-    public String getGlobalState(){
+    public GlobalState getGlobalState(){
         return globalState;
     }
-    public void setGlobalState(String m_globalState){
+    public void setGlobalState(GlobalState m_globalState){
         this.globalState = m_globalState;
     }
-    public String getLocalState(){
+    public LocalState getLocalState(){
         return localState;
     }
-    public void setLocalState(String m_localState){
+    public void setLocalState(LocalState m_localState){
         this.localState = m_localState;
     }
     public String getInformation(){
@@ -132,5 +204,11 @@ public class User{
     }
     public void setInformation(String m_information){
         this.information = m_information;
+    }
+    public List<String> getLiked() {
+        return liked;
+    }
+    public void addLiked(String id) {
+        liked.add(id);
     }
 }

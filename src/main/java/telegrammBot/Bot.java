@@ -30,11 +30,15 @@ public class Bot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         String message = update.getMessage().getText();
         String chatId = update.getMessage().getChatId().toString();
+        String username = update.getMessage().getFrom().getUserName();
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
         if (message.length() <= 150){
             String[] reply = processor.processMessage(chatId, message);
+            if (reply[0].equals("требуется имя пользователя")){
+                reply = processor.processMessage(chatId, "username" + username);
+            }
             for (int i = 0; i < 12; i++){
                 if (reply[i] != null){
                     sendMessage.setText(reply[i]);
