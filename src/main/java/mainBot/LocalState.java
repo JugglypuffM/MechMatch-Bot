@@ -11,5 +11,6 @@ public enum LocalState {
     EAGEMAX,
     ESEX,
     ECITY,
+    PHOTO,
     FINISH
 }
