@@ -28,7 +28,6 @@ public class MessageProcessorTests {
         processor.processPhoto(id, "Екатеринбург");
         processor.processMessage(id, "да");
     }
-
     /**
      * Initialization of {@link MessageProcessor} and basic user with id 0
      */
@@ -195,7 +194,7 @@ public class MessageProcessorTests {
                 Диапазон возраста собеседника: 17 - 23
                 Пол собеседника: девушка
                 Город собеседника: Екатеринбург""", processor.processMessage(id, "1")[2]);
-        processor.processMessage("1", "/match");
+        processor.processMessage("1", "/allProfiles");
         Assertions.assertEquals("""
                 Имя: Стас
                 Возраст: 19

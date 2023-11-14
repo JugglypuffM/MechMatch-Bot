@@ -88,7 +88,7 @@ public class MessageProcessor {
         for (int i = 0; i < 10; i++){
             if (i+page*10 < values.size()){
                 answer[2+i] = profileData(values.get(i+page*10));
-                answer[14+i] = storage.getUser(opl.get(i+page*10)).getPhotoID();
+                answer[14+i] = storage.getUser(values.get(i+page*10)).getPhotoID();
             }else {
                 break;
             }
@@ -133,13 +133,13 @@ public class MessageProcessor {
                 break;
             case "/changeProfile":
                 eraseProfileData(id);
-                storage.deleteFromOPL(id);
+                storage.deleteFromFPL(id);
                 reply[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
             case "/editProfile":
-                storage.deleteFromOPL(id);
+                storage.deleteFromFPL(id);
                 reply[0] = "Что хочешь изменить?";
                 reply[1] = "Вот список полей доступных для изменения:" +
                         " \n1 - Имя(" + sender.getName() +
@@ -157,7 +157,7 @@ public class MessageProcessor {
                 sender.setLocalState(LocalState.START);
                 break;
             case "/allProfiles":
-                if (storage.getOtherProfilesList(id).isEmpty()){
+                if (storage.getFPL(id).isEmpty()){
                     reply[0] = "Кроме тебя пока никого нет ;(";
                     break;
                 }
@@ -222,7 +222,7 @@ public class MessageProcessor {
                 break;
             case FINISH:
                 if (message.equalsIgnoreCase("да")) {
-                    storage.addToOPL(id);
+                    storage.addToFPL(id);
                     reply[0] = "Отлично, теперь можно переходить к использованию.";
                     reply[1] = giveHelp();
                     sender.setGlobalState(GlobalState.COMMAND);
@@ -276,7 +276,7 @@ public class MessageProcessor {
             if (sender.setField(message)) {
                 reply[0] = "Изменение внесено.";
                 sender.setGlobalState(GlobalState.COMMAND);
-                storage.addToOPL(id);
+                storage.addToFPL(id);
             } else {
                 reply[0] = wrongReplies.get(sender.getLocalState());
             }
@@ -367,7 +367,7 @@ public class MessageProcessor {
         if (sender.getGlobalState() == GlobalState.PROFILE_EDIT){
             reply[0] = "Изменение внесено.";
             sender.setGlobalState(GlobalState.COMMAND);
-            storage.addToOPL(id);
+            storage.addToFPL(id);
         }
         else{
             reply[0] = rightReplies.get(LocalState.PHOTO);
