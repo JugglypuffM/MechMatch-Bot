@@ -25,9 +25,9 @@ public class MessageProcessorTests {
         processor.processMessage(id, "23");
         processor.processMessage(id, "Девушка");
         processor.processMessage(id, "Екатеринбург");
+        processor.processPhoto(id, "Екатеринбург");
         processor.processMessage(id, "да");
     }
-
     /**
      * Initialization of {@link MessageProcessor} and basic user with id 0
      */
@@ -47,6 +47,7 @@ public class MessageProcessorTests {
         processor.processMessage(id, "23");
         processor.processMessage(id, "Девушка");
         processor.processMessage(id, "Екатеринбург");
+        processor.processPhoto(id, "Екатеринбург");
     }
     /**
      * Test of profile filling procedure.
@@ -55,6 +56,7 @@ public class MessageProcessorTests {
     @Test
     public void profileFillTest(){
         processor.processMessage(id, "да");
+        String[] reply = processor.processMessage(id, "/myProfile");
         Assertions.assertEquals("""
                 Имя: Стас
                 Возраст: 19
@@ -63,7 +65,8 @@ public class MessageProcessorTests {
                 Информация о себе: просто круд
                 Диапазон возраста собеседника: 17 - 23
                 Пол собеседника: девушка
-                Город собеседника: Екатеринбург""", processor.processMessage(id, "/myProfile")[0]);
+                Город собеседника: Екатеринбург""", reply[0]);
+        Assertions.assertEquals("Екатеринбург", reply[12]);
     }
 
     /**
@@ -82,7 +85,8 @@ public class MessageProcessorTests {
                 "6 - Нижний порог возраста собеседника(17)\n" +
                 "7 - Верхний порог возраста собеседника(23)\n" +
                 "8 - Пол собеседника(девушка)\n" +
-                "9 - Город собеседника(Екатеринбург)", reply[1]);
+                "9 - Город собеседника(Екатеринбург)\n" +
+                "10 - Фото", reply[1]);
     }
 
     /**
@@ -108,6 +112,20 @@ public class MessageProcessorTests {
     }
 
     /**
+     * Test for photo editing case.
+     * Tests if processPhoto method works correctly
+     */
+    @Test
+    public void photoEditTest(){
+        processor.processMessage(id, "да");
+        processor.processMessage(id, "/editProfile");
+        processor.processMessage(id, "10");
+        Assertions.assertEquals("Пожалуйста, отправь картинку.", processor.processMessage(id, "dfgsdfgsdfg")[0]);
+        Assertions.assertEquals("Изменение внесено.", processor.processPhoto(id, "dfgsdfgsdfg")[0]);
+        Assertions.assertEquals("dfgsdfgsdfg", processor.processMessage(id, "/myProfile")[12]);
+    }
+
+    /**
      * Test for profile change procedure.
      * Edit added just in case it may work wrong.
      */
@@ -128,6 +146,7 @@ public class MessageProcessorTests {
         processor.processMessage(id, "82");
         processor.processMessage(id, "Парень");
         processor.processMessage(id, "грубниретакЕ");
+        processor.processPhoto(id, "грубниретакЕ");
         processor.processMessage(id, "да");
         Assertions.assertEquals("""
                 Имя: сатС
@@ -138,6 +157,8 @@ public class MessageProcessorTests {
                 Диапазон возраста собеседника: 71 - 82
                 Пол собеседника: парень
                 Город собеседника: грубниретакЕ""", processor.processMessage(id, "/myProfile")[0]);
+        Assertions.assertEquals("грубниретакЕ", processor.processMessage(id, "/myProfile")[12]);
+
     }
 
     /**
@@ -173,6 +194,17 @@ public class MessageProcessorTests {
                 Диапазон возраста собеседника: 17 - 23
                 Пол собеседника: девушка
                 Город собеседника: Екатеринбург""", processor.processMessage(id, "1")[2]);
+        processor.processMessage("1", "/allProfiles");
+        Assertions.assertEquals("""
+                Имя: Стас
+                Возраст: 19
+                Пол: парень
+                Город: Екатеринбург
+                Информация о себе: просто круд
+                Диапазон возраста собеседника: 17 - 23
+                Пол собеседника: девушка
+                Город собеседника: Екатеринбург""", processor.processMessage("1", "1")[2]);
+
     }
 
     /**

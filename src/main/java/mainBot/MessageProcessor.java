@@ -88,12 +88,12 @@ public class MessageProcessor {
         for (int i = 0; i < 10; i++){
             if (i+page*10 < values.size()){
                 answer[2+i] = profileData(values.get(i+page*10));
+                answer[14+i] = storage.getUser(values.get(i+page*10)).getPhotoID();
             }else {
                 break;
             }
         }
     }
-
     /**
      * Command handler.
      * Changes state depending on command.
@@ -150,7 +150,9 @@ public class MessageProcessor {
                         ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
                         ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
                         ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
-                        ")\n9 - Город собеседника(" + sender.getExpectedCity() + ")";
+                        ")\n9 - Город собеседника(" + sender.getExpectedCity() +
+                        ")\n10 - Фото";
+                reply[13] = sender.getPhotoID();
                 sender.setGlobalState(GlobalState.PROFILE_EDIT);
                 sender.setLocalState(LocalState.START);
                 break;
@@ -189,6 +191,7 @@ public class MessageProcessor {
                 break;
             case "/myProfile":
                 reply[0] = profileData(id);
+                reply[12] = sender.getPhotoID();
                 break;
             case "/myMatches":
                 if (sender.getLiked().isEmpty()){
@@ -234,7 +237,8 @@ public class MessageProcessor {
                             ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
                             ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
                             ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
-                            ")\n9 - Город собеседника(" + sender.getExpectedCity() + ")";
+                            ")\n9 - Город собеседника(" + sender.getExpectedCity() +
+                            ")\n10 - Фото";
                     sender.setGlobalState(GlobalState.PROFILE_EDIT);
                     sender.setLocalState(LocalState.START);
                     break;
@@ -245,9 +249,6 @@ public class MessageProcessor {
             default:
                 if (sender.setField(message)) {
                     reply[0] = rightReplies.get(sender.getLocalState());
-                    if (sender.getLocalState().equals(LocalState.ECITY)) {
-                        reply[2] = profileData(id);
-                    }
                     sender.setLocalState(nextDict.get(sender.getLocalState()));
                 } else {
                     reply[0] = wrongReplies.get(sender.getLocalState());
@@ -255,7 +256,6 @@ public class MessageProcessor {
                 break;
         }
     }
-
     /**
      * Profile editing procedure handler.
      * Fills the exact profile data field of given user depending on the user's choice
@@ -265,7 +265,6 @@ public class MessageProcessor {
      * @param reply array of strings with size of 12, where every string is a separate message
      */
     private void caseProfileEdit(String id, String message, User sender, String[] reply){
-        reply[0] = "Изменение внесено.";
         if (sender.getLocalState().equals(LocalState.START)) {
             reply[0] = "Введи новое значение.";
             if (!stateDict.containsKey(message)) {
@@ -275,6 +274,7 @@ public class MessageProcessor {
             sender.setLocalState(stateDict.get(message));
         } else {
             if (sender.setField(message)) {
+                reply[0] = "Изменение внесено.";
                 sender.setGlobalState(GlobalState.COMMAND);
                 storage.addToFPL(id);
             } else {
@@ -316,7 +316,6 @@ public class MessageProcessor {
         getTenProfiles(reply, page - 1, id, idList);
         sender.setGlobalState(GlobalState.COMMAND);
     }
-
     /**
      * Main message processing method.
      * Initializes reply variable as an array of strings with size 12.
@@ -327,7 +326,7 @@ public class MessageProcessor {
      * @return reply to user message
      */
     public String[] processMessage(String id, String message){
-        String[] reply = new String[12];
+        String[] reply = new String[24];
         String username;
         if (storage.getUser(id) == null){
             if (message.startsWith("username")){
@@ -344,6 +343,36 @@ public class MessageProcessor {
             case PROFILE_FILL -> caseProfileFill(id, message, sender, reply);
             case PROFILE_EDIT -> caseProfileEdit(id, message, sender, reply);
             case GET_PROFILES -> caseGetProfiles(id, message, sender, reply);
+        }
+        return reply;
+    }
+
+    /**
+     * Photo handler.
+     * Asks to send a message if {@link LocalState} of user with given id is not {@link LocalState#PHOTO}.
+     * If it is sets user's photoID with given photoID
+     * @param id string presentation of user id
+     * @param photoID id of picture, which is going to be user's profile photo
+     * @return reply to user message
+     */
+    public String[] processPhoto(String id, String photoID){
+        String[] reply = new String[24];
+        User sender = storage.getUser(id);
+        if (sender.getLocalState() != LocalState.PHOTO){
+            reply[0] = "Пожалуйста, отправь сообщение.";
+            return reply;
+        }
+        sender.setPhotoID(photoID);
+        sender.setLocalState(nextDict.get(LocalState.PHOTO));
+        if (sender.getGlobalState() == GlobalState.PROFILE_EDIT){
+            reply[0] = "Изменение внесено.";
+            sender.setGlobalState(GlobalState.COMMAND);
+            storage.addToFPL(id);
+        }
+        else{
+            reply[0] = rightReplies.get(LocalState.PHOTO);
+            reply[2] = profileData(id);
+            reply[14] = sender.getPhotoID();
         }
         return reply;
     }
