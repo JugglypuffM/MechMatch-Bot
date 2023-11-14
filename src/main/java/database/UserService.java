@@ -7,28 +7,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TO DESCRIBE
+ * Data access layer class.
+ * Responsible for working with database.
  */
 public class UserService {
     /**
-     * TO DESCRIBE
+     * Data Access Object class.
      */
     private final DAO dao = new DAO();
     /**
-     * TO DESCRIBE
+     * List with id's of users with filled profiles.
+     * Stored in memory for speed purposes.
      */
     private final List<String> filledProfilesList = new ArrayList<>();
-    /**
-     * TO DESCRIBE
-     * @param id string representation of user id
-     */
     public void addUser(String id, String username){
        dao.createUser(new User(id, username));
     }
     /**
-     * TO DESCRIBE
+     * Get user from database.
+     * Checks if user exists.
      * @param id string representation of user id
-     * @return TO DESCRIBE
+     * @return {@link User} if exists, null if not
      */
     public User getUser(String id){
         User user;
@@ -39,13 +38,14 @@ public class UserService {
         }
         return user;
     }
-    /**
-     * TO DESCRIBE
-     * @param user
-     */
     public void updateUser(User user){
         dao.updateUser(user);
     }
+    /**
+     * Delete user from database.
+     * Checks if user exists.
+     * @param id string representation of user id
+     */
     public void deleteUser(String id){
         User user;
         try {
@@ -59,18 +59,26 @@ public class UserService {
         Connection connection = new Connection(userID, friendID);
         dao.createConnection(connection);
     }
-    public List<String> getConnectionsWith(String userID){
+
+    /**
+     * Get list with id's of users, who have connection with given user
+     * @param id string representation of user id
+     * @return list of id's
+     */
+    public List<String> getConnectionsWith(String id){
         List<String> connections = new ArrayList<>();
-        for (Connection connection: dao.getConnectionsWith(userID)){
+        for (Connection connection: dao.getConnectionsWith(id)){
             connections.add(connection.getFriendID());
         }
         return connections;
     }
 
     /**
-     * TO DESCRIBE
-     * @param id
-     * @return
+     * Get {@link UserService#filledProfilesList}.
+     * Checks if it is initialized and initializes if not.
+     * Excludes given id from returned list.
+     * @param id string representation of user id
+     * @return list with id's
      */
     public List<String> getFilledProfilesList(String id){
         if (filledProfilesList.isEmpty()){

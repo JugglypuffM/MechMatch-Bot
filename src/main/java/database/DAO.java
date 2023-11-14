@@ -10,12 +10,9 @@ import org.hibernate.query.Query;
 import java.util.List;
 
 /**
- * TO DESCRIBE
+ * Data Access Object for {@link User} and {@link Connection}.
  */
 public class DAO {
-    /**
-     * TO DESCRIBE
-     */
     private final HibernateSessionFactory sessionFactory = new HibernateSessionFactory();
     public User getUser(String id) {
         return sessionFactory.getSessionFactory().openSession().get(User.class, id);
@@ -46,7 +43,8 @@ public class DAO {
         return users;
     }
     /**
-     * TO DESCRIBE
+     * Get list of users, who already filled profiles.
+     * @return list of users
      */
     public List<User> getProfileFilledUsers(){
         List<User> users = (List<User>)  sessionFactory.getSessionFactory().openSession().createQuery("From User WHERE profileFilled").list();
@@ -67,7 +65,8 @@ public class DAO {
         session.close();
     }
     /**
-     * TO DESCRIBE
+     * Ger list with connections of given user with other users
+     * @return connections list
      */
     public List<Connection> getConnectionsWith(String id) {
         Session session = sessionFactory.getSessionFactory().openSession();

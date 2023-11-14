@@ -48,6 +48,10 @@ public class User {
     public int hashCode() {
         return id.hashCode();
     }
+
+    /**
+     * Constructor for tests
+     */
     public User(String id, String name, String city, String expectedCity, String sex, String expectedSex, String information, String photoID, GlobalState globalState, LocalState localState, int age, int minExpectedAge, int maxExpectedAge) {
         this.id = id;
         this.name = name;
@@ -210,14 +214,18 @@ public class User {
     public void setPhotoID(String m_pictureID){
         this.photoID = m_pictureID;
     }
-
     public boolean isProfileFilled() {
         return profileFilled;
     }
-
     public void setProfileFilled(boolean profileFilled) {
         this.profileFilled = profileFilled;
     }
+    /**
+     * Method to unify field filling.
+     * Uses different setters depending on current {@link User#localState}.
+     * @param value user's message
+     * @return true if field was filled successfully and false if not
+     */
     public boolean setField(String value){
         switch (this.getLocalState()){
             case NAME:

@@ -6,9 +6,17 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
+/**
+ * Session factory class.
+ */
 public class HibernateSessionFactory {
     private SessionFactory sessionFactory;
     public HibernateSessionFactory() {}
+
+    /**
+     * Initializes new session factory if it is not initialized
+     * @return {@link HibernateSessionFactory#sessionFactory}
+     */
     public SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             try {

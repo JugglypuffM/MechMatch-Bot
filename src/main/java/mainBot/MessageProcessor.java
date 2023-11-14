@@ -9,7 +9,7 @@ import java.util.Map;
 public class MessageProcessor {
     private final Utility util = new Utility();
     /**
-     * TO DESCRIBE
+     * Database interface.
      */
     private final UserService service;
     /**
