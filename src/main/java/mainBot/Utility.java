@@ -51,7 +51,7 @@ public class Utility {
         rightAnswers.put(LocalState.ABOUT, "Теперь напиши минимальный возраст твоего потенциального собеседника.");
         rightAnswers.put(LocalState.EAGEMIN, "Теперь напиши максимальный возраст твоего потенциального собеседника.");
         rightAnswers.put(LocalState.EAGEMAX, "Теперь укажи пол твоего потенциального собеседника(Парень/Девушка/Без разницы).");
-        rightAnswers.put(LocalState.ESEX, "Хорошо, напиши название города, в котором хочешь найти собеседника.");
+        rightAnswers.put(LocalState.ESEX, "Хорошо, напиши название города, в котором хочешь найти собеседника. Можешь написать \"любой\", чтобы этот параметр не учитывался при подборе собеседника");
         rightAnswers.put(LocalState.ECITY, "Теперь отправь обложку для профиля.");
         rightAnswers.put(LocalState.PHOTO, "Посмотри свою анкету еще раз, всё ли верно? Ответь да или нет.");
         return rightAnswers;
@@ -75,7 +75,7 @@ public class Utility {
         globalStateMap.put("COMMAND", GlobalState.COMMAND);
         globalStateMap.put("PROFILE_FILL", GlobalState.PROFILE_FILL);
         globalStateMap.put("PROFILE_EDIT", GlobalState.PROFILE_EDIT);
-        globalStateMap.put("MATCHING", GlobalState.MATCHING);
+        globalStateMap.put("GET_PROFILES", GlobalState.GET_PROFILES);
         return globalStateMap;
     }
     public Map<String, LocalState> getLocalStateMap(){

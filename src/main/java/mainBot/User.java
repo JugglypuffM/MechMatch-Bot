@@ -2,9 +2,10 @@ package mainBot;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Main user class.
@@ -17,19 +18,35 @@ import java.io.Serializable;
 public class User {
     @Id
     private String id;
+    private String username;
     private String name, city, expectedCity, sex, expectedSex, information, photoID;
     private String globalState;
     private String localState;
     private int age, minExpectedAge, maxExpectedAge;
     private boolean profileFilled;
     public User(){}
-    public User(String m_id){
+    public User(String m_id, String m_username){
         this.id = m_id;
+        this.username = m_username;
         this.globalState = "COMMAND";
         this.localState = "START";
         this.minExpectedAge = 0;
         this.maxExpectedAge = 999;
         this.profileFilled = false;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
     public User(String id, String name, String city, String expectedCity, String sex, String expectedSex, String information, String photoID, GlobalState globalState, LocalState localState, int age, int minExpectedAge, int maxExpectedAge) {
         this.id = id;
@@ -49,6 +66,9 @@ public class User {
     }
     public String getId(){
         return id;
+    }
+    public String getUsername() {
+        return username;
     }
     public String getName() {
         return name;
@@ -198,7 +218,6 @@ public class User {
     public void setProfileFilled(boolean profileFilled) {
         this.profileFilled = profileFilled;
     }
-
     public boolean setField(String value){
         switch (this.getLocalState()){
             case NAME:

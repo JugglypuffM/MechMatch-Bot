@@ -12,7 +12,9 @@ public enum LocalState {
     ESEX("ESEX"),
     ECITY("ECITY"),
     PHOTO("PHOTO"),
-    FINISH("FINISH");
+    FINISH("FINISH"),
+    ALL("ALL"),
+    MATCHES("MATCHES");
     final String value;
     LocalState(String m_value){
         this.value = m_value;

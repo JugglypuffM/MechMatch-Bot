@@ -20,7 +20,7 @@ public class Bot extends TelegramLongPollingBot {
         System.out.println(tgMessage.getChatId());
         System.out.println(tgMessage.getFrom().getUserName());
         System.out.println(tgMessage.getText());
-        System.out.println(tgMessage.hasPhoto());
+        System.out.println("Has photo: " + tgMessage.hasPhoto());
         for (int i = 0; i < 12; i++){
             if (reply[i] != null){
                 System.out.println(reply[i]);
@@ -36,6 +36,7 @@ public class Bot extends TelegramLongPollingBot {
         String chatId = update.getMessage().getChatId().toString();
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);
+        String username = update.getMessage().getFrom().getUserName();
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
@@ -49,6 +50,9 @@ public class Bot extends TelegramLongPollingBot {
                 reply = processor.processPhoto(chatId, update.getMessage().getPhoto().get(0).getFileId());
             }else {
                 reply = processor.processMessage(chatId, message);
+                if (reply[0].equals("требуется имя пользователя")){
+                    reply = processor.processMessage(chatId, "username" + username);
+                }
             }
             for (int i = 0; i < 12; i++){
                 if (reply[i] != null){

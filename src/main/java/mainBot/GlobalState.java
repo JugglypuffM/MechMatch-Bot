@@ -14,9 +14,9 @@ public enum GlobalState {
      */
     PROFILE_EDIT("PROFILE_EDIT"),
     /**
-     * State of user, while he is in matching procedure
+     * State of user, while he is in getting profiles procedure
      */
-    MATCHING("MATCHING");
+    GET_PROFILES("GET_PROFILES");
     final String value;
     GlobalState(String m_value){
         this.value = m_value;

@@ -7,7 +7,7 @@ import java.util.Map;
 public class MessageProcessor {
     private final Utility util = new Utility();
     /**
-     * Storage of users, which are represented by {@link User} class and can be accessed by id.
+     * TO DESCRIBE
      */
     private final UserService service = new UserService();
     /**
@@ -38,11 +38,12 @@ public class MessageProcessor {
         return """
                Вот, что я умею:\s
                 /help - вывод описания всех команд\s
-                /start - начало работы с ботом\s
-                /myProfile - бот отправляет пользователю его анкету\s
-                /match - начало поиска собеседника, вывод анкет пользователей\s
-                /changeProfile - бот сбрасывает текущую анкету пользователя и создает новую, начинает заново процедуру заполнения анкеты\s
-                /editProfile - бот предлагает изменить одно из полей анкеты пользователя
+                /myProfile - посмотреть данные своей анкеты\s
+                /allProfiles - выбрать и посмотреть страницу из десяти профилей\s
+                /match - поиск собеседника\s
+                /myMatches - посмотреть анкету уже предложенных пользователей\s
+                /changeProfile - удалить текущую анкету и заполнить новую\s
+                /editProfile - изменить одно из полей анкеты
                """;
     }
     /**
@@ -78,18 +79,17 @@ public class MessageProcessor {
         user.setExpectedCity(null);
     }
     /**
-     * Method that writes data of ten profiles from {@link UserService#getOtherProfilesList}
+     * Method that writes data of ten profiles from {@link UserService#getFilledProfilesList}
      * into answer variable from {@link MessageProcessor#processMessage}
      * @param answer link to answer variable in {@link MessageProcessor#processMessage}
      * @param page number of profiles decade
      * @param id id of requester, this user will not be within the profiles
      */
-    private void getTenProfiles(String[] answer, int page, String id){
-        List<String> opl = service.getOtherProfilesList(id);
+    private void getTenProfiles(String[] answer, int page, String id, List<String> values){
         for (int i = 0; i < 10; i++){
-            if (i+page*10 < opl.size()){
-                answer[2+i] = profileData(opl.get(i+page*10));
-                answer[14+i] = service.getUser(opl.get(i+page*10)).getPhotoID();
+            if (i+page*10 < values.size()){
+                answer[2+i] = profileData(values.get(i+page*10));
+                answer[14+i] = service.getUser(values.get(i+page*10)).getPhotoID();
             }else {
                 break;
             }
@@ -134,14 +134,14 @@ public class MessageProcessor {
                 break;
             case "/changeProfile":
                 eraseProfileData(id);
-                service.deleteFromOPL(id);
+                service.deleteFromFPL(id);
                 sender.setProfileFilled(false);
                 reply[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
             case "/editProfile":
-                service.deleteFromOPL(id);
+                service.deleteFromFPL(id);
                 sender.setProfileFilled(false);
                 reply[0] = "Что хочешь изменить?";
                 reply[1] = "Вот список полей доступных для изменения:" +
@@ -159,17 +159,52 @@ public class MessageProcessor {
                 sender.setGlobalState(GlobalState.PROFILE_EDIT);
                 sender.setLocalState(LocalState.START);
                 break;
-            case "/match":
-                if (service.getOtherProfilesList(id).isEmpty()){
+            case "/allProfiles":
+                if (service.getFilledProfilesList(id).isEmpty()){
                     reply[0] = "Кроме тебя пока никого нет ;(";
                     break;
                 }
-                reply[0] = "Какую страницу анкет вывести(Всего: " + (service.getOtherProfilesList(id).size()/10 + 1) + ")?";
-                sender.setGlobalState(GlobalState.MATCHING);
+                reply[0] = "Какую страницу анкет вывести(Всего: " + (service.getFilledProfilesList(id).size()/10 + 1) + ")?";
+                sender.setGlobalState(GlobalState.GET_PROFILES);
+                sender.setLocalState(LocalState.ALL);
+                break;
+            case "/match":
+                User friend;
+                List<String> fpl = service.getFilledProfilesList(id);
+                int tmpNum = 0;
+                reply[0] = "Не нашлось никого, кто соответствует твоей уникальности ;(";
+                while (tmpNum < fpl.size()) {
+                    friend = service.getUser(fpl.get(tmpNum));
+                    boolean senderSexMatch = (sender.getExpectedSex().equals("без разницы")) || (friend.getSex().equals(sender.getExpectedSex()));
+                    boolean friendSexMatch = (friend.getExpectedSex().equals("без разницы")) || (sender.getSex().equals(friend.getExpectedSex()));
+                    boolean senderCityMatch = (sender.getExpectedCity().equals("любой")) || (friend.getCity().equals(sender.getExpectedCity()));
+                    boolean friendCityMatch = (friend.getExpectedCity().equals("любой")) || (sender.getCity().equals(friend.getExpectedCity()));
+                    boolean senderAgeMatch = (friend.getAge() <= sender.getMaxExpectedAge()) && (friend.getAge() >= sender.getMinExpectedAge());
+                    boolean friendAgeMatch = (sender.getAge() <= friend.getMaxExpectedAge()) && (sender.getAge() >= friend.getMinExpectedAge());
+                    if (senderSexMatch && senderCityMatch && senderAgeMatch &&
+                            friendSexMatch && friendCityMatch && friendAgeMatch &&
+                            (!service.getConnectionsWith(id).contains(friend.getId()))) {
+                        reply[0] = profileData(fpl.get(tmpNum));
+                        reply[1] = "Вот ссылка на профиль этого пользователя - @" + friend.getUsername();
+                        reply[12] = service.getUser(fpl.get(tmpNum)).getPhotoID();
+                        service.addConnection(id, service.getUser(fpl.get(tmpNum)).getId());
+                        break;
+                    }
+                    tmpNum++;
+                }
                 break;
             case "/myProfile":
                 reply[0] = profileData(id);
                 reply[12] = sender.getPhotoID();
+                break;
+            case "/myMatches":
+                if (service.getConnectionsWith(id).isEmpty()){
+                    reply[0] = "Понравившихся профилей пока что нет ;(\nПопробуй ввести /match";
+                    return;
+                }
+                reply[0] = "Какую страницу анкет вывести(Всего: " + (service.getConnectionsWith(id).size()/10 + 1) + ")?";
+                sender.setGlobalState(GlobalState.GET_PROFILES);
+                sender.setLocalState(LocalState.MATCHES);
                 break;
         }
     }
@@ -191,7 +226,7 @@ public class MessageProcessor {
                 break;
             case FINISH:
                 if (message.equalsIgnoreCase("да")) {
-                    service.addToOPL(id);
+                    service.addToFPL(id);
                     sender.setProfileFilled(true);
                     reply[0] = "Отлично, теперь можно переходить к использованию.";
                     reply[1] = giveHelp();
@@ -246,7 +281,7 @@ public class MessageProcessor {
             if (sender.setField(message)) {
                 reply[0] = "Изменение внесено.";
                 sender.setGlobalState(GlobalState.COMMAND);
-                service.addToOPL(id);
+                service.addToFPL(id);
                 sender.setProfileFilled(true);
             } else {
                 reply[0] = wrongReplies.get(sender.getLocalState());
@@ -255,7 +290,8 @@ public class MessageProcessor {
     }
 
     /**
-     * Matching procedure handler.
+     * Get profiles command handler
+     * Depending on local state of user with given id takes profiles from all profiles or user's liked profiles
      * Fills reply with decade of profiles on given page.
      * Data of each profile will be placed in separate array cell
      * @param id string representation of user id
@@ -263,20 +299,27 @@ public class MessageProcessor {
      * @param sender instance of {@link User} class representing a sender
      * @param reply array of strings with size of 12, where every string is a separate message
      */
-    private void caseMatching(String id, String message, User sender, String[] reply){
+    private void caseGetProfiles(String id, String message, User sender, String[] reply){
+        List<String> idList;
         int page;
+        if (sender.getLocalState() == LocalState.ALL){
+            idList = service.getFilledProfilesList(id);
+        }else
+        {
+            idList = service.getConnectionsWith(sender.getId());
+        }
         try {
             page = Integer.parseInt(message);
-        } catch (NumberFormatException e) {
+        }catch (NumberFormatException e){
             reply[0] = "Пожалуйста, введи ответ цифрами.";
             return;
         }
-        if ((page < 1) || (page > service.getOtherProfilesList(id).size() / 10 + 1)) {
+        if ((page < 1) || (page > idList.size()/10 + 1)){
             reply[0] = "Нет страницы с таким номером.";
             return;
         }
         reply[0] = "Профили на странице " + message + ":";
-        getTenProfiles(reply, page - 1, id);
+        getTenProfiles(reply, page - 1, id, idList);
         sender.setGlobalState(GlobalState.COMMAND);
     }
     /**
@@ -290,15 +333,22 @@ public class MessageProcessor {
      */
     public String[] processMessage(String id, String message){
         String[] reply = new String[24];
-        if (service.getUser(id) == null){
-            service.addUser(id);
+        if (service.getUser(id) == null) {
+            String username;
+            if (message.startsWith("username")) {
+                username = message.substring(8);
+            } else {
+                reply[0] = "требуется имя пользователя";
+                return reply;
+            }
+            service.addUser(id, username);
         }
         User sender = service.getUser(id);
         switch (sender.getGlobalState()){
             case COMMAND -> caseCommand(id, message, sender, reply);
             case PROFILE_FILL -> caseProfileFill(id, message, sender, reply);
             case PROFILE_EDIT -> caseProfileEdit(id, message, sender, reply);
-            case MATCHING ->  caseMatching(id, message, sender, reply);
+            case GET_PROFILES -> caseGetProfiles(id, message, sender, reply);
         }
         service.updateUser(sender);
         return reply;
@@ -324,7 +374,7 @@ public class MessageProcessor {
         if (sender.getGlobalState() == GlobalState.PROFILE_EDIT){
             reply[0] = "Изменение внесено.";
             sender.setGlobalState(GlobalState.COMMAND);
-            service.addToOPL(id);
+            service.addToFPL(id);
             sender.setProfileFilled(true);
         }
         else {
