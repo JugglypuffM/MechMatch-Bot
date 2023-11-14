@@ -14,6 +14,7 @@ public class MessageProcessorTests {
      */
     public void fillProfile(String id, MessageProcessor processor){
         processor.processMessage(id, "/start");
+        processor.processMessage(id, "usernamestas");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "19");
@@ -36,6 +37,7 @@ public class MessageProcessorTests {
         this.processor = new MessageProcessor();
         this.id = "0";
         processor.processMessage(id, "/start");
+        processor.processMessage(id, "usernamestas");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "19");
@@ -161,15 +163,15 @@ public class MessageProcessorTests {
     }
 
     /**
-     * Test of matching procedure.
+     * Test of all profiles getting procedure.
      */
     @Test
-    public void matchingTest(){
+    public void allProfilesTest(){
         processor.processMessage(id, "да");
-        Assertions.assertEquals("Кроме тебя пока никого нет ;(", processor.processMessage(id, "/match")[0]);
+        Assertions.assertEquals("Кроме тебя пока никого нет ;(", processor.processMessage(id, "/allProfiles")[0]);
         fillProfile("1", processor);
-        Assertions.assertEquals("Какую страницу анкет вывести(Всего: 1)?", processor.processMessage(id, "/match")[0]);
-        Assertions.assertEquals("Пожалуйста, введи ответ цифрами.", processor.processMessage(id, "/match")[0]);
+        Assertions.assertEquals("Какую страницу анкет вывести(Всего: 1)?", processor.processMessage(id, "/allProfiles")[0]);
+        Assertions.assertEquals("Пожалуйста, введи ответ цифрами.", processor.processMessage(id, "/allProfiles")[0]);
         Assertions.assertEquals("Нет страницы с таким номером.", processor.processMessage(id, "2")[0]);
         Assertions.assertEquals("""
                 Имя: Стас
@@ -183,7 +185,7 @@ public class MessageProcessorTests {
         processor.processMessage("1", "/editProfile");
         processor.processMessage("1", "1");
         processor.processMessage("1", "Тсас");
-        processor.processMessage(id, "/match");
+        processor.processMessage(id, "/allProfiles");
         Assertions.assertEquals("""
                 Имя: Тсас
                 Возраст: 19
@@ -204,5 +206,47 @@ public class MessageProcessorTests {
                 Пол собеседника: девушка
                 Город собеседника: Екатеринбург""", processor.processMessage("1", "1")[2]);
 
+    }
+
+    /**
+     * Test of matching procedure.
+     */
+    @Test
+    public void matchingTest(){
+        processor.processMessage(id, "да");
+        fillProfile("1", processor);
+        fillProfile("2", processor);
+        String[] reply;
+        processor.processMessage("0", "/editProfile");
+        processor.processMessage("0", "8");
+        processor.processMessage("0", "парень");
+        processor.processMessage("1", "/editProfile");
+        processor.processMessage("1", "8");
+        processor.processMessage("1", "парень");
+        reply = processor.processMessage("0", "/match");
+        Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], reply[0]);
+        reply = processor.processMessage("0", "/match");
+        Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(", reply[0]);
+    }
+
+    /**
+     * Test of /myMatches command
+     */
+    @Test
+    public void myMatchesTest(){
+        processor.processMessage(id, "да");
+        MessageProcessor processor = new MessageProcessor();
+        fillProfile("0", processor);
+        fillProfile("1", processor);
+        processor.processMessage("0", "/editProfile");
+        processor.processMessage("0", "8");
+        processor.processMessage("0", "парень");
+        processor.processMessage("1", "/editProfile");
+        processor.processMessage("1", "8");
+        processor.processMessage("1", "парень");
+        processor.processMessage("0", "/match");
+        processor.processMessage("0", "/myMatches");
+        String[] reply = processor.processMessage("0", "1");
+        Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], reply[2]);
     }
 }

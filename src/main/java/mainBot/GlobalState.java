@@ -14,7 +14,7 @@ public enum GlobalState {
      */
     PROFILE_EDIT,
     /**
-     * State of user, while he is in matching procedure
+     * State of user, while he is in getting profiles procedure
      */
-    MATCHING
+    GET_PROFILES
 }

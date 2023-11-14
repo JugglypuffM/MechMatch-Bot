@@ -12,5 +12,7 @@ public enum LocalState {
     ESEX,
     ECITY,
     PHOTO,
-    FINISH
+    FINISH,
+    ALL,
+    MATCHES
 }

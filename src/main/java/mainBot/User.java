@@ -1,22 +1,42 @@
 package mainBot;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Main user class. Contains all data fields required for matching.<p>
  * {@link User#id} is unique for every user.<p>
  * {@link User#sex} and {@link User#expectedSex} are boolean, where false is male and true is female.
  */
 public class User{
-    private final String id;
+    private final String id, username;
+    private final List<String> liked;
     private String name, city, expectedCity, sex, expectedSex, information, photoID;
     private GlobalState globalState;
     private LocalState localState;
     private int age, minExpectedAge, maxExpectedAge;
-    public User(String m_id){
+    public User(String m_id, String m_username){
         this.id = m_id;
+        this.username = m_username;
         this.globalState = GlobalState.COMMAND;
         this.localState = LocalState.START;
         this.minExpectedAge = 0;
         this.maxExpectedAge = 999;
+        this.liked = new ArrayList<>();
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 
     /**
@@ -56,6 +76,9 @@ public class User{
     }
     public String getId(){
         return id;
+    }
+    public String getUsername() {
+        return username;
     }
     public String getName() {
         return name;
@@ -194,5 +217,11 @@ public class User{
     }
     public void setPhotoID(String m_pictureID){
         this.photoID = m_pictureID;
+    }
+    public List<String> getLiked() {
+        return liked;
+    }
+    public void addLiked(String id) {
+        liked.add(id);
     }
 }
