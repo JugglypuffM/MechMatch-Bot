@@ -1,5 +1,6 @@
 package mainBot;
 
+import database.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,8 +35,11 @@ public class MessageProcessorTests {
      */
     @BeforeEach
     public void initialize(){
-        this.processor = new MessageProcessor();
         this.id = "0";
+        UserService service = new UserService();
+        service.deleteUser(id);
+        this.processor = new MessageProcessor(service);
+
         processor.processMessage(id, "/start");
         processor.processMessage(id, "usernamestas");
         processor.processMessage(id, "Стас");

@@ -1,11 +1,11 @@
-package mainBot;
+package database.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
+import mainBot.GlobalState;
+import mainBot.LocalState;
+import mainBot.Utility;
 
 /**
  * Main user class.

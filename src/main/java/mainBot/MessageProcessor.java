@@ -1,6 +1,8 @@
 package mainBot;
 
 import database.UserService;
+import database.models.User;
+
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +11,7 @@ public class MessageProcessor {
     /**
      * TO DESCRIBE
      */
-    private final UserService service = new UserService();
+    private final UserService service;
     /**
      * Dictionary with field names and states, in which this fields changed
      * Key - field name(or number), Value - state
@@ -30,6 +32,14 @@ public class MessageProcessor {
      * Key - state, Value - reply text
      */
     private final Map<LocalState, String> wrongReplies = util.getWrongReplies();
+    public MessageProcessor(){
+        this.service = new UserService();
+    }
+
+    public MessageProcessor(UserService service) {
+        this.service = service;
+    }
+
     /**
      * Simple help method
      * @return a description of the commands

@@ -1,6 +1,7 @@
 package database;
 
-import mainBot.User;
+import database.models.Connection;
+import database.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,15 @@ public class UserService {
      */
     public void updateUser(User user){
         dao.updateUser(user);
+    }
+    public void deleteUser(String id){
+        User user;
+        try {
+            user = dao.getUser(id);
+        }catch (NullPointerException e){
+            return;
+        }
+        dao.deleteUser(user);
     }
     public void addConnection(String userID, String friendID){
         Connection connection = new Connection(userID, friendID);
