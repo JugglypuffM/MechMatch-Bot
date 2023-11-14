@@ -1,6 +1,7 @@
 package mainBot;
 
 import database.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,10 +37,7 @@ public class MessageProcessorTests {
     @BeforeEach
     public void initialize(){
         this.id = "0";
-        UserService service = new UserService();
-        service.deleteUser(id);
-        this.processor = new MessageProcessor(service);
-
+        this.processor = new MessageProcessor();
         processor.processMessage(id, "/start");
         processor.processMessage(id, "usernamestas");
         processor.processMessage(id, "Стас");
@@ -53,6 +51,15 @@ public class MessageProcessorTests {
         processor.processMessage(id, "Девушка");
         processor.processMessage(id, "Екатеринбург");
         processor.processPhoto(id, "Екатеринбург");
+    }
+    @AfterEach
+    public void deleteUsers(){
+        processor.processMessage(id, "/deleteProfile");
+        processor.processMessage(id, "stas");
+        processor.processMessage("1", "/deleteProfile");
+        processor.processMessage("1", "stas");
+        processor.processMessage("2", "/deleteProfile");
+        processor.processMessage("2", "stas");
     }
     /**
      * Test of profile filling procedure.
@@ -92,6 +99,8 @@ public class MessageProcessorTests {
                 "8 - Пол собеседника(девушка)\n" +
                 "9 - Город собеседника(Екатеринбург)\n" +
                 "10 - Фото", reply[1]);
+        processor.processMessage(id, "2");
+        processor.processMessage(id, "18");
     }
 
     /**
@@ -163,7 +172,6 @@ public class MessageProcessorTests {
                 Пол собеседника: парень
                 Город собеседника: грубниретакЕ""", processor.processMessage(id, "/myProfile")[0]);
         Assertions.assertEquals("грубниретакЕ", processor.processMessage(id, "/myProfile")[12]);
-
     }
 
     /**
@@ -199,7 +207,7 @@ public class MessageProcessorTests {
                 Диапазон возраста собеседника: 17 - 23
                 Пол собеседника: девушка
                 Город собеседника: Екатеринбург""", processor.processMessage(id, "1")[2]);
-        processor.processMessage("1", "/match");
+        processor.processMessage("1", "/allProfiles");
         Assertions.assertEquals("""
                 Имя: Стас
                 Возраст: 19
@@ -209,7 +217,6 @@ public class MessageProcessorTests {
                 Диапазон возраста собеседника: 17 - 23
                 Пол собеседника: девушка
                 Город собеседника: Екатеринбург""", processor.processMessage("1", "1")[2]);
-
     }
 
     /**
@@ -227,10 +234,8 @@ public class MessageProcessorTests {
         processor.processMessage("1", "/editProfile");
         processor.processMessage("1", "8");
         processor.processMessage("1", "парень");
-        reply = processor.processMessage("0", "/match");
-        Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], reply[0]);
-        reply = processor.processMessage("0", "/match");
-        Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(", reply[0]);
+        Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], processor.processMessage("0", "/match")[0]);
+        Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(", processor.processMessage("0", "/match")[0]);
     }
 
     /**
@@ -239,8 +244,6 @@ public class MessageProcessorTests {
     @Test
     public void myMatchesTest(){
         processor.processMessage(id, "да");
-        MessageProcessor processor = new MessageProcessor();
-        fillProfile("0", processor);
         fillProfile("1", processor);
         processor.processMessage("0", "/editProfile");
         processor.processMessage("0", "8");
@@ -252,5 +255,14 @@ public class MessageProcessorTests {
         processor.processMessage("0", "/myMatches");
         String[] reply = processor.processMessage("0", "1");
         Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], reply[2]);
+    }
+    @Test
+    public void deleteTest(){
+        processor.processMessage(id, "да");
+        Assertions.assertEquals("Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!", processor.processMessage(id, "/deleteProfile")[0]);
+        Assertions.assertEquals("Введено неверное значение, процедура удаления прекращена.", processor.processMessage(id, "stas1")[0]);
+        processor.processMessage(id, "/deleteProfile");
+        Assertions.assertEquals("Профиль успешно удален.", processor.processMessage(id, "stas")[0]);
+        Assertions.assertEquals("требуется имя пользователя", processor.processMessage(id, "/start")[0]);
     }
 }

@@ -92,6 +92,9 @@ public class Utility {
         localStateMap.put("ECITY", LocalState.ECITY);
         localStateMap.put("PHOTO", LocalState.PHOTO);
         localStateMap.put("FINISH", LocalState.FINISH);
+        localStateMap.put("ALL", LocalState.ALL);
+        localStateMap.put("MATCHES", LocalState.MATCHES);
+        localStateMap.put("DELETE", LocalState.DELETE);
         return localStateMap;
     }
 }

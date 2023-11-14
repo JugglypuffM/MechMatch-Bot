@@ -14,7 +14,8 @@ public enum LocalState {
     PHOTO("PHOTO"),
     FINISH("FINISH"),
     ALL("ALL"),
-    MATCHES("MATCHES");
+    MATCHES("MATCHES"),
+    DELETE("DELETE");
     final String value;
     LocalState(String m_value){
         this.value = m_value;

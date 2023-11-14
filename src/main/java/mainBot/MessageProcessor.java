@@ -35,11 +35,6 @@ public class MessageProcessor {
     public MessageProcessor(){
         this.service = new UserService();
     }
-
-    public MessageProcessor(UserService service) {
-        this.service = service;
-    }
-
     /**
      * Simple help method
      * @return a description of the commands
@@ -53,7 +48,8 @@ public class MessageProcessor {
                 /match - поиск собеседника\s
                 /myMatches - посмотреть анкету уже предложенных пользователей\s
                 /changeProfile - удалить текущую анкету и заполнить новую\s
-                /editProfile - изменить одно из полей анкеты
+                /editProfile - изменить одно из полей анкеты\s
+                /deleteProfile - полностью удалить профиль
                """;
     }
     /**
@@ -216,6 +212,13 @@ public class MessageProcessor {
                 sender.setGlobalState(GlobalState.GET_PROFILES);
                 sender.setLocalState(LocalState.MATCHES);
                 break;
+            case "/deleteProfile":
+                reply[0] = "Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!";
+                reply[1] = "Если ты действительно этого хочешь, то введи свое имя пользователя(то что с собачкой)";
+                sender.setGlobalState(GlobalState.PROFILE_EDIT);
+                sender.setLocalState(LocalState.DELETE);
+                sender.setProfileFilled(false);
+                break;
         }
     }
 
@@ -287,7 +290,20 @@ public class MessageProcessor {
                 return;
             }
             sender.setLocalState(stateDict.get(message));
-        } else {
+        }
+        else if (sender.getLocalState() == LocalState.DELETE){
+            if (message.equals(sender.getUsername()) || message.equals("@" + sender.getUsername())){
+                reply[0] = "Профиль успешно удален.";
+                service.deleteUser(id);
+                service.deleteConnectionsWith(id);
+                return;
+            }
+            reply[0] = "Введено неверное значение, процедура удаления прекращена.";
+            sender.setGlobalState(GlobalState.COMMAND);
+            service.addToFPL(id);
+            sender.setProfileFilled(true);
+        }
+        else {
             if (sender.setField(message)) {
                 reply[0] = "Изменение внесено.";
                 sender.setGlobalState(GlobalState.COMMAND);

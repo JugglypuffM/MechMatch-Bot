@@ -39,6 +39,9 @@ public class UserService {
         return user;
     }
     public void updateUser(User user){
+        if (dao.getUser(user.getId()) == null){
+            return;
+        }
         dao.updateUser(user);
     }
     /**
@@ -72,7 +75,11 @@ public class UserService {
         }
         return connections;
     }
-
+    public void deleteConnectionsWith(String id){
+        for (Connection connection: dao.getConnectionsWith(id)){
+            dao.deleteConnection(connection);
+        }
+    }
     /**
      * Get {@link UserService#filledProfilesList}.
      * Checks if it is initialized and initializes if not.
