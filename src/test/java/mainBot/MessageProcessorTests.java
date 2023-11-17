@@ -112,7 +112,7 @@ public class MessageProcessorTests {
         processor.processMessage(id, "да");
         processor.processMessage(id, "/editProfile");
         Assertions.assertEquals("Напиши либо цифру соответствующую полю, либо название поля.", processor.processMessage(id, "svfand")[0]);
-        Assertions.assertEquals("Введи новое значение.", processor.processMessage(id, "2")[0]);
+        Assertions.assertEquals("Напиши цифрами новый возраст.", processor.processMessage(id, "2")[0]);
         Assertions.assertEquals("Изменение внесено.", processor.processMessage(id, "18")[0]);
         Assertions.assertEquals("""
                 Имя: Стас
@@ -172,51 +172,6 @@ public class MessageProcessorTests {
                 Пол собеседника: парень
                 Город собеседника: грубниретакЕ""", processor.processMessage(id, "/myProfile")[0]);
         Assertions.assertEquals("грубниретакЕ", processor.processMessage(id, "/myProfile")[12]);
-    }
-
-    /**
-     * Test of all profiles getting procedure.
-     */
-    @Test
-    public void allProfilesTest(){
-        processor.processMessage(id, "да");
-        Assertions.assertEquals("Кроме тебя пока никого нет ;(", processor.processMessage(id, "/allProfiles")[0]);
-        fillProfile("1", processor);
-        Assertions.assertEquals("Какую страницу анкет вывести(Всего: 1)?", processor.processMessage(id, "/allProfiles")[0]);
-        Assertions.assertEquals("Пожалуйста, введи ответ цифрами.", processor.processMessage(id, "/allProfiles")[0]);
-        Assertions.assertEquals("Нет страницы с таким номером.", processor.processMessage(id, "2")[0]);
-        Assertions.assertEquals("""
-                Имя: Стас
-                Возраст: 19
-                Пол: парень
-                Город: Екатеринбург
-                Информация о себе: просто круд
-                Диапазон возраста собеседника: 17 - 23
-                Пол собеседника: девушка
-                Город собеседника: Екатеринбург""", processor.processMessage(id, "1")[2]);
-        processor.processMessage("1", "/editProfile");
-        processor.processMessage("1", "1");
-        processor.processMessage("1", "Тсас");
-        processor.processMessage(id, "/allProfiles");
-        Assertions.assertEquals("""
-                Имя: Тсас
-                Возраст: 19
-                Пол: парень
-                Город: Екатеринбург
-                Информация о себе: просто круд
-                Диапазон возраста собеседника: 17 - 23
-                Пол собеседника: девушка
-                Город собеседника: Екатеринбург""", processor.processMessage(id, "1")[2]);
-        processor.processMessage("1", "/allProfiles");
-        Assertions.assertEquals("""
-                Имя: Стас
-                Возраст: 19
-                Пол: парень
-                Город: Екатеринбург
-                Информация о себе: просто круд
-                Диапазон возраста собеседника: 17 - 23
-                Пол собеседника: девушка
-                Город собеседника: Екатеринбург""", processor.processMessage("1", "1")[2]);
     }
 
     /**

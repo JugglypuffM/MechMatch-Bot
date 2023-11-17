@@ -5,7 +5,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import mainBot.GlobalState;
 import mainBot.LocalState;
-import mainBot.Utility;
+import mainBot.StateFSM;
 
 /**
  * Main user class.
@@ -189,14 +189,14 @@ public class User {
         return false;
     }
     public GlobalState getGlobalState(){
-        Utility util = new Utility();
+        StateFSM util = new StateFSM();
         return util.getGlobalStateMap().get(this.globalState);
     }
     public void setGlobalState(GlobalState m_globalState){
         this.globalState = m_globalState.toString();
     }
     public LocalState getLocalState(){
-        Utility util = new Utility();
+        StateFSM util = new StateFSM();
         return util.getLocalStateMap().get(this.localState);
     }
     public void setLocalState(LocalState m_localState){

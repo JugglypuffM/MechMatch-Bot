@@ -4,34 +4,13 @@ import database.UserService;
 import database.models.User;
 
 import java.util.List;
-import java.util.Map;
 
 public class MessageProcessor {
-    private final Utility util = new Utility();
+    private final StateFSM stateFSM = new StateFSM();
     /**
      * Database interface.
      */
     private final UserService service;
-    /**
-     * Dictionary with field names and states, in which this fields changed
-     * Key - field name(or number), Value - state
-     */
-    private final Map<String, LocalState> stateDict = util.getStateDict();
-    /**
-     * Dictionary with state sequences.
-     * Key - current state, Value - next state after current
-     */
-    private final Map<LocalState, LocalState> nextDict = util.getNextDict();
-    /**
-     * Dictionary with replies for case, when user gave valid data
-     * Key - state, Value - reply text
-     */
-    private final Map<LocalState, String> rightReplies = util.getRightReplies();
-    /**
-     * Dictionary with replies for case, when user gave invalid data
-     * Key - state, Value - reply text
-     */
-    private final Map<LocalState, String> wrongReplies = util.getWrongReplies();
     public MessageProcessor(){
         this.service = new UserService();
     }
@@ -44,7 +23,6 @@ public class MessageProcessor {
                Вот, что я умею:\s
                 /help - вывод описания всех команд\s
                 /myProfile - посмотреть данные своей анкеты\s
-                /allProfiles - выбрать и посмотреть страницу из десяти профилей\s
                 /match - поиск собеседника\s
                 /myMatches - посмотреть анкету уже предложенных пользователей\s
                 /changeProfile - удалить текущую анкету и заполнить новую\s
@@ -165,15 +143,6 @@ public class MessageProcessor {
                 sender.setGlobalState(GlobalState.PROFILE_EDIT);
                 sender.setLocalState(LocalState.START);
                 break;
-            case "/allProfiles":
-                if (service.getFilledProfilesList(id).isEmpty()){
-                    reply[0] = "Кроме тебя пока никого нет ;(";
-                    break;
-                }
-                reply[0] = "Какую страницу анкет вывести(Всего: " + (service.getFilledProfilesList(id).size()/10 + 1) + ")?";
-                sender.setGlobalState(GlobalState.GET_PROFILES);
-                sender.setLocalState(LocalState.ALL);
-                break;
             case "/match":
                 User friend;
                 List<String> fpl = service.getFilledProfilesList(id);
@@ -190,8 +159,8 @@ public class MessageProcessor {
                     if (senderSexMatch && senderCityMatch && senderAgeMatch &&
                             friendSexMatch && friendCityMatch && friendAgeMatch &&
                             (!service.getConnectionsWith(id).contains(friend.getId()))) {
-                        reply[0] = profileData(fpl.get(tmpNum));
-                        reply[1] = "Вот ссылка на профиль этого пользователя - @" + friend.getUsername();
+                        reply[0] = profileData(friend.getId());
+                        reply[1] = "Вот ссылка на этого пользователя - @" + friend.getUsername();
                         reply[12] = service.getUser(fpl.get(tmpNum)).getPhotoID();
                         service.addConnection(id, service.getUser(fpl.get(tmpNum)).getId());
                         break;
@@ -266,10 +235,10 @@ public class MessageProcessor {
                 break;
             default:
                 if (sender.setField(message)) {
-                    reply[0] = rightReplies.get(sender.getLocalState());
-                    sender.setLocalState(nextDict.get(sender.getLocalState()));
+                    reply[0] = stateFSM.getRightReplies().get(sender.getLocalState());
+                    sender.setLocalState(stateFSM.getNextDict().get(sender.getLocalState()));
                 } else {
-                    reply[0] = wrongReplies.get(sender.getLocalState());
+                    reply[0] = stateFSM.getWrongReplies().get(sender.getLocalState());
                 }
                 break;
         }
@@ -284,12 +253,12 @@ public class MessageProcessor {
      */
     private void caseProfileEdit(String id, String message, User sender, String[] reply){
         if (sender.getLocalState().equals(LocalState.START)) {
-            reply[0] = "Введи новое значение.";
-            if (!stateDict.containsKey(message)) {
+            if (!stateFSM.getStateDict().containsKey(message)) {
                 reply[0] = "Напиши либо цифру соответствующую полю, либо название поля.";
                 return;
             }
-            sender.setLocalState(stateDict.get(message));
+            sender.setLocalState(stateFSM.getStateDict().get(message));
+            reply[0] = stateFSM.getEditReplies().get(sender.getLocalState());
         }
         else if (sender.getLocalState() == LocalState.DELETE){
             if (message.equals(sender.getUsername()) || message.equals("@" + sender.getUsername())){
@@ -310,7 +279,7 @@ public class MessageProcessor {
                 service.addToFPL(id);
                 sender.setProfileFilled(true);
             } else {
-                reply[0] = wrongReplies.get(sender.getLocalState());
+                reply[0] = stateFSM.getWrongReplies().get(sender.getLocalState());
             }
         }
     }
@@ -328,12 +297,7 @@ public class MessageProcessor {
     private void caseGetProfiles(String id, String message, User sender, String[] reply){
         List<String> idList;
         int page;
-        if (sender.getLocalState() == LocalState.ALL){
-            idList = service.getFilledProfilesList(id);
-        }else
-        {
-            idList = service.getConnectionsWith(sender.getId());
-        }
+        idList = service.getConnectionsWith(sender.getId());
         try {
             page = Integer.parseInt(message);
         }catch (NumberFormatException e){
@@ -396,7 +360,7 @@ public class MessageProcessor {
             return reply;
         }
         sender.setPhotoID(photoID);
-        sender.setLocalState(nextDict.get(LocalState.PHOTO));
+        sender.setLocalState(stateFSM.getNextDict().get(LocalState.PHOTO));
         if (sender.getGlobalState() == GlobalState.PROFILE_EDIT){
             reply[0] = "Изменение внесено.";
             sender.setGlobalState(GlobalState.COMMAND);
@@ -404,7 +368,7 @@ public class MessageProcessor {
             sender.setProfileFilled(true);
         }
         else {
-            reply[0] = rightReplies.get(LocalState.PHOTO);
+            reply[0] = stateFSM.getRightReplies().get(LocalState.PHOTO);
             reply[2] = profileData(id);
             reply[14] = sender.getPhotoID();
         }

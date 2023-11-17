@@ -13,7 +13,6 @@ public enum LocalState {
     ECITY("ECITY"),
     PHOTO("PHOTO"),
     FINISH("FINISH"),
-    ALL("ALL"),
     MATCHES("MATCHES"),
     DELETE("DELETE");
     final String value;
