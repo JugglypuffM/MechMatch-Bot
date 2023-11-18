@@ -1,6 +1,6 @@
 package mainBot;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import database.models.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

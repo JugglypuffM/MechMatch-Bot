@@ -20,7 +20,7 @@ public class Bot extends TelegramLongPollingBot {
         System.out.println(tgMessage.getChatId());
         System.out.println(tgMessage.getFrom().getUserName());
         System.out.println(tgMessage.getText());
-        System.out.println(tgMessage.hasPhoto());
+        System.out.println("Has photo: " + tgMessage.hasPhoto());
         for (int i = 0; i < 12; i++){
             if (reply[i] != null){
                 System.out.println(reply[i]);

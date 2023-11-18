@@ -1,28 +1,38 @@
-package mainBot;
+package database.models;
 
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import mainBot.GlobalState;
+import mainBot.LocalState;
+import mainBot.StateFSM;
 
 /**
- * Main user class. Contains all data fields required for matching.<p>
- * {@link User#id} is unique for every user.<p>
+ * Main user class.
+ * Contains all data fields required for matching.
+ * {@link User#id} is unique for every user.
  * {@link User#sex} and {@link User#expectedSex} are boolean, where false is male and true is female.
  */
-public class User{
-    private final String id, username;
-    private final List<String> liked;
+@Entity
+@Table(name = "users", schema = "public")
+public class User {
+    @Id
+    private String id;
+    private String username;
     private String name, city, expectedCity, sex, expectedSex, information, photoID;
-    private GlobalState globalState;
-    private LocalState localState;
+    private String globalState;
+    private String localState;
     private int age, minExpectedAge, maxExpectedAge;
+    private boolean profileFilled;
+    public User(){}
     public User(String m_id, String m_username){
         this.id = m_id;
         this.username = m_username;
-        this.globalState = GlobalState.COMMAND;
-        this.localState = LocalState.START;
+        this.globalState = "COMMAND";
+        this.localState = "START";
         this.minExpectedAge = 0;
         this.maxExpectedAge = 999;
-        this.liked = new ArrayList<>();
+        this.profileFilled = false;
     }
     @Override
     public boolean equals(Object o) {
@@ -40,39 +50,23 @@ public class User{
     }
 
     /**
-     * Method to unify field filling.
-     * Uses different setters depending on current {@link User#localState}.
-     * @param value user's message
-     * @return true if field was filled successfully and false if not
+     * Constructor for tests
      */
-    public boolean setField(String value){
-        switch (this.getLocalState()){
-            case NAME:
-                this.setName(value);
-                return true;
-            case AGE:
-                return this.setAge(value);
-            case SEX:
-                return this.setSex(value);
-            case CITY:
-                this.setCity(value);
-                return true;
-            case ABOUT:
-                this.setInformation(value);
-                return true;
-            case EAGEMIN:
-                return this.setMinExpectedAge(value);
-            case EAGEMAX:
-                return this.setMaxExpectedAge(value);
-            case ESEX:
-                return this.setExpectedSex(value);
-            case ECITY:
-                this.setExpectedCity(value);
-                return true;
-            case PHOTO:
-                return false;
-        }
-        return false;
+    public User(String id, String name, String city, String expectedCity, String sex, String expectedSex, String information, String photoID, GlobalState globalState, LocalState localState, int age, int minExpectedAge, int maxExpectedAge) {
+        this.id = id;
+        this.name = name;
+        this.city = city;
+        this.expectedCity = expectedCity;
+        this.sex = sex;
+        this.expectedSex = expectedSex;
+        this.information = information;
+        this.photoID = photoID;
+        this.globalState = globalState.toString();
+        this.localState = localState.toString();
+        this.age = age;
+        this.minExpectedAge = minExpectedAge;
+        this.maxExpectedAge = maxExpectedAge;
+        this.profileFilled = true;
     }
     public String getId(){
         return id;
@@ -195,16 +189,18 @@ public class User{
         return false;
     }
     public GlobalState getGlobalState(){
-        return globalState;
+        StateFSM util = new StateFSM();
+        return util.getGlobalStateMap().get(this.globalState);
     }
     public void setGlobalState(GlobalState m_globalState){
-        this.globalState = m_globalState;
+        this.globalState = m_globalState.toString();
     }
     public LocalState getLocalState(){
-        return localState;
+        StateFSM util = new StateFSM();
+        return util.getLocalStateMap().get(this.localState);
     }
     public void setLocalState(LocalState m_localState){
-        this.localState = m_localState;
+        this.localState = m_localState.toString();
     }
     public String getInformation(){
         return information;
@@ -218,10 +214,64 @@ public class User{
     public void setPhotoID(String m_pictureID){
         this.photoID = m_pictureID;
     }
-    public List<String> getLiked() {
-        return liked;
+    public boolean isProfileFilled() {
+        return profileFilled;
     }
-    public void addLiked(String id) {
-        liked.add(id);
+    public void setProfileFilled(boolean profileFilled) {
+        this.profileFilled = profileFilled;
+    }
+    /**
+     * Method to unify field filling.
+     * Uses different setters depending on current {@link User#localState}.
+     * @param value user's message
+     * @return true if field was filled successfully and false if not
+     */
+    public boolean setField(String value){
+        switch (this.getLocalState()){
+            case NAME:
+                this.setName(value);
+                return true;
+            case AGE:
+                return this.setAge(value);
+            case SEX:
+                return this.setSex(value);
+            case CITY:
+                this.setCity(value);
+                return true;
+            case ABOUT:
+                this.setInformation(value);
+                return true;
+            case EAGEMIN:
+                return this.setMinExpectedAge(value);
+            case EAGEMAX:
+                return this.setMaxExpectedAge(value);
+            case ESEX:
+                return this.setExpectedSex(value);
+            case ECITY:
+                this.setExpectedCity(value);
+                return true;
+            case PHOTO:
+                return false;
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", city='" + city + '\'' +
+                ", expectedCity='" + expectedCity + '\'' +
+                ", sex='" + sex + '\'' +
+                ", expectedSex='" + expectedSex + '\'' +
+                ", information='" + information + '\'' +
+                ", photoID='" + photoID + '\'' +
+                ", globalState=" + globalState +
+                ", localState=" + localState +
+                ", age=" + age +
+                ", minExpectedAge=" + minExpectedAge +
+                ", maxExpectedAge=" + maxExpectedAge +
+                '}';
     }
 }
