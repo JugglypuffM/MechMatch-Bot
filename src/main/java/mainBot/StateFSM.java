@@ -103,6 +103,8 @@ public class StateFSM {
         globalStateMap.put("PROFILE_FILL", GlobalState.PROFILE_FILL);
         globalStateMap.put("PROFILE_EDIT", GlobalState.PROFILE_EDIT);
         globalStateMap.put("GET_PROFILES", GlobalState.GET_PROFILES);
+        globalStateMap.put("MATCHING", GlobalState.MATCHING);
+        globalStateMap.put("PENDING", GlobalState.PENDING);
 
         this.localStateMap = new HashMap<>();
         localStateMap.put("START", LocalState.START);
