@@ -178,11 +178,15 @@ public class MessageProcessorTests {
      * Test of matching procedure.
      */
     @Test
-    public void matchingTest(){
+    public void matchingFailTest(){
         processor.processMessage(id, "да");
         fillProfile("1", processor);
-        fillProfile("2", processor);
-        String[] reply;
+        Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(", processor.processMessage("0", "/match")[0]);
+    }
+    @Test
+    public void matchingLikeLikeTest(){
+        processor.processMessage(id, "да");
+        fillProfile("1", processor);
         processor.processMessage("0", "/editProfile");
         processor.processMessage("0", "8");
         processor.processMessage("0", "парень");
@@ -190,9 +194,41 @@ public class MessageProcessorTests {
         processor.processMessage("1", "8");
         processor.processMessage("1", "парень");
         Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], processor.processMessage("0", "/match")[0]);
-        Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(", processor.processMessage("0", "/match")[0]);
+        Assertions.assertEquals("Введи да или нет.", processor.processMessage("0", "дварыера")[0]);
+        Assertions.assertEquals("Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!", processor.processMessage("0", "да")[0]);
+        Assertions.assertEquals("Введи да или нет.", processor.processMessage("1", "дварыера")[0]);
+        String[] reply = processor.processMessage("1", "да");
+        Assertions.assertEquals("Ура! Теперь вы можете перейти к общению.", reply[0]);
+        Assertions.assertEquals("Вот ссылка на профиль собеседника - @stas", reply[1]);
     }
-
+    @Test
+    public void matchingLikeDislikeTest(){
+        processor.processMessage(id, "да");
+        fillProfile("1", processor);
+        processor.processMessage("0", "/editProfile");
+        processor.processMessage("0", "8");
+        processor.processMessage("0", "парень");
+        processor.processMessage("1", "/editProfile");
+        processor.processMessage("1", "8");
+        processor.processMessage("1", "парень");
+        Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], processor.processMessage("0", "/match")[0]);
+        Assertions.assertEquals("Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!", processor.processMessage("0", "да")[0]);
+        String[] reply = processor.processMessage("1", "нет");
+        Assertions.assertEquals("Хорошо, больше ты этого человека не увидишь. Если только не решишь удалить его из списка не понравившихся профилей.", reply[0]);
+    }
+    @Test
+    public void matchingDislikeTest(){
+        processor.processMessage(id, "да");
+        fillProfile("1", processor);
+        processor.processMessage("0", "/editProfile");
+        processor.processMessage("0", "8");
+        processor.processMessage("0", "парень");
+        processor.processMessage("1", "/editProfile");
+        processor.processMessage("1", "8");
+        processor.processMessage("1", "парень");
+        Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], processor.processMessage("0", "/match")[0]);
+        Assertions.assertEquals("Очень жаль, в следующий раз постараюсь лучше :(", processor.processMessage("0", "нет")[0]);
+    }
     /**
      * Test of /myMatches command
      */
