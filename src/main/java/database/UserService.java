@@ -40,9 +40,6 @@ public class UserService {
         return user;
     }
     public void updateUser(User user){
-        if (dao.getUser(user.getId()) == null){
-            return;
-        }
         dao.updateUser(user);
     }
     /**
@@ -60,9 +57,14 @@ public class UserService {
         dao.deleteUser(user);
     }
     public void addConnection(String userID, String friendID, Boolean isLiked){
-        Connection connection = new Connection(userID, friendID, isLiked);
-        dao.createConnection(connection);
+        dao.createConnection(new Connection(userID, friendID, isLiked));
     }
+    /**
+     * Get connection from database.
+     * Checks if connection exists.
+     * @param id string representation of user id
+     * @return {@link Connection} if exists, null if not
+     */
     public Connection getConnection(int id){
         Connection connection;
         try {
@@ -73,9 +75,6 @@ public class UserService {
         return connection;
     }
     public void updateConnection(Connection connection){
-        if (dao.getConnection(connection.getId()) == null){
-            return;
-        }
         dao.updateConnection(connection);
     }
     /**
@@ -90,13 +89,18 @@ public class UserService {
         }
         return connections;
     }
-    public List<Integer> getAllConnections(String id){
+    public List<Integer> getAllConnectionsWith(String id){
         List<Integer> connections = new ArrayList<>();
         for (Connection connection: dao.getConnectionsWith(id)){
             connections.add(connection.getId());
         }
         return connections;
     }
+    /**
+     * Get connections with given user, which were not set to like or dislike
+     * @param id string representation of user id
+     * @return list with integer id's of connections
+     */
     public List<Integer> getPendingOf(String id){
         List<Integer> connections = new ArrayList<>();
         for (Connection connection: dao.getPendingOf(id)){
@@ -104,7 +108,7 @@ public class UserService {
         }
         return connections;
     }
-    public void deleteConnectionsWith(String id){
+    public void deleteAllConnectionsWith(String id){
         for (Connection connection: dao.getConnectionsWith(id)){
             dao.deleteConnection(connection);
         }

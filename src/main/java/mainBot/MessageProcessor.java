@@ -128,11 +128,11 @@ public class MessageProcessor {
                 reply[12] = sender.getPhotoID();
                 break;
             case "/myMatches":
-                if (service.getAllConnections(id).isEmpty()){
+                if (service.getAllConnectionsWith(id).isEmpty()){
                     reply[0] = "Понравившихся профилей пока что нет ;(\nПопробуй ввести /match";
                     return;
                 }
-                reply[0] = "Какую страницу анкет вывести(Всего: " + (service.getAllConnections(id).size()/10 + 1) + ")?";
+                reply[0] = "Какую страницу анкет вывести(Всего: " + (service.getAllConnectionsWith(id).size()/10 + 1) + ")?";
                 sender.setGlobalState(GlobalState.GET_PROFILES);
                 sender.setLocalState(LocalState.MATCHES);
                 break;
@@ -229,7 +229,7 @@ public class MessageProcessor {
             if (message.equals(sender.getUsername()) || message.equals("@" + sender.getUsername())){
                 reply[0] = "Профиль успешно удален.";
                 service.deleteUser(id);
-                service.deleteConnectionsWith(id);
+                service.deleteAllConnectionsWith(id);
                 return;
             }
             reply[0] = "Введено неверное значение, процедура удаления прекращена.";
@@ -276,6 +276,16 @@ public class MessageProcessor {
         service.getTenProfiles(reply, page - 1, idList);
         sender.setGlobalState(GlobalState.COMMAND);
     }
+
+    /**
+     * Matching procedure handler.
+     * Decides whether to send notification to suggested friend or write him in the black list.
+     * Method is synchronized to prevent situation when users like each other at once.
+     * @param id string representation of user id
+     * @param message user message
+     * @param sender instance of {@link User} class representing a sender
+     * @param reply array of strings with size of 12, where every string is a separate message
+     */
     private synchronized void caseMatching(String id, String message, User sender, String[] reply){
         if (service.getUser(sender.getSuggestedFriendID()).getSuggestedFriendID() != null){
             if (service.getUser(sender.getSuggestedFriendID()).getSuggestedFriendID().equals(sender.getId())){
@@ -307,7 +317,16 @@ public class MessageProcessor {
         sender.setSuggestedFriendID(null);
         sender.setGlobalState(GlobalState.COMMAND);
     }
-    private synchronized void casePending(String id, String message, User sender, String[] reply){
+
+    /**
+     * Pending users watch handler.
+     * Decides whether to send usernames to both of user or write suggested user in the black list.
+     * @param id string representation of user id
+     * @param message user message
+     * @param sender instance of {@link User} class representing a sender
+     * @param reply array of strings with size of 12, where every string is a separate message
+     */
+    private void casePending(String id, String message, User sender, String[] reply){
         List<Integer> pending = service.getPendingOf(id);
         Connection connection = service.getConnection(pending.get(0));
         if (message.equalsIgnoreCase("да")){

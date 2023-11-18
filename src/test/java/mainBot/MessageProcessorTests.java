@@ -1,6 +1,5 @@
 package mainBot;
 
-import database.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +51,10 @@ public class MessageProcessorTests {
         processor.processMessage(id, "Екатеринбург");
         processor.processPhoto(id, "Екатеринбург");
     }
+
+    /**
+     * Test users deletion after tests
+     */
     @AfterEach
     public void deleteUsers(){
         processor.processMessage(id, "/deleteProfile");
@@ -88,17 +91,18 @@ public class MessageProcessorTests {
     public void editAfterFillTest(){
         String[] reply = processor.processMessage(id, "нет");
         Assertions.assertEquals("Что хочешь изменить?", reply[0]);
-        Assertions.assertEquals("Вот список полей доступных для изменения: \n" +
-                "1 - Имя(Стас)\n" +
-                "2 - Возраст(19)\n" +
-                "3 - Пол(парень)\n" +
-                "4 - Город(Екатеринбург)\n" +
-                "5 - Информация о себе(просто круд)\n" +
-                "6 - Нижний порог возраста собеседника(17)\n" +
-                "7 - Верхний порог возраста собеседника(23)\n" +
-                "8 - Пол собеседника(девушка)\n" +
-                "9 - Город собеседника(Екатеринбург)\n" +
-                "10 - Фото", reply[1]);
+        Assertions.assertEquals("""
+                Вот список полей доступных для изменения:\s
+                1 - Имя(Стас)
+                2 - Возраст(19)
+                3 - Пол(парень)
+                4 - Город(Екатеринбург)
+                5 - Информация о себе(просто круд)
+                6 - Нижний порог возраста собеседника(17)
+                7 - Верхний порог возраста собеседника(23)
+                8 - Пол собеседника(девушка)
+                9 - Город собеседника(Екатеринбург)
+                10 - Фото""", reply[1]);
         processor.processMessage(id, "2");
         processor.processMessage(id, "18");
     }
@@ -183,6 +187,10 @@ public class MessageProcessorTests {
         fillProfile("1", processor);
         Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(", processor.processMessage("0", "/match")[0]);
     }
+
+    /**
+     * Test case for mutual like of two users
+     */
     @Test
     public void matchingLikeLikeTest(){
         processor.processMessage(id, "да");
@@ -201,6 +209,10 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Ура! Теперь вы можете перейти к общению.", reply[0]);
         Assertions.assertEquals("Вот ссылка на профиль собеседника - @stas", reply[1]);
     }
+
+    /**
+     * Test case for rejection by second user
+     */
     @Test
     public void matchingLikeDislikeTest(){
         processor.processMessage(id, "да");
@@ -216,6 +228,10 @@ public class MessageProcessorTests {
         String[] reply = processor.processMessage("1", "нет");
         Assertions.assertEquals("Хорошо, больше ты этого человека не увидишь. Если только не решишь удалить его из списка не понравившихся профилей.", reply[0]);
     }
+
+    /**
+     * Test case for rejection by first user
+     */
     @Test
     public void matchingDislikeTest(){
         processor.processMessage(id, "да");
@@ -247,6 +263,10 @@ public class MessageProcessorTests {
         String[] reply = processor.processMessage("0", "1");
         Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], reply[2]);
     }
+
+    /**
+     * User deletion command test
+     */
     @Test
     public void deleteTest(){
         processor.processMessage(id, "да");

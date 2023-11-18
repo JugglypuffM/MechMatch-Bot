@@ -24,8 +24,22 @@ public class StateFSM {
      * Key - state, Value - reply text
      */
     private final Map<LocalState, String> wrongReplies;
+    /**
+     * Dictionary with replies for case, when user is asked to edit something
+     * Key - state, Value - reply text
+     */
     private final Map<LocalState, String> editReplies;
+    /**
+     * Dictionary with string representations of global states.
+     * Used to translate the string into the global state
+     * Key - string representation of state, Value - the global state itself
+     */
     private final Map<String, GlobalState> globalStateMap;
+    /**
+     * Dictionary with string representations of local states.
+     * Used to translate the string into the local state
+     * Key - string representation of state, Value - the local state itself
+     */
     private final Map<String, LocalState> localStateMap;
     public StateFSM(){
         this.stateDict = new HashMap<>();

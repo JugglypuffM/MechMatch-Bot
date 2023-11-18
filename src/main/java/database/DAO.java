@@ -25,6 +25,9 @@ public class DAO {
         return sessionFactory.getSessionFactory().openSession().get(User.class, id);
     }
     public void updateUser(User user) {
+        if (getUser(user.getId()) == null){
+            return;
+        }
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.merge(user);
@@ -56,6 +59,9 @@ public class DAO {
         return sessionFactory.getSessionFactory().openSession().get(Connection.class, id);
     }
     public void updateConnection(Connection connection) {
+        if (getConnection(connection.getId()) == null){
+            return;
+        }
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.merge(connection);
@@ -70,7 +76,7 @@ public class DAO {
         session.close();
     }
     /**
-     * Ger list with connections of given user with other users
+     * Get list with connections of given user with other users
      * @return connections list
      */
     public List<Connection> getConnectionsWith(String id) {
@@ -79,6 +85,10 @@ public class DAO {
         query.setParameter("paramid", id);
         return query.list();
     }
+    /**
+     * Get list with connections of given user with other users, which were not set to like or dislike
+     * @return connections list
+     */
     public List<Connection> getPendingOf(String id){
         Session session = sessionFactory.getSessionFactory().openSession();
         Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is null )");
