@@ -259,9 +259,10 @@ public class MessageProcessorTests {
         processor.processMessage("1", "8");
         processor.processMessage("1", "парень");
         processor.processMessage("0", "/match");
+        processor.processMessage("0", "да");
+        processor.processMessage("1", "да");
         processor.processMessage("0", "/myMatches");
-        String[] reply = processor.processMessage("0", "1");
-        Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], reply[2]);
+        Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], processor.processMessage("0", "1")[2]);
     }
 
     /**
