@@ -13,7 +13,9 @@ public enum LocalState {
     ECITY("ECITY"),
     PHOTO("PHOTO"),
     FINISH("FINISH"),
-    MATCHES("MATCHES"),
+    CHOICE("CHOICE"),
+    PROFILES("PROFILES"),
+    EDIT("EDIT"),
     DELETE("DELETE");
     final String value;
     LocalState(String m_value){

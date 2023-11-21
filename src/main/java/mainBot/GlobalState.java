@@ -16,7 +16,7 @@ public enum GlobalState {
     /**
      * State of user, while he is in getting profiles procedure
      */
-    GET_PROFILES("GET_PROFILES"),
+    MATCHES("MATCHES"),
     MATCHING("MATCHING"),
     PENDING("PENDING");
     final String value;
