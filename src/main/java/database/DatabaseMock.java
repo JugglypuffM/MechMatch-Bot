@@ -17,9 +17,12 @@ public class DatabaseMock implements Database {
      */
     private final Map<String, User> userDict = new HashMap<>();
     /**
-     * Dictionary of users, where user id is key and the instance of {@link User} is value
+     * Dictionary of connections, where connection id is key and the instance of {@link Connection} is value
      */
     private final Map<Integer, Connection> connectionDict = new HashMap<>();
+    /**
+     * Auto incrementing on every new connection id
+     */
     private Integer lastConnectionID = 0;
     /**
      * List of users with fully filled profiles id's

@@ -7,8 +7,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MessageProcessorTests {
-    private final Database database = new DatabaseMock();
-    private final MessageProcessor processor = new MessageProcessor(database);
+    /**
+     * Mock database class.
+     * Has the same functionality as the main {@link database.DatabaseService} class.
+     */
+    private Database database;
+    /**
+     * Instance of {@link MessageProcessor}.
+     * Used to process all test messages.
+     */
+    private MessageProcessor processor;
     String id = "0";
     /**
      * Utility method to fill all profile data at once
@@ -37,6 +45,8 @@ public class MessageProcessorTests {
      */
     @BeforeEach
     public void initialize(){
+        this.database = new DatabaseMock();
+        this.processor = new MessageProcessor(database);
         processor.processMessage(id, "/start");
         processor.processMessage(id, "usernamestas");
         processor.processMessage(id, "Стас");
