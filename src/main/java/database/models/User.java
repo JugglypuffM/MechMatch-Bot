@@ -7,6 +7,9 @@ import mainBot.GlobalState;
 import mainBot.LocalState;
 import mainBot.StateFSM;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Main user class.
  * Contains all data fields required for matching.
@@ -25,6 +28,8 @@ public class User {
     private int age, minExpectedAge, maxExpectedAge;
     private boolean profileFilled;
     private String suggestedFriendID;
+    private String profilesList;
+    private Integer profilesPage;
     public User(){}
     public User(String m_id, String m_username){
         this.id = m_id;
@@ -207,6 +212,19 @@ public class User {
     public void setSuggestedFriendID(String suggestedFriend) {
         this.suggestedFriendID = suggestedFriend;
     }
+    public String getProfilesList() {
+        return profilesList;
+    }
+    public void setProfilesList(String profilesList) {
+        this.profilesList = profilesList;
+    }
+    public int getProfilesPage() {
+        return profilesPage;
+    }
+    public void setProfilesPage(Integer profilesPage) {
+        this.profilesPage = profilesPage;
+    }
+
     /**
      * Method to unify field filling.
      * Uses different setters depending on current {@link User#localState}.

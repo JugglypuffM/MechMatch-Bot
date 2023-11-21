@@ -22,7 +22,7 @@ public class UserService {
      */
     private final List<String> filledProfilesList = new ArrayList<>();
     public void addUser(String id, String username){
-       dao.createUser(new User(id, username));
+        dao.createUser(new User(id, username));
     }
     /**
      * Get user from database.
@@ -31,15 +31,12 @@ public class UserService {
      * @return {@link User} if exists, null if not
      */
     public User getUser(String id){
-        User user;
-        try {
-            user = dao.getUser(id);
-        }catch (NullPointerException e){
-            return null;
-        }
-        return user;
+        return dao.getUser(id);
     }
     public void updateUser(User user){
+        if (getUser(user.getId()) == null){
+            return;
+        }
         dao.updateUser(user);
     }
     /**
@@ -48,10 +45,8 @@ public class UserService {
      * @param id string representation of user id
      */
     public void deleteUser(String id){
-        User user;
-        try {
-            user = dao.getUser(id);
-        }catch (NullPointerException e){
+        User user = dao.getUser(id);
+        if (user == null){
             return;
         }
         dao.deleteUser(user);
@@ -66,16 +61,25 @@ public class UserService {
      * @return {@link Connection} if exists, null if not
      */
     public Connection getConnection(int id){
-        Connection connection;
-        try {
-            connection = dao.getConnection(id);
-        }catch (NullPointerException e){
-            return null;
-        }
-        return connection;
+        return dao.getConnection(id);
     }
     public void updateConnection(Connection connection){
+        if (getConnection(connection.getId()) == null){
+            return;
+        }
         dao.updateConnection(connection);
+    }
+    /**
+     * Delete user from database.
+     * Checks if user exists.
+     * @param id string representation of user id
+     */
+    public void deleteConnection(int id){
+        Connection connection = dao.getConnection(id);
+        if (connection == null){
+            return;
+        }
+        dao.deleteConnection(connection);
     }
     /**
      * Get list with id's of users, who have connection with given user
@@ -104,6 +108,30 @@ public class UserService {
     public List<Integer> getPendingOf(String id){
         List<Integer> connections = new ArrayList<>();
         for (Connection connection: dao.getPendingOf(id)){
+            connections.add(connection.getId());
+        }
+        return connections;
+    }
+    /**
+     * Get connections with given user, which were set to like
+     * @param id string representation of user id
+     * @return list with integer id's of connections
+     */
+    public List<Integer> getLikesOf(String id){
+        List<Integer> connections = new ArrayList<>();
+        for (Connection connection: dao.getLikesOf(id)){
+            connections.add(connection.getId());
+        }
+        return connections;
+    }
+    /**
+     * Get connections with given user, which were set to dislike
+     * @param id string representation of user id
+     * @return list with integer id's of connections
+     */
+    public List<Integer> getDislikesOf(String id){
+        List<Integer> connections = new ArrayList<>();
+        for (Connection connection: dao.getDislikesOf(id)){
             connections.add(connection.getId());
         }
         return connections;
@@ -163,22 +191,7 @@ public class UserService {
         user.setExpectedSex("");
         user.setExpectedCity(null);
     }
-    /**
-     * Method that writes data of ten profiles from {@link UserService#getFilledProfilesList}
-     * into answer variable from {@link MessageProcessor#processMessage}
-     * @param answer link to answer variable in {@link MessageProcessor#processMessage}
-     * @param page number of profiles decade
-     */
-    public void getTenProfiles(String[] answer, int page, List<String> values){
-        for (int i = 0; i < 10; i++){
-            if (i+page*10 < values.size()){
-                answer[2+i] = profileData(values.get(i+page*10));
-                answer[14+i] = getUser(values.get(i+page*10)).getPhotoID();
-            }else {
-                break;
-            }
-        }
-    }
+
     public void addToFPL(String id){
         filledProfilesList.add(id);
     }

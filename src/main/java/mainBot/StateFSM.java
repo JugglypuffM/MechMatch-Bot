@@ -116,7 +116,7 @@ public class StateFSM {
         globalStateMap.put("COMMAND", GlobalState.COMMAND);
         globalStateMap.put("PROFILE_FILL", GlobalState.PROFILE_FILL);
         globalStateMap.put("PROFILE_EDIT", GlobalState.PROFILE_EDIT);
-        globalStateMap.put("GET_PROFILES", GlobalState.GET_PROFILES);
+        globalStateMap.put("MATCHES", GlobalState.MATCHES);
         globalStateMap.put("MATCHING", GlobalState.MATCHING);
         globalStateMap.put("PENDING", GlobalState.PENDING);
 
@@ -133,7 +133,9 @@ public class StateFSM {
         localStateMap.put("ECITY", LocalState.ECITY);
         localStateMap.put("PHOTO", LocalState.PHOTO);
         localStateMap.put("FINISH", LocalState.FINISH);
-        localStateMap.put("MATCHES", LocalState.MATCHES);
+        localStateMap.put("CHOICE", LocalState.CHOICE);
+        localStateMap.put("PROFILES", LocalState.PROFILES);
+        localStateMap.put("EDIT", LocalState.EDIT);
         localStateMap.put("DELETE", LocalState.DELETE);
     }
 
