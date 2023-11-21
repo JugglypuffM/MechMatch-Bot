@@ -2,16 +2,15 @@ package database;
 
 import database.models.Connection;
 import database.models.User;
-import mainBot.MessageProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Data access layer class.
- * Responsible for working with database.
+ * Responsible for working with Database.
  */
-public class UserService {
+public class DatabaseService implements Database {
     /**
      * Data Access Object class.
      */
@@ -24,12 +23,6 @@ public class UserService {
     public void addUser(String id, String username){
         dao.createUser(new User(id, username));
     }
-    /**
-     * Get user from database.
-     * Checks if user exists.
-     * @param id string representation of user id
-     * @return {@link User} if exists, null if not
-     */
     public User getUser(String id){
         return dao.getUser(id);
     }
@@ -39,11 +32,6 @@ public class UserService {
         }
         dao.updateUser(user);
     }
-    /**
-     * Delete user from database.
-     * Checks if user exists.
-     * @param id string representation of user id
-     */
     public void deleteUser(String id){
         User user = dao.getUser(id);
         if (user == null){
@@ -54,12 +42,6 @@ public class UserService {
     public void addConnection(String userID, String friendID, Boolean isLiked){
         dao.createConnection(new Connection(userID, friendID, isLiked));
     }
-    /**
-     * Get connection from database.
-     * Checks if connection exists.
-     * @param id string representation of user id
-     * @return {@link Connection} if exists, null if not
-     */
     public Connection getConnection(int id){
         return dao.getConnection(id);
     }
@@ -69,11 +51,6 @@ public class UserService {
         }
         dao.updateConnection(connection);
     }
-    /**
-     * Delete user from database.
-     * Checks if user exists.
-     * @param id string representation of user id
-     */
     public void deleteConnection(int id){
         Connection connection = dao.getConnection(id);
         if (connection == null){
@@ -81,11 +58,6 @@ public class UserService {
         }
         dao.deleteConnection(connection);
     }
-    /**
-     * Get list with id's of users, who have connection with given user
-     * @param id string representation of user id
-     * @return list of id's
-     */
     public List<String> getAllConnectedUserIds(String id){
         List<String> connections = new ArrayList<>();
         for (Connection connection: dao.getConnectionsWith(id)){
@@ -100,11 +72,6 @@ public class UserService {
         }
         return connections;
     }
-    /**
-     * Get connections with given user, which were not set to like or dislike
-     * @param id string representation of user id
-     * @return list with integer id's of connections
-     */
     public List<Integer> getPendingOf(String id){
         List<Integer> connections = new ArrayList<>();
         for (Connection connection: dao.getPendingOf(id)){
@@ -112,11 +79,6 @@ public class UserService {
         }
         return connections;
     }
-    /**
-     * Get connections with given user, which were set to like
-     * @param id string representation of user id
-     * @return list with integer id's of connections
-     */
     public List<Integer> getLikesOf(String id){
         List<Integer> connections = new ArrayList<>();
         for (Connection connection: dao.getLikesOf(id)){
@@ -124,11 +86,6 @@ public class UserService {
         }
         return connections;
     }
-    /**
-     * Get connections with given user, which were set to dislike
-     * @param id string representation of user id
-     * @return list with integer id's of connections
-     */
     public List<Integer> getDislikesOf(String id){
         List<Integer> connections = new ArrayList<>();
         for (Connection connection: dao.getDislikesOf(id)){
@@ -141,13 +98,6 @@ public class UserService {
             dao.deleteConnection(connection);
         }
     }
-    /**
-     * Get {@link UserService#filledProfilesList}.
-     * Checks if it is initialized and initializes if not.
-     * Excludes given id from returned list.
-     * @param id string representation of user id
-     * @return list with id's
-     */
     public List<String> getFilledProfilesList(String id){
         if (filledProfilesList.isEmpty()){
             List<User> users = dao.getProfileFilledUsers();
@@ -159,11 +109,6 @@ public class UserService {
         tmpList.remove(id);
         return tmpList;
     }
-    /**
-     * Collecting all user data in a string
-     * @param id string presentation of user id
-     * @return formatted user profile data
-     */
     public String profileData(String id){
         User user = getUser(id);
         return "Имя: " + user.getName() +
@@ -175,10 +120,6 @@ public class UserService {
                 "\nПол собеседника: " + user.getExpectedSex() +
                 "\nГород собеседника: " + user.getExpectedCity();
     }
-    /**
-     * Erase all profile data to fill it again
-     * @param id string representation of user id
-     */
     public void eraseProfileData(String id){
         User user = getUser(id);
         user.setName(null);
