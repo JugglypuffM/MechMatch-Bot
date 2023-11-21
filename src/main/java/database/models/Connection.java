@@ -11,6 +11,12 @@ public class Connection {
     private String userID, friendID;
     private Boolean isLiked;
     public Connection(){}
+    public Connection(Integer id, String userID, String friendID, Boolean isLiked) {
+        this.id = id;
+        this.userID = userID;
+        this.friendID = friendID;
+        this.isLiked = isLiked;
+    }
     public Connection(String userID, String friendID, Boolean isLiked) {
         this.userID = userID;
         this.friendID = friendID;
@@ -26,6 +32,11 @@ public class Connection {
     public String getFriendID() {
         return friendID;
     }
+
+    public Boolean getLiked() {
+        return isLiked;
+    }
+
     public void setIsLiked(Boolean m_isLiked) {
         this.isLiked = m_isLiked;
     }

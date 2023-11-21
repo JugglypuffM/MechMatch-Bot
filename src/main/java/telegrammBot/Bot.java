@@ -1,6 +1,8 @@
 package telegrammBot;
 
 
+import database.Database;
+import database.DatabaseService;
 import mainBot.MessageProcessor;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -14,7 +16,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class Bot extends TelegramLongPollingBot {
-    private final MessageProcessor processor = new MessageProcessor();
+    private final Database database = new DatabaseService();
+    private final MessageProcessor processor = new MessageProcessor(database);
     private final Map<String, String> env = System.getenv();
 
     public void send(String id, String username, String message, String[] reply) {

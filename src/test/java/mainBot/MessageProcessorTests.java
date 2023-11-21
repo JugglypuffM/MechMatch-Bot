@@ -1,14 +1,22 @@
 package mainBot;
 
-import database.UserService;
-import org.junit.jupiter.api.AfterEach;
+import database.Database;
+import database.DatabaseMock;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MessageProcessorTests {
-    private final UserService service = new UserService();
-    private final MessageProcessor processor = new MessageProcessor(service);
+    /**
+     * Mock database class.
+     * Has the same functionality as the main {@link database.DatabaseService} class.
+     */
+    private Database database;
+    /**
+     * Instance of {@link MessageProcessor}.
+     * Used to process all test messages.
+     */
+    private MessageProcessor processor;
     String id = "0";
     /**
      * Utility method to fill all profile data at once
@@ -37,6 +45,8 @@ public class MessageProcessorTests {
      */
     @BeforeEach
     public void initialize(){
+        this.database = new DatabaseMock();
+        this.processor = new MessageProcessor(database);
         processor.processMessage(id, "/start");
         processor.processMessage(id, "usernamestas");
         processor.processMessage(id, "Стас");
@@ -50,19 +60,6 @@ public class MessageProcessorTests {
         processor.processMessage(id, "Девушка");
         processor.processMessage(id, "Екатеринбург");
         processor.processPhoto(id, "Екатеринбург");
-    }
-
-    /**
-     * Test users deletion after tests
-     */
-    @AfterEach
-    public void deleteUsers(){
-        service.deleteUser(id);
-        service.deleteAllConnectionsWith(id);
-        service.deleteUser("1");
-        service.deleteAllConnectionsWith("1");
-        service.deleteUser("5");
-        service.deleteAllConnectionsWith("5");
     }
     /**
      * Test of profile filling procedure.
