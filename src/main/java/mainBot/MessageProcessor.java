@@ -1,8 +1,10 @@
 package mainBot;
 
-import database.UserService;
+import database.Database;
+import database.models.Connection;
 import database.models.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MessageProcessor {
@@ -10,9 +12,10 @@ public class MessageProcessor {
     /**
      * Database interface.
      */
-    private final UserService service;
-    public MessageProcessor(){
-        this.service = new UserService();
+    private final Database database;
+    private final Notificator notificator = new Notificator();
+    public MessageProcessor(Database database){
+        this.database = database;
     }
     /**
      * Simple help method
@@ -25,55 +28,42 @@ public class MessageProcessor {
                 /myProfile - посмотреть данные своей анкеты\s
                 /match - поиск собеседника\s
                 /myMatches - посмотреть анкету уже предложенных пользователей\s
+                /pending - посмотреть людей, ожидающих твоего ответа\s
                 /changeProfile - удалить текущую анкету и заполнить новую\s
                 /editProfile - изменить одно из полей анкеты\s
                 /deleteProfile - полностью удалить профиль
                """;
     }
-    /**
-     * Collecting all user data in a string
-     * @param id string presentation of user id
-     * @return formatted user profile data
-     */
-    private String profileData(String id){
-        User user = service.getUser(id);
-        return "Имя: " + user.getName() +
-                "\nВозраст: " + user.getAge() +
-                "\nПол: " + user.getSex() +
-                "\nГород: " + user.getCity() +
-                "\nИнформация о себе: " + user.getInformation() +
-                "\nДиапазон возраста собеседника: " + user.getMinExpectedAge() + " - " + user.getMaxExpectedAge() +
-                "\nПол собеседника: " + user.getExpectedSex() +
-                "\nГород собеседника: " + user.getExpectedCity();
+    public List<String> getIdList(User sender){
+        List<String> idList = new ArrayList<>();
+        if (sender.getProfilesList().equalsIgnoreCase("лайки")){
+            for (Integer i: database.getLikesOf(sender.getId())){
+                idList.add(database.getConnection(i).getFriendID());
+            }
+        }
+        else{
+            for (Integer i: database.getDislikesOf(sender.getId())){
+                idList.add(database.getConnection(i).getFriendID());
+            }
+        }
+        return idList;
     }
-    /**
-     * Erase all profile data to fill it again
-     * @param id string representation of user id
-     */
-    private void eraseProfileData(String id){
-        User user = service.getUser(id);
-        user.setName(null);
-        user.setAge("0");
-        user.setSex("");
-        user.setCity(null);
-        user.setInformation(null);
-        user.setMinExpectedAge("0");
-        user.setMaxExpectedAge("999");
-        user.setExpectedSex("");
-        user.setExpectedCity(null);
-    }
-    /**
-     * Method that writes data of ten profiles from {@link UserService#getFilledProfilesList}
-     * into answer variable from {@link MessageProcessor#processMessage}
-     * @param answer link to answer variable in {@link MessageProcessor#processMessage}
-     * @param page number of profiles decade
-     * @param id id of requester, this user will not be within the profiles
-     */
-    private void getTenProfiles(String[] answer, int page, String id, List<String> values){
+    public void getTenProfiles(User sender, String[] reply, List<String> idList){
+        int page = sender.getProfilesPage()-1;
+        reply[0] = "Профили на странице " + (page+1) + ":";
         for (int i = 0; i < 10; i++){
-            if (i+page*10 < values.size()){
-                answer[2+i] = profileData(values.get(i+page*10));
-                answer[14+i] = service.getUser(values.get(i+page*10)).getPhotoID();
+            if (i+page*10 < idList.size()){
+                reply[2+i] = "Профиль " + (1+i+page*10) + ":\n" + database.profileData(idList.get(i+page*10));
+                if (sender.getProfilesList().equalsIgnoreCase("лайки")){
+                    List<String> friendLikes = new ArrayList<>();
+                    for (Integer j: database.getLikesOf(idList.get(i+page*10))){
+                        friendLikes.add(database.getConnection(j).getFriendID());
+                    }
+                    if (friendLikes.contains(sender.getId())){
+                        reply[2+i] = reply[2+i] + "\nВот ссылка на профиль этого пользователя - @" + database.getUser(idList.get(i+page*10)).getUsername();
+                    }
+                }
+                reply[14+i] = database.getUser(idList.get(i+page*10)).getPhotoID();
             }else {
                 break;
             }
@@ -89,7 +79,7 @@ public class MessageProcessor {
      * @param reply array of strings with size of 12, where every string is a separate message
      */
     private void caseCommand(String id, String message, User sender, String[] reply){
-        if (service.getUser(id).getExpectedCity() == null){
+        if (database.getUser(id).getExpectedCity() == null){
             message = "/start";
         }
         if (!(message.charAt(0) == '/')){
@@ -101,7 +91,7 @@ public class MessageProcessor {
                 reply[0] = "Такой команды нет, введи /help, чтобы увидеть список всех команд";
                 break;
             case "/start":
-                if (service.getUser(id).getExpectedCity() != null){
+                if (database.getUser(id).getExpectedCity() != null){
                     reply[0] = giveHelp();
                     break;
                 }
@@ -117,15 +107,15 @@ public class MessageProcessor {
                 reply[0] = giveHelp();
                 break;
             case "/changeProfile":
-                eraseProfileData(id);
-                service.deleteFromFPL(id);
+                database.eraseProfileData(id);
+                database.deleteFromFPL(id);
                 sender.setProfileFilled(false);
                 reply[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
             case "/editProfile":
-                service.deleteFromFPL(id);
+                database.deleteFromFPL(id);
                 sender.setProfileFilled(false);
                 reply[0] = "Что хочешь изменить?";
                 reply[1] = "Вот список полей доступных для изменения:" +
@@ -145,41 +135,49 @@ public class MessageProcessor {
                 break;
             case "/match":
                 User friend;
-                List<String> fpl = service.getFilledProfilesList(id);
+                List<String> fpl = database.getFilledProfilesList(id);
                 int tmpNum = 0;
                 reply[0] = "Не нашлось никого, кто соответствует твоей уникальности ;(";
                 while (tmpNum < fpl.size()) {
-                    friend = service.getUser(fpl.get(tmpNum));
+                    friend = database.getUser(fpl.get(tmpNum));
                     boolean senderSexMatch = (sender.getExpectedSex().equals("без разницы")) || (friend.getSex().equals(sender.getExpectedSex()));
                     boolean friendSexMatch = (friend.getExpectedSex().equals("без разницы")) || (sender.getSex().equals(friend.getExpectedSex()));
                     boolean senderCityMatch = (sender.getExpectedCity().equals("любой")) || (friend.getCity().equals(sender.getExpectedCity()));
                     boolean friendCityMatch = (friend.getExpectedCity().equals("любой")) || (sender.getCity().equals(friend.getExpectedCity()));
                     boolean senderAgeMatch = (friend.getAge() <= sender.getMaxExpectedAge()) && (friend.getAge() >= sender.getMinExpectedAge());
                     boolean friendAgeMatch = (sender.getAge() <= friend.getMaxExpectedAge()) && (sender.getAge() >= friend.getMinExpectedAge());
+                    List<String> friendDislikes = new ArrayList<>();
+                    for (Integer i: database.getDislikesOf(friend.getId())){
+                        friendDislikes.add(database.getConnection(i).getFriendID());
+                    }
                     if (senderSexMatch && senderCityMatch && senderAgeMatch &&
                             friendSexMatch && friendCityMatch && friendAgeMatch &&
-                            (!service.getConnectionsWith(id).contains(friend.getId()))) {
-                        reply[0] = profileData(friend.getId());
-                        reply[1] = "Вот ссылка на этого пользователя - @" + friend.getUsername();
-                        reply[12] = service.getUser(fpl.get(tmpNum)).getPhotoID();
-                        service.addConnection(id, service.getUser(fpl.get(tmpNum)).getId());
+                            (!database.getAllConnectedUserIds(id).contains(friend.getId())) &&
+                            (!friendDislikes.contains(id))) {
+                        reply[0] = database.profileData(friend.getId());
+                        reply[1] = "Напиши, понравился ли тебе пользователь(да/нет).";
+                        reply[12] = database.getUser(fpl.get(tmpNum)).getPhotoID();
+                        sender.setSuggestedFriendID(friend.getId());
+                        sender.setGlobalState(GlobalState.MATCHING);
                         break;
                     }
                     tmpNum++;
                 }
                 break;
             case "/myProfile":
-                reply[0] = profileData(id);
+                reply[0] = database.profileData(id);
                 reply[12] = sender.getPhotoID();
                 break;
             case "/myMatches":
-                if (service.getConnectionsWith(id).isEmpty()){
-                    reply[0] = "Понравившихся профилей пока что нет ;(\nПопробуй ввести /match";
+                if (database.getAllConnectionsWith(id).isEmpty()){
+                    reply[0] = "Просмотренных профилей пока что нет ;(\nПопробуй ввести /match";
                     return;
                 }
-                reply[0] = "Какую страницу анкет вывести(Всего: " + (service.getConnectionsWith(id).size()/10 + 1) + ")?";
-                sender.setGlobalState(GlobalState.GET_PROFILES);
-                sender.setLocalState(LocalState.MATCHES);
+                reply[0] = "Какой список профилей вывести(лайки/дизлайки)?";
+                reply[1] = "Также из этих списков можно будет удалить профиль по номеру на странице. " +
+                        "А если удаление не требуется, то просто напиши \"выйти\"";
+                sender.setGlobalState(GlobalState.MATCHES);
+                sender.setLocalState(LocalState.CHOICE);
                 break;
             case "/deleteProfile":
                 reply[0] = "Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!";
@@ -187,6 +185,16 @@ public class MessageProcessor {
                 sender.setGlobalState(GlobalState.PROFILE_EDIT);
                 sender.setLocalState(LocalState.DELETE);
                 sender.setProfileFilled(false);
+                break;
+            case "/pending":
+                if(database.getPendingOf(id).isEmpty()){
+                    reply[0] = "Нет профилей, ожидающих твоего ответа.";
+                    return;
+                }
+                reply[0] = database.profileData(database.getConnection(database.getPendingOf(id).get(0)).getFriendID());
+                reply[1] = "Напиши, хочешь ли ты начать общение с эти человеком(да/нет)?.";
+                reply[12] = database.getUser(database.getConnection(database.getPendingOf(id).get(0)).getFriendID()).getPhotoID();
+                sender.setGlobalState(GlobalState.PENDING);
                 break;
         }
     }
@@ -208,7 +216,7 @@ public class MessageProcessor {
                 break;
             case FINISH:
                 if (message.equalsIgnoreCase("да")) {
-                    service.addToFPL(id);
+                    database.addToFPL(id);
                     sender.setProfileFilled(true);
                     reply[0] = "Отлично, теперь можно переходить к использованию.";
                     reply[1] = giveHelp();
@@ -263,53 +271,195 @@ public class MessageProcessor {
         else if (sender.getLocalState() == LocalState.DELETE){
             if (message.equals(sender.getUsername()) || message.equals("@" + sender.getUsername())){
                 reply[0] = "Профиль успешно удален.";
-                service.deleteUser(id);
-                service.deleteConnectionsWith(id);
+                database.deleteUser(id);
+                database.deleteAllConnectionsWith(id);
                 return;
             }
             reply[0] = "Введено неверное значение, процедура удаления прекращена.";
             sender.setGlobalState(GlobalState.COMMAND);
-            service.addToFPL(id);
+            database.addToFPL(id);
             sender.setProfileFilled(true);
         }
         else {
             if (sender.setField(message)) {
                 reply[0] = "Изменение внесено.";
                 sender.setGlobalState(GlobalState.COMMAND);
-                service.addToFPL(id);
+                database.addToFPL(id);
                 sender.setProfileFilled(true);
             } else {
                 reply[0] = stateFSM.getWrongReplies().get(sender.getLocalState());
             }
         }
     }
-
     /**
-     * Get profiles command handler
-     * Depending on local state of user with given id takes profiles from all profiles or user's liked profiles
-     * Fills reply with decade of profiles on given page.
-     * Data of each profile will be placed in separate array cell
+     * Matches case handler
+     * Shows first ten profiles from users likes or dislikes list.
+     * Pages are different depending on users reply(next/previous).
+     * Data of each profile will be placed in separate array cell.
+     * Offers to delete one profile by a number.
+     * @param message user message
+     * @param sender instance of {@link User} class representing a sender
+     * @param reply array of strings with size of 12, where every string is a separate message
+     */
+    private void caseMatches(String message, User sender, String[] reply){
+        switch (sender.getLocalState()){
+            case CHOICE -> {
+                if (message.equalsIgnoreCase("лайки")) {
+                    if (database.getLikesOf(sender.getId()).isEmpty()) {
+                        reply[0] = "Этот список пуст :(";
+                        sender.setGlobalState(GlobalState.COMMAND);
+                        return;
+                    }
+                    sender.setProfilesList(message);
+                } else if (message.equalsIgnoreCase("дизлайки")) {
+                    if (database.getDislikesOf(sender.getId()).isEmpty()) {
+                        reply[0] = "Этот список пуст :(";
+                        sender.setGlobalState(GlobalState.COMMAND);
+                        return;
+                    }
+                    sender.setProfilesList(message);
+                } else {
+                    reply[0] = "Такого списка нет, введи либо \"лайки\", либо \"дизлайки\".";
+                    return;
+                }
+                sender.setProfilesPage(1);
+                getTenProfiles(sender, reply, getIdList(sender));
+                sender.setLocalState(LocalState.PROFILES);
+            }
+            case PROFILES -> {
+                switch (message) {
+                    default -> {
+                        try {
+                            int toDelete = Integer.parseInt(message);
+                            List<Integer> connectionIDs;
+                            if (sender.getProfilesList().equalsIgnoreCase("лайки")) {
+                                connectionIDs = database.getLikesOf(sender.getId());
+                            } else {
+                                connectionIDs = database.getDislikesOf(sender.getId());
+                            }
+                            if ((toDelete < 1) || (toDelete > connectionIDs.size())) {
+                                reply[0] = "Нет профиля с таким номером.";
+                                return;
+                            }
+                            toDelete = toDelete - 1;
+                            database.deleteConnection(connectionIDs.get(toDelete));
+                            reply[0] = "Профиль успешно удален из списка.";
+                            sender.setProfilesList(null);
+                            sender.setGlobalState(GlobalState.COMMAND);
+                        } catch (NumberFormatException e) {
+                            reply[0] = "Введи \"далее\" или \"назад\" для смены страниц, \"выйти\" для выхода или номер профиля, который хочешь удалить.";
+                        }
+                    }
+                    case "далее", "назад" -> {
+                        if (message.equalsIgnoreCase("далее")) {
+                            if (sender.getProfilesPage() < getIdList(sender).size() / 10) {
+                                sender.setProfilesPage(sender.getProfilesPage() + 1);
+                            } else {
+                                reply[0] = "Больше страниц нет.";
+                                return;
+                            }
+                        } else {
+                            if (sender.getProfilesPage() == 1) {
+                                reply[0] = "Это первая страница.";
+                                return;
+                            } else {
+                                sender.setProfilesPage(sender.getProfilesPage() - 1);
+                            }
+                            sender.setProfilesPage(sender.getProfilesPage() - 1);
+                        }
+                        getTenProfiles(sender, reply, getIdList(sender));
+                    }
+                    case "выйти" -> {
+                        reply[0] = "Процедура изменения списка отменена.";
+                        sender.setGlobalState(GlobalState.COMMAND);
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * Matching procedure handler.
+     * Decides whether to send notification to suggested friend or write him in the black list.
+     * Method is synchronized to prevent situation when users like each other at once.
      * @param id string representation of user id
      * @param message user message
      * @param sender instance of {@link User} class representing a sender
      * @param reply array of strings with size of 12, where every string is a separate message
      */
-    private void caseGetProfiles(String id, String message, User sender, String[] reply){
-        List<String> idList;
-        int page;
-        idList = service.getConnectionsWith(sender.getId());
-        try {
-            page = Integer.parseInt(message);
-        }catch (NumberFormatException e){
-            reply[0] = "Пожалуйста, введи ответ цифрами.";
+    private synchronized void caseMatching(String id, String message, User sender, String[] reply){
+        if (database.getUser(sender.getSuggestedFriendID()).getSuggestedFriendID() != null){
+            if (database.getUser(sender.getSuggestedFriendID()).getSuggestedFriendID().equals(sender.getId())){
+                return;
+            }
+        }
+        List<String> friendLikes = new ArrayList<>();
+        for (Integer i: database.getLikesOf(sender.getSuggestedFriendID())){
+            friendLikes.add(database.getConnection(i).getFriendID());
+        }
+        if (friendLikes.contains(id)){
+            String[] notification = new String[24];
+            database.addConnection(id, sender.getSuggestedFriendID(), true);
+            notification[0] = "Ура! Тебе ответили взаимностью, можно переходить к общению.";
+            notification[1] = "Вот ссылка на профиль собеседника - @" + sender.getUsername();
+            notificator.notifyFriend(sender.getSuggestedFriendID(), database.getUser(sender.getSuggestedFriendID()).getUsername(), notification);
+            reply[0] = "Ура! Этот пользователь когда-то уже отвечал взаимностью, теперь вы можете перейти к общению.";
+            reply[1] = "Вот ссылка на профиль собеседника - @" + database.getUser(sender.getSuggestedFriendID()).getUsername();
+        }
+        else if (message.equalsIgnoreCase("да")){
+            String[] notification = new String[24];
+            database.addConnection(id, sender.getSuggestedFriendID(), true);
+            database.addConnection(sender.getSuggestedFriendID(), id, null);
+            User friend = database.getUser(sender.getSuggestedFriendID());
+            friend.setGlobalState(GlobalState.PENDING);
+            database.updateUser(friend);
+            notification[0] = "Твой профиль понравился кое-кому.";
+            notification[1] = database.profileData(id);
+            notification[2] = "Напиши, хочешь ли ты начать общение с эти человеком(да/нет)?.";
+            notification[13] = sender.getPhotoID();
+            notificator.notifyFriend(sender.getSuggestedFriendID(), database.getUser(sender.getSuggestedFriendID()).getUsername(), notification);
+            reply[0] = "Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!";
+        }
+        else if (message.equalsIgnoreCase("нет")){
+            database.addConnection(id, sender.getSuggestedFriendID(), false);
+            reply[0] = "Очень жаль, в следующий раз постараюсь лучше :(";
+        }
+        else {
+            reply[0] = "Введи да или нет.";
             return;
         }
-        if ((page < 1) || (page > idList.size()/10 + 1)){
-            reply[0] = "Нет страницы с таким номером.";
+        sender.setSuggestedFriendID(null);
+        sender.setGlobalState(GlobalState.COMMAND);
+    }
+    /**
+     * Pending users watch handler.
+     * Decides whether to send usernames to both of user or write suggested user in the black list.
+     * @param id string representation of user id
+     * @param message user message
+     * @param sender instance of {@link User} class representing a sender
+     * @param reply array of strings with size of 12, where every string is a separate message
+     */
+    private void casePending(String id, String message, User sender, String[] reply){
+        List<Integer> pending = database.getPendingOf(id);
+        Connection connection = database.getConnection(pending.get(0));
+        if (message.equalsIgnoreCase("да")){
+            String[] notification = new String[24];
+            connection.setIsLiked(true);
+            database.updateConnection(connection);
+            notification[0] = "Ура! Тебе ответили взаимностью, можно переходить к общению.";
+            notification[1] = "Вот ссылка на профиль собеседника - @" + sender.getUsername();
+            notificator.notifyFriend(connection.getFriendID(), database.getUser(connection.getFriendID()).getUsername(), notification);
+            reply[0] = "Ура! Теперь вы можете перейти к общению.";
+            reply[1] = "Вот ссылка на профиль собеседника - @" + database.getUser(connection.getFriendID()).getUsername();
+        }
+        else if (message.equalsIgnoreCase("нет")){
+            connection.setIsLiked(false);
+            database.updateConnection(connection);
+            reply[0] = "Хорошо, больше ты этого человека не увидишь. Если только не решишь удалить его из списка не понравившихся профилей.";
+        }
+        else {
+            reply[0] = "Введи да или нет.";
             return;
         }
-        reply[0] = "Профили на странице " + message + ":";
-        getTenProfiles(reply, page - 1, id, idList);
         sender.setGlobalState(GlobalState.COMMAND);
     }
     /**
@@ -323,7 +473,7 @@ public class MessageProcessor {
      */
     public String[] processMessage(String id, String message){
         String[] reply = new String[24];
-        if (service.getUser(id) == null) {
+        if (database.getUser(id) == null) {
             String username;
             if (message.startsWith("username")) {
                 username = message.substring(8);
@@ -331,16 +481,18 @@ public class MessageProcessor {
                 reply[0] = "требуется имя пользователя";
                 return reply;
             }
-            service.addUser(id, username);
+            database.addUser(id, username);
         }
-        User sender = service.getUser(id);
+        User sender = database.getUser(id);
         switch (sender.getGlobalState()){
             case COMMAND -> caseCommand(id, message, sender, reply);
             case PROFILE_FILL -> caseProfileFill(id, message, sender, reply);
             case PROFILE_EDIT -> caseProfileEdit(id, message, sender, reply);
-            case GET_PROFILES -> caseGetProfiles(id, message, sender, reply);
+            case MATCHES -> caseMatches(message, sender, reply);
+            case MATCHING -> caseMatching(id, message, sender, reply);
+            case PENDING -> casePending(id, message, sender, reply);
         }
-        service.updateUser(sender);
+        database.updateUser(sender);
         return reply;
     }
 
@@ -354,7 +506,7 @@ public class MessageProcessor {
      */
     public String[] processPhoto(String id, String photoID){
         String[] reply = new String[24];
-        User sender = service.getUser(id);
+        User sender = database.getUser(id);
         if (sender.getLocalState() != LocalState.PHOTO){
             reply[0] = "Пожалуйста, отправь сообщение.";
             return reply;
@@ -364,15 +516,15 @@ public class MessageProcessor {
         if (sender.getGlobalState() == GlobalState.PROFILE_EDIT){
             reply[0] = "Изменение внесено.";
             sender.setGlobalState(GlobalState.COMMAND);
-            service.addToFPL(id);
+            database.addToFPL(id);
             sender.setProfileFilled(true);
         }
         else {
             reply[0] = stateFSM.getRightReplies().get(LocalState.PHOTO);
-            reply[2] = profileData(id);
+            reply[2] = database.profileData(id);
             reply[14] = sender.getPhotoID();
         }
-        service.updateUser(sender);
+        database.updateUser(sender);
         return reply;
     }
 }

@@ -7,6 +7,9 @@ import mainBot.GlobalState;
 import mainBot.LocalState;
 import mainBot.StateFSM;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Main user class.
  * Contains all data fields required for matching.
@@ -24,6 +27,9 @@ public class User {
     private String localState;
     private int age, minExpectedAge, maxExpectedAge;
     private boolean profileFilled;
+    private String suggestedFriendID;
+    private String profilesList;
+    private Integer profilesPage;
     public User(){}
     public User(String m_id, String m_username){
         this.id = m_id;
@@ -47,26 +53,6 @@ public class User {
     @Override
     public int hashCode() {
         return id.hashCode();
-    }
-
-    /**
-     * Constructor for tests
-     */
-    public User(String id, String name, String city, String expectedCity, String sex, String expectedSex, String information, String photoID, GlobalState globalState, LocalState localState, int age, int minExpectedAge, int maxExpectedAge) {
-        this.id = id;
-        this.name = name;
-        this.city = city;
-        this.expectedCity = expectedCity;
-        this.sex = sex;
-        this.expectedSex = expectedSex;
-        this.information = information;
-        this.photoID = photoID;
-        this.globalState = globalState.toString();
-        this.localState = localState.toString();
-        this.age = age;
-        this.minExpectedAge = minExpectedAge;
-        this.maxExpectedAge = maxExpectedAge;
-        this.profileFilled = true;
     }
     public String getId(){
         return id;
@@ -220,6 +206,25 @@ public class User {
     public void setProfileFilled(boolean profileFilled) {
         this.profileFilled = profileFilled;
     }
+    public String getSuggestedFriendID() {
+        return suggestedFriendID;
+    }
+    public void setSuggestedFriendID(String suggestedFriend) {
+        this.suggestedFriendID = suggestedFriend;
+    }
+    public String getProfilesList() {
+        return profilesList;
+    }
+    public void setProfilesList(String profilesList) {
+        this.profilesList = profilesList;
+    }
+    public int getProfilesPage() {
+        return profilesPage;
+    }
+    public void setProfilesPage(Integer profilesPage) {
+        this.profilesPage = profilesPage;
+    }
+
     /**
      * Method to unify field filling.
      * Uses different setters depending on current {@link User#localState}.

@@ -1,6 +1,8 @@
 package telegrammBot;
 
 
+import database.Database;
+import database.DatabaseService;
 import mainBot.MessageProcessor;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -11,31 +13,63 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class Bot extends TelegramLongPollingBot {
-    private final MessageProcessor processor = new MessageProcessor();
+    private final Database database = new DatabaseService();
+    private final MessageProcessor processor = new MessageProcessor(database);
     private final Map<String, String> env = System.getenv();
-    private synchronized void printInfo(Message tgMessage, String[] reply){
-        System.out.println("-----------------------------------------------------------------------");
-        System.out.println(tgMessage.getChatId());
-        System.out.println(tgMessage.getFrom().getUserName());
-        System.out.println(tgMessage.getText());
-        System.out.println("Has photo: " + tgMessage.hasPhoto());
+
+    public void send(String id, String username, String message, String[] reply) {
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setChatId(id);
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.enableMarkdown(true);
+        sendMessage.setChatId(id);
         for (int i = 0; i < 12; i++){
             if (reply[i] != null){
-                System.out.println(reply[i]);
-                System.out.println(reply[i+12]);
+                System.out.println("-----------------------------------------------------------------------\n");
+                System.out.println("-----------------------------------------------------------------------");
+                System.out.println(id);
+                System.out.println(username);
+                System.out.println(message);
+                String text = reply[i].replace("_", "\\_");
+                if (reply[i+12] != null){
+                    sendPhoto.setPhoto(new InputFile(reply[i+12]));
+                    sendPhoto.setCaption(text);
+                    System.out.println("Has photo: TRUE");
+                    System.out.println(reply[i]);
+                    System.out.println(reply[i+12]);
+                    try {
+                        execute(sendPhoto);
+                    } catch (TelegramApiException e) {
+                        e.printStackTrace(System.out);
+                        System.out.println("Message send fail");
+                        continue;
+                    }
+                    System.out.println("Message sent successfully");
+                }
+                else {
+                    sendMessage.setText(text);
+                    System.out.println("Has photo: FALSE");
+                    System.out.println(reply[i]);
+                    try {
+                        execute(sendMessage);
+                    } catch (TelegramApiException e) {
+                        e.printStackTrace(System.out);
+                        System.out.println("Message send fail");
+                        continue;
+                    }
+                    System.out.println("Message sent successfully");
+                }
             }
         }
-        System.out.println("-----------------------------------------------------------------------");
     }
 
     @Override
     public void onUpdateReceived(Update update) {
         String message = update.getMessage().getText();
         String chatId = update.getMessage().getChatId().toString();
-        SendPhoto sendPhoto = new SendPhoto();
-        sendPhoto.setChatId(chatId);
         String username = update.getMessage().getFrom().getUserName();
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
@@ -54,37 +88,22 @@ public class Bot extends TelegramLongPollingBot {
                     reply = processor.processMessage(chatId, "username" + username);
                 }
             }
-            for (int i = 0; i < 12; i++){
-                if (reply[i] != null){
-                    if (reply[i+12] != null){
-                        sendPhoto.setPhoto(new InputFile(reply[i+12]));
-                        sendPhoto.setCaption(reply[i]);
-                        try {
-                            execute(sendPhoto);
-                        } catch (TelegramApiException e) {
-                            e.printStackTrace(System.out);
-                        }
-                    }
-                    else {
-                        sendMessage.setText(reply[i]);
-                        try {
-                            execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            e.printStackTrace(System.out);
-                        }
-                    }
-                }
-            }
-            printInfo(update.getMessage(), reply);
+            send(chatId, username, message, reply);
         }
         else{
             sendMessage.setText("Длинна сообщения слишком большая, введите не более 150-и символов");
             try {
                 execute(sendMessage);
+                System.out.println("-----------------------------------------------------------------------");
+                System.out.println(chatId);
+                System.out.println(username);
+                System.out.println(message);
+                System.out.println("Has photo: FALSE");
+                System.out.println("Длинна сообщения слишком большая, введите не более 150-и символов");
+                System.out.println("-----------------------------------------------------------------------");
             } catch (TelegramApiException e) {
                 e.printStackTrace(System.out);
             }
-            printInfo(update.getMessage(), new String[]{"Длинна сообщения слишком большая, введите не более 150-и символов"});
         }
     }
     @Override

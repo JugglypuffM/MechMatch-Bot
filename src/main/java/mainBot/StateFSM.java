@@ -24,8 +24,22 @@ public class StateFSM {
      * Key - state, Value - reply text
      */
     private final Map<LocalState, String> wrongReplies;
+    /**
+     * Dictionary with replies for case, when user is asked to edit something
+     * Key - state, Value - reply text
+     */
     private final Map<LocalState, String> editReplies;
+    /**
+     * Dictionary with string representations of global states.
+     * Used to translate the string into the global state
+     * Key - string representation of state, Value - the global state itself
+     */
     private final Map<String, GlobalState> globalStateMap;
+    /**
+     * Dictionary with string representations of local states.
+     * Used to translate the string into the local state
+     * Key - string representation of state, Value - the local state itself
+     */
     private final Map<String, LocalState> localStateMap;
     public StateFSM(){
         this.stateDict = new HashMap<>();
@@ -102,7 +116,9 @@ public class StateFSM {
         globalStateMap.put("COMMAND", GlobalState.COMMAND);
         globalStateMap.put("PROFILE_FILL", GlobalState.PROFILE_FILL);
         globalStateMap.put("PROFILE_EDIT", GlobalState.PROFILE_EDIT);
-        globalStateMap.put("GET_PROFILES", GlobalState.GET_PROFILES);
+        globalStateMap.put("MATCHES", GlobalState.MATCHES);
+        globalStateMap.put("MATCHING", GlobalState.MATCHING);
+        globalStateMap.put("PENDING", GlobalState.PENDING);
 
         this.localStateMap = new HashMap<>();
         localStateMap.put("START", LocalState.START);
@@ -117,7 +133,9 @@ public class StateFSM {
         localStateMap.put("ECITY", LocalState.ECITY);
         localStateMap.put("PHOTO", LocalState.PHOTO);
         localStateMap.put("FINISH", LocalState.FINISH);
-        localStateMap.put("MATCHES", LocalState.MATCHES);
+        localStateMap.put("CHOICE", LocalState.CHOICE);
+        localStateMap.put("PROFILES", LocalState.PROFILES);
+        localStateMap.put("EDIT", LocalState.EDIT);
         localStateMap.put("DELETE", LocalState.DELETE);
     }
 
