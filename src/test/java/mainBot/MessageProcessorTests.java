@@ -1,13 +1,15 @@
 package mainBot;
 
+import database.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MessageProcessorTests {
-    MessageProcessor processor;
-    String id;
+    private final UserService service = new UserService();
+    private final MessageProcessor processor = new MessageProcessor(service);
+    String id = "0";
     /**
      * Utility method to fill all profile data at once
      * @param id user id
@@ -35,8 +37,6 @@ public class MessageProcessorTests {
      */
     @BeforeEach
     public void initialize(){
-        this.id = "0";
-        this.processor = new MessageProcessor();
         processor.processMessage(id, "/start");
         processor.processMessage(id, "usernamestas");
         processor.processMessage(id, "Стас");
@@ -57,12 +57,12 @@ public class MessageProcessorTests {
      */
     @AfterEach
     public void deleteUsers(){
-        processor.processMessage(id, "/deleteProfile");
-        processor.processMessage(id, "stas");
-        processor.processMessage("1", "/deleteProfile");
-        processor.processMessage("1", "stas");
-        processor.processMessage("2", "/deleteProfile");
-        processor.processMessage("2", "stas");
+        service.deleteUser(id);
+        service.deleteAllConnectionsWith(id);
+        service.deleteUser("1");
+        service.deleteAllConnectionsWith("1");
+        service.deleteUser("5");
+        service.deleteAllConnectionsWith("5");
     }
     /**
      * Test of profile filling procedure.
@@ -258,10 +258,24 @@ public class MessageProcessorTests {
         processor.processMessage("1", "/editProfile");
         processor.processMessage("1", "8");
         processor.processMessage("1", "парень");
+        Assertions.assertEquals("Просмотренных профилей пока что нет ;(\nПопробуй ввести /match", processor.processMessage("0", "/myMatches")[0]);
         processor.processMessage("0", "/match");
+        processor.processMessage("0", "да");
+        processor.processMessage("1", "да");
+        Assertions.assertEquals("Какой список профилей вывести(лайки/дизлайки)?", processor.processMessage("0", "/myMatches")[0]);
+        Assertions.assertEquals("Такого списка нет, введи либо \"лайки\", либо \"дизлайки\".", processor.processMessage("0", "ыважлпдлавп")[0]);
+        Assertions.assertEquals("Этот список пуст :(", processor.processMessage("0", "дизлайки")[0]);
         processor.processMessage("0", "/myMatches");
-        String[] reply = processor.processMessage("0", "1");
-        Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], reply[2]);
+        String[] reply = processor.processMessage("0", "лайки");
+        Assertions.assertEquals("Профили на странице 1:", reply[0]);
+        Assertions.assertEquals("Профиль 1:\n" + processor.processMessage("1", "/myProfile")[0] +
+                "\nВот ссылка на профиль этого пользователя - @stas", reply[2]);
+        Assertions.assertEquals("Больше страниц нет.", processor.processMessage("0", "далее")[0]);
+        Assertions.assertEquals("Это первая страница.", processor.processMessage("0", "назад")[0]);
+        Assertions.assertEquals("Введи \"далее\" или \"назад\" для смены страниц, \"выйти\" для выхода или номер профиля, который хочешь удалить.", processor.processMessage("0", "выфжадвыьфа")[0]);
+        Assertions.assertEquals("Нет профиля с таким номером.", processor.processMessage("0", "2")[0]);
+        Assertions.assertEquals("Профиль успешно удален из списка.", processor.processMessage("0", "1")[0]);
+        Assertions.assertEquals("Просмотренных профилей пока что нет ;(\nПопробуй ввести /match", processor.processMessage("0", "/myMatches")[0]);
     }
 
     /**
