@@ -25,9 +25,6 @@ public class DAO {
         return sessionFactory.getSessionFactory().openSession().get(User.class, id);
     }
     public void updateUser(User user) {
-        if (getUser(user.getId()) == null){
-            return;
-        }
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.merge(user);
@@ -48,7 +45,21 @@ public class DAO {
     public List<User> getProfileFilledUsers(){
         return sessionFactory.getSessionFactory().openSession().createQuery("From User WHERE profileFilled").list();
     }
+
+    /**
+     * Connection creation method.
+     * Checks if owner of this connection has less, than 100 likes and dislikes, else deletes the earliest one
+     * @param connection
+     */
     public void createConnection(Connection connection) {
+        List<Connection> likes = getLikesOf(connection.getUserID());
+        if (likes.size() > 100){
+            deleteConnection(likes.get(0));
+        }
+        List<Connection> dislikes = getDislikesOf(connection.getUserID());
+        if (dislikes.size() > 100){
+            deleteConnection(dislikes.get(0));
+        }
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.persist(connection);
@@ -59,9 +70,6 @@ public class DAO {
         return sessionFactory.getSessionFactory().openSession().get(Connection.class, id);
     }
     public void updateConnection(Connection connection) {
-        if (getConnection(connection.getId()) == null){
-            return;
-        }
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.merge(connection);
@@ -91,7 +99,19 @@ public class DAO {
      */
     public List<Connection> getPendingOf(String id){
         Session session = sessionFactory.getSessionFactory().openSession();
-        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is null )");
+        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is null ) order by id asc" );
+        query.setParameter("paramid", id);
+        return query.list();
+    }
+    public List<Connection> getLikesOf(String id){
+        Session session = sessionFactory.getSessionFactory().openSession();
+        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is true ) order by id asc");
+        query.setParameter("paramid", id);
+        return query.list();
+    }
+    public List<Connection> getDislikesOf(String id){
+        Session session = sessionFactory.getSessionFactory().openSession();
+        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is false ) order by id asc");
         query.setParameter("paramid", id);
         return query.list();
     }
