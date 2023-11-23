@@ -59,7 +59,39 @@
           <version>2.21.1</version>
       </dependency>
 
+      <dependency>
+          <groupId>io.github.cdimascio</groupId>
+          <artifactId>java-dotenv</artifactId>
+          <version>5.2.2</version>
+      </dependency>
+
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>Main</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
     <dependencyManagement>
         <dependencies>
