@@ -1,0 +1,28 @@
+version: '3.5'
+services:
+    db:
+        build:
+            dockerfile: ./src/main/java/database/Dockerfile
+        container_name: db
+        env_file:
+            - .env
+        networks:
+            - localnet
+        volumes:
+            - bot_db:/var/lib/postgresql/data
+    bot:
+        build:
+            dockerfile: ./Dockerfile
+        container_name: bot
+        env_file:
+            - .env
+        networks:
+            - localnet
+        depends_on:
+            - db
+networks:
+    localnet:
+        external: true
+volumes:
+    bot_db:
+        external: true
