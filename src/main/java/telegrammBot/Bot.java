@@ -3,22 +3,22 @@ package telegrammBot;
 
 import database.Database;
 import database.DatabaseService;
+import io.github.cdimascio.dotenv.Dotenv;
 import mainBot.MessageProcessor;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Map;
-import java.util.Optional;
-
 public class Bot extends TelegramLongPollingBot {
+    private final Dotenv dotenv = Dotenv.load();
     private final Database database = new DatabaseService();
     private final MessageProcessor processor = new MessageProcessor(database);
-    private final Map<String, String> env = System.getenv();
+    public Bot(){
+        super(Dotenv.load().get("TG_BOT_TOKEN"));
+    }
 
     public void send(String id, String username, String message, String[] reply) {
         SendPhoto sendPhoto = new SendPhoto();
@@ -108,11 +108,6 @@ public class Bot extends TelegramLongPollingBot {
     }
     @Override
     public String getBotUsername() {
-        return env.get("testBotName");
-    }
-
-    @Override
-    public String getBotToken() {
-        return env.get("testBotToken");
+        return dotenv.get("TG_BOT_NAME");
     }
 }
