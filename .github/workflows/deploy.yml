@@ -36,7 +36,7 @@ jobs:
     steps:
       - name: Fill private key file
         run: |
-          cd /root/.ssh/
+          sudo cd /root/.ssh/
           cat ${{ secrets.SSH_PRIVATE_KEY}} >> id_rsa
 
       - name: Run command on remote server
