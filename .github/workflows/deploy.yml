@@ -32,7 +32,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Run command on remote server
         uses: D3rHase/ssh-command-action@v0.2.2
@@ -44,5 +44,8 @@ jobs:
             cd ${{ secrets.PROJECT_FOLDER }};
             git checkout master;
             git pull;
+            sudo docker stop bot db
+            sudo docker rm bot db
+            sudo docker rmi oop-java-project-bot oop-java-project-db
             sudo docker-compose up -d;
             sudo docker system prune --all --force;
