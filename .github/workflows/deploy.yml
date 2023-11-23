@@ -34,9 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Fill private key file
-        run: sudo echo "${{ secrets.SSH_PRIVATE_KEY}}" >> /root/.ssh/id_rsa
-
       - name: Run command on remote server
         uses: D3rHase/ssh-command-action@v0.2.2
         with:
