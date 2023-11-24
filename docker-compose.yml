@@ -20,6 +20,8 @@ services:
             - .env
         networks:
             - localnet
+        volumes:
+            - /logs:/logs
         depends_on:
             - db
 networks:
