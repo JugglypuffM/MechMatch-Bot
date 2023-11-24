@@ -3,12 +3,9 @@ package database.models;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import mainBot.GlobalState;
-import mainBot.LocalState;
-import mainBot.StateFSM;
-
-import java.util.ArrayList;
-import java.util.List;
+import mainBot.states.GlobalState;
+import mainBot.states.LocalState;
+import mainBot.states.StateFSM;
 
 /**
  * Main user class.

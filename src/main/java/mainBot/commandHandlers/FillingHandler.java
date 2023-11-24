@@ -1,10 +1,10 @@
 package mainBot.commandHandlers;
 
-import database.Database;
+import database.main.Database;
 import database.models.User;
-import mainBot.GlobalState;
-import mainBot.LocalState;
-import mainBot.StateFSM;
+import mainBot.states.GlobalState;
+import mainBot.states.LocalState;
+import mainBot.states.StateFSM;
 
 /**
  * Profile filling procedure handler.

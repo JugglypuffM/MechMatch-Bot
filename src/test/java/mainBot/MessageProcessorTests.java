@@ -1,7 +1,8 @@
 package mainBot;
 
-import database.Database;
-import database.DatabaseMock;
+import database.main.Database;
+import database.main.DatabaseMock;
+import database.main.DatabaseService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,7 @@ import org.junit.jupiter.api.Test;
 public class MessageProcessorTests {
     /**
      * Mock database class.
-     * Has the same functionality as the main {@link database.DatabaseService} class.
+     * Has the same functionality as the main {@link DatabaseService} class.
      */
     private Database database;
     /**

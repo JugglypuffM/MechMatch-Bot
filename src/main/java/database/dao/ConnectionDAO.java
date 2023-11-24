@@ -1,64 +1,31 @@
-package database;
+package database.dao;
 
-
+import database.hibernate.HibernateSessionFactory;
 import database.models.Connection;
-import database.models.User;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.util.List;
 
-/**
- * Data Access Object for {@link User} and {@link Connection}.
- */
-public class DAO {
-    private final HibernateSessionFactory sessionFactory = new HibernateSessionFactory();
-    public void createUser(User user) {
-        Session session = sessionFactory.getSessionFactory().openSession();
-        Transaction tx1 = session.beginTransaction();
-        session.persist(user);
-        tx1.commit();
-        session.close();
+public class ConnectionDAO implements DAO<Connection, Integer>{
+    private final HibernateSessionFactory sessionFactory;
+    public ConnectionDAO(HibernateSessionFactory hsf){
+        this.sessionFactory = hsf;
     }
-    public User getUser(String id) {
-        return sessionFactory.getSessionFactory().openSession().get(User.class, id);
-    }
-    public void updateUser(User user) {
-        Session session = sessionFactory.getSessionFactory().openSession();
-        Transaction tx1 = session.beginTransaction();
-        session.merge(user);
-        tx1.commit();
-        session.close();
-    }
-    public void deleteUser(User user) {
-        Session session = sessionFactory.getSessionFactory().openSession();
-        Transaction tx1 = session.beginTransaction();
-        session.remove(user);
-        tx1.commit();
-        session.close();
-    }
-    /**
-     * Get list of users, who already filled profiles.
-     * @return list of users
-     */
-    public List<User> getProfileFilledUsers(){
-        return sessionFactory.getSessionFactory().openSession().createQuery("From User WHERE profileFilled").list();
-    }
-
     /**
      * Connection creation method.
      * Checks if owner of this connection has less, than 100 likes and dislikes, else deletes the earliest one
-     * @param connection
+     * @param connection new connection
      */
-    public void createConnection(Connection connection) {
+    public void create(Connection connection) {
         List<Connection> likes = getLikesOf(connection.getUserID());
         if (likes.size() > 100){
-            deleteConnection(likes.get(0));
+            delete(likes.get(0));
         }
         List<Connection> dislikes = getDislikesOf(connection.getUserID());
         if (dislikes.size() > 100){
-            deleteConnection(dislikes.get(0));
+            delete(dislikes.get(0));
         }
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
@@ -66,17 +33,17 @@ public class DAO {
         tx1.commit();
         session.close();
     }
-    public Connection getConnection(int id) {
+    public Connection read(Integer id) {
         return sessionFactory.getSessionFactory().openSession().get(Connection.class, id);
     }
-    public void updateConnection(Connection connection) {
+    public void update(Connection connection) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.merge(connection);
         tx1.commit();
         session.close();
     }
-    public void deleteConnection(Connection connection) {
+    public void delete(Connection connection) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.remove(connection);

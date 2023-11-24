@@ -1,4 +1,4 @@
-package mainBot;
+package mainBot.notificator;
 
 import telegrammBot.BotRegistrar;
 

@@ -1,8 +1,12 @@
 package mainBot;
 
-import database.Database;
+import database.main.Database;
 import database.models.User;
 import mainBot.commandHandlers.*;
+import mainBot.notificator.Notificator;
+import mainBot.states.GlobalState;
+import mainBot.states.LocalState;
+import mainBot.states.StateFSM;
 
 
 public class MessageProcessor {

@@ -1,6 +1,8 @@
 package mainBot;
 
 import database.models.User;
+import mainBot.states.GlobalState;
+import mainBot.states.LocalState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

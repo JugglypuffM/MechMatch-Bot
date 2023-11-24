@@ -1,8 +1,8 @@
 package telegrammBot;
 
 
-import database.Database;
-import database.DatabaseService;
+import database.main.Database;
+import database.main.DatabaseService;
 import io.github.cdimascio.dotenv.Dotenv;
 import mainBot.MessageProcessor;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;

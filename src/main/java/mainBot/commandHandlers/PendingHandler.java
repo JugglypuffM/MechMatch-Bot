@@ -1,10 +1,10 @@
 package mainBot.commandHandlers;
 
-import database.Database;
+import database.main.Database;
 import database.models.Connection;
 import database.models.User;
-import mainBot.GlobalState;
-import mainBot.Notificator;
+import mainBot.states.GlobalState;
+import mainBot.notificator.Notificator;
 
 import java.util.List;
 

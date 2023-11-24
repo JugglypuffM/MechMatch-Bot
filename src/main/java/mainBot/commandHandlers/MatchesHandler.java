@@ -1,9 +1,9 @@
 package mainBot.commandHandlers;
 
-import database.Database;
+import database.main.Database;
 import database.models.User;
-import mainBot.GlobalState;
-import mainBot.LocalState;
+import mainBot.states.GlobalState;
+import mainBot.states.LocalState;
 
 import java.util.ArrayList;
 import java.util.List;

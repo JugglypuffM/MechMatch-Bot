@@ -1,4 +1,4 @@
-package mainBot;
+package mainBot.states;
 
 import java.util.HashMap;
 import java.util.Map;

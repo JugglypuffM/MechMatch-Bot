@@ -1,4 +1,4 @@
-package database;
+package database.hibernate;
 
 import database.models.Connection;
 import database.models.User;
