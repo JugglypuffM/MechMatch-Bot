@@ -1,9 +1,11 @@
 package mainBot.commandHandlers;
 
+import database.Database;
 import database.models.User;
 import mainBot.GlobalState;
 import mainBot.LocalState;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,6 +16,45 @@ import java.util.List;
  * Offers to delete one profile by a number.
  */
 public class MatchesHandler implements Handler{
+    private final Database database;
+    public MatchesHandler(Database m_database){
+        this.database = m_database;
+    }
+    private List<String> getIdList(User sender){
+        List<String> idList = new ArrayList<>();
+        if (sender.getProfilesList().equalsIgnoreCase("лайки")){
+            for (Integer i: database.getLikesOf(sender.getId())){
+                idList.add(database.getConnection(i).getFriendID());
+            }
+        }
+        else{
+            for (Integer i: database.getDislikesOf(sender.getId())){
+                idList.add(database.getConnection(i).getFriendID());
+            }
+        }
+        return idList;
+    }
+    private void getTenProfiles(User sender, String[] reply, List<String> idList){
+        int page = sender.getProfilesPage()-1;
+        reply[0] = "Профили на странице " + (page+1) + ":";
+        for (int i = 0; i < 10; i++){
+            if (i+page*10 < idList.size()){
+                reply[2+i] = "Профиль " + (1+i+page*10) + ":\n" + database.profileData(idList.get(i+page*10));
+                if (sender.getProfilesList().equalsIgnoreCase("лайки")){
+                    List<String> friendLikes = new ArrayList<>();
+                    for (Integer j: database.getLikesOf(idList.get(i+page*10))){
+                        friendLikes.add(database.getConnection(j).getFriendID());
+                    }
+                    if (friendLikes.contains(sender.getId())){
+                        reply[2+i] = reply[2+i] + "\nВот ссылка на профиль этого пользователя - @" + database.getUser(idList.get(i+page*10)).getUsername();
+                    }
+                }
+                reply[14+i] = database.getUser(idList.get(i+page*10)).getPhotoID();
+            }else {
+                break;
+            }
+        }
+    }
     public void handleMessage(User sender, String[] reply, String message) {
         switch (sender.getLocalState()){
             case CHOICE -> {
