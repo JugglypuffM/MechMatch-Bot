@@ -242,6 +242,21 @@ public class MessageProcessorTests {
         Assertions.assertEquals(processor.processMessage("1", "/myProfile")[0], processor.processMessage("0", "/match")[0]);
         Assertions.assertEquals("Очень жаль, в следующий раз постараюсь лучше :(", processor.processMessage("0", "нет")[0]);
     }
+    @Test
+    public void TwoUsersMatchTest(){
+        processor.processMessage(id, "да");
+        fillProfile("1", processor);
+        processor.processMessage("0", "/editProfile");
+        processor.processMessage("0", "8");
+        processor.processMessage("0", "парень");
+        processor.processMessage("1", "/editProfile");
+        processor.processMessage("1", "8");
+        processor.processMessage("1", "парень");
+        processor.processMessage("0", "/match");
+        Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(", processor.processMessage("1", "/match")[0]);
+        Assertions.assertEquals("Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!", processor.processMessage("0", "да")[0]);
+        Assertions.assertEquals("Ура! Теперь вы можете перейти к общению.", processor.processMessage("1", "да")[0]);
+    }
     /**
      * Test of /myMatches command
      */

@@ -7,6 +7,7 @@ import mainBot.LocalState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Command handler.
@@ -109,8 +110,9 @@ public class CommandHandler implements Handler{
                     }
                     if (senderSexMatch && senderCityMatch && senderAgeMatch &&
                             friendSexMatch && friendCityMatch && friendAgeMatch &&
-                            (!database.getAllConnectedUserIds(sender.getId()).contains(friend.getId())) &&
-                            (!friendDislikes.contains(sender.getId()))) {
+                            !database.getAllConnectedUserIds(sender.getId()).contains(friend.getId()) &&
+                            !friendDislikes.contains(sender.getId()) &&
+                            !(Objects.equals(friend.getSuggestedFriendID(), sender.getId()))) {
                         reply[0] = database.profileData(friend.getId());
                         reply[1] = "Напиши, понравился ли тебе пользователь(да/нет).";
                         reply[12] = database.getUser(fpl.get(tmpNum)).getPhotoID();
