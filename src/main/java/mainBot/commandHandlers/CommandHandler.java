@@ -37,6 +37,7 @@ public class CommandHandler implements Handler{
                """;
     }
     public void handleMessage(User sender, String[] reply, String message) {
+        message = message.toLowerCase();
         if (database.getUser(sender.getId()).getExpectedCity() == null){
             message = "/start";
         }
@@ -64,7 +65,7 @@ public class CommandHandler implements Handler{
             case "/help":
                 reply[0] = giveHelp();
                 break;
-            case "/changeProfile":
+            case "/changeprofile":
                 database.eraseProfileData(sender.getId());
                 database.deleteFromFPL(sender.getId());
                 sender.setProfileFilled(false);
@@ -72,7 +73,7 @@ public class CommandHandler implements Handler{
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
-            case "/editProfile":
+            case "/editprofile":
                 database.deleteFromFPL(sender.getId());
                 sender.setProfileFilled(false);
                 reply[0] = "Что хочешь изменить?";
@@ -123,11 +124,11 @@ public class CommandHandler implements Handler{
                     tmpNum++;
                 }
                 break;
-            case "/myProfile":
+            case "/myprofile":
                 reply[0] = database.profileData(sender.getId());
                 reply[12] = sender.getPhotoID();
                 break;
-            case "/myMatches":
+            case "/mymatches":
                 if (database.getAllConnectionsWith(sender.getId()).isEmpty()){
                     reply[0] = "Просмотренных профилей пока что нет ;(\nПопробуй ввести /match";
                     return;
@@ -138,7 +139,7 @@ public class CommandHandler implements Handler{
                 sender.setGlobalState(GlobalState.MATCHES);
                 sender.setLocalState(LocalState.CHOICE);
                 break;
-            case "/deleteProfile":
+            case "/deleteprofile":
                 reply[0] = "Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!";
                 reply[1] = "Если ты действительно этого хочешь, то введи свое имя пользователя(то что с собачкой)";
                 sender.setGlobalState(GlobalState.PROFILE_EDIT);
