@@ -4,6 +4,7 @@ services:
         build:
             dockerfile: ./src/main/java/database/Dockerfile
         container_name: db
+        restart: unless-stopped
         env_file:
             - .env
         networks:
@@ -14,6 +15,7 @@ services:
         build:
             dockerfile: ./Dockerfile
         container_name: bot
+        restart: unless-stopped
         env_file:
             - .env
         networks:
