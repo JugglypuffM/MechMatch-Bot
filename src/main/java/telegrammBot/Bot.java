@@ -1,10 +1,11 @@
 package telegrammBot;
 
 
-import database.Database;
-import database.DatabaseService;
+import database.main.Database;
+import database.main.DatabaseService;
 import io.github.cdimascio.dotenv.Dotenv;
 import mainBot.MessageProcessor;
+import org.slf4j.Logger;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -16,6 +17,7 @@ public class Bot extends TelegramLongPollingBot {
     private final Dotenv dotenv = Dotenv.load();
     private final Database database = new DatabaseService();
     private final MessageProcessor processor = new MessageProcessor(database);
+    private final Logger logger = org.slf4j.LoggerFactory.getLogger(Bot.class);
     public Bot(){
         super(Dotenv.load().get("TG_BOT_TOKEN"));
     }
@@ -28,39 +30,37 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage.setChatId(id);
         for (int i = 0; i < 12; i++){
             if (reply[i] != null){
-                System.out.println("-----------------------------------------------------------------------\n");
-                System.out.println("-----------------------------------------------------------------------");
-                System.out.println(id);
-                System.out.println(username);
-                System.out.println(message);
+                logger.info("-----------------------------------------------------------------------\n");
+                logger.info("-----------------------------------------------------------------------");
+                logger.info(id);
+                logger.info(username);
+                logger.info(message);
                 String text = reply[i].replace("_", "\\_");
                 if (reply[i+12] != null){
                     sendPhoto.setPhoto(new InputFile(reply[i+12]));
                     sendPhoto.setCaption(text);
-                    System.out.println("Has photo: TRUE");
-                    System.out.println(reply[i]);
-                    System.out.println(reply[i+12]);
+                    logger.info("Has photo: TRUE");
+                    logger.info(reply[i]);
+                    logger.info(reply[i+12]);
                     try {
                         execute(sendPhoto);
                     } catch (TelegramApiException e) {
-                        e.printStackTrace(System.out);
-                        System.out.println("Message send fail");
+                        logger.error("Message send fail", e);
                         continue;
                     }
-                    System.out.println("Message sent successfully");
+                    logger.info("Message sent successfully");
                 }
                 else {
                     sendMessage.setText(text);
-                    System.out.println("Has photo: FALSE");
-                    System.out.println(reply[i]);
+                    logger.info("Has photo: FALSE");
+                    logger.info(reply[i]);
                     try {
                         execute(sendMessage);
                     } catch (TelegramApiException e) {
-                        e.printStackTrace(System.out);
-                        System.out.println("Message send fail");
+                        logger.error("Message send fail", e);
                         continue;
                     }
-                    System.out.println("Message sent successfully");
+                    logger.info("Message sent successfully");
                 }
             }
         }
@@ -78,7 +78,7 @@ public class Bot extends TelegramLongPollingBot {
         if (message != null){
             l = message.length();
         }
-        if (l <= 150){
+        if (l <= 500){
             String[] reply;
             if (update.getMessage().hasPhoto()){
                 reply = processor.processPhoto(chatId, update.getMessage().getPhoto().get(0).getFileId());
@@ -91,18 +91,18 @@ public class Bot extends TelegramLongPollingBot {
             send(chatId, username, message, reply);
         }
         else{
-            sendMessage.setText("Длинна сообщения слишком большая, введите не более 150-и символов");
+            sendMessage.setText("Длинна сообщения слишком большая, введите не более 500 символов");
             try {
                 execute(sendMessage);
-                System.out.println("-----------------------------------------------------------------------");
-                System.out.println(chatId);
-                System.out.println(username);
-                System.out.println(message);
-                System.out.println("Has photo: FALSE");
-                System.out.println("Длинна сообщения слишком большая, введите не более 150-и символов");
-                System.out.println("-----------------------------------------------------------------------");
+                logger.info("-----------------------------------------------------------------------");
+                logger.info(chatId);
+                logger.info(username);
+                logger.info(message);
+                logger.info("Has photo: FALSE");
+                logger.info("Длинна сообщения слишком большая, введите не более 150-и символов");
+                logger.info("-----------------------------------------------------------------------");
             } catch (TelegramApiException e) {
-                e.printStackTrace(System.out);
+                logger.error("Message send fail", e);
             }
         }
     }

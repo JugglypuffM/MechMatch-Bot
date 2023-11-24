@@ -1,12 +1,13 @@
 package mainBot.commandHandlers;
 
-import database.Database;
+import database.main.Database;
 import database.models.User;
-import mainBot.GlobalState;
-import mainBot.LocalState;
+import mainBot.states.GlobalState;
+import mainBot.states.LocalState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Command handler.
@@ -36,6 +37,7 @@ public class CommandHandler implements Handler{
                """;
     }
     public void handleMessage(User sender, String[] reply, String message) {
+        message = message.toLowerCase();
         if (database.getUser(sender.getId()).getExpectedCity() == null){
             message = "/start";
         }
@@ -63,7 +65,7 @@ public class CommandHandler implements Handler{
             case "/help":
                 reply[0] = giveHelp();
                 break;
-            case "/changeProfile":
+            case "/changeprofile":
                 database.eraseProfileData(sender.getId());
                 database.deleteFromFPL(sender.getId());
                 sender.setProfileFilled(false);
@@ -71,7 +73,7 @@ public class CommandHandler implements Handler{
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
-            case "/editProfile":
+            case "/editprofile":
                 database.deleteFromFPL(sender.getId());
                 sender.setProfileFilled(false);
                 reply[0] = "Что хочешь изменить?";
@@ -97,10 +99,10 @@ public class CommandHandler implements Handler{
                 reply[0] = "Не нашлось никого, кто соответствует твоей уникальности ;(";
                 while (tmpNum < fpl.size()) {
                     friend = database.getUser(fpl.get(tmpNum));
-                    boolean senderSexMatch = (sender.getExpectedSex().equals("без разницы")) || (friend.getSex().equals(sender.getExpectedSex()));
-                    boolean friendSexMatch = (friend.getExpectedSex().equals("без разницы")) || (sender.getSex().equals(friend.getExpectedSex()));
-                    boolean senderCityMatch = (sender.getExpectedCity().equals("любой")) || (friend.getCity().equals(sender.getExpectedCity()));
-                    boolean friendCityMatch = (friend.getExpectedCity().equals("любой")) || (sender.getCity().equals(friend.getExpectedCity()));
+                    boolean senderSexMatch = (sender.getExpectedSex().equalsIgnoreCase("без разницы")) || (friend.getSex().equals(sender.getExpectedSex()));
+                    boolean friendSexMatch = (friend.getExpectedSex().equalsIgnoreCase("без разницы")) || (sender.getSex().equals(friend.getExpectedSex()));
+                    boolean senderCityMatch = (sender.getExpectedCity().equalsIgnoreCase("любой")) || (friend.getCity().equalsIgnoreCase(sender.getExpectedCity()));
+                    boolean friendCityMatch = (friend.getExpectedCity().equalsIgnoreCase("любой")) || (sender.getCity().equalsIgnoreCase(friend.getExpectedCity()));
                     boolean senderAgeMatch = (friend.getAge() <= sender.getMaxExpectedAge()) && (friend.getAge() >= sender.getMinExpectedAge());
                     boolean friendAgeMatch = (sender.getAge() <= friend.getMaxExpectedAge()) && (sender.getAge() >= friend.getMinExpectedAge());
                     List<String> friendDislikes = new ArrayList<>();
@@ -109,8 +111,9 @@ public class CommandHandler implements Handler{
                     }
                     if (senderSexMatch && senderCityMatch && senderAgeMatch &&
                             friendSexMatch && friendCityMatch && friendAgeMatch &&
-                            (!database.getAllConnectedUserIds(sender.getId()).contains(friend.getId())) &&
-                            (!friendDislikes.contains(sender.getId()))) {
+                            !database.getAllConnectedUserIds(sender.getId()).contains(friend.getId()) &&
+                            !friendDislikes.contains(sender.getId()) &&
+                            !(Objects.equals(friend.getSuggestedFriendID(), sender.getId()))) {
                         reply[0] = database.profileData(friend.getId());
                         reply[1] = "Напиши, понравился ли тебе пользователь(да/нет).";
                         reply[12] = database.getUser(fpl.get(tmpNum)).getPhotoID();
@@ -121,11 +124,11 @@ public class CommandHandler implements Handler{
                     tmpNum++;
                 }
                 break;
-            case "/myProfile":
+            case "/myprofile":
                 reply[0] = database.profileData(sender.getId());
                 reply[12] = sender.getPhotoID();
                 break;
-            case "/myMatches":
+            case "/mymatches":
                 if (database.getAllConnectionsWith(sender.getId()).isEmpty()){
                     reply[0] = "Просмотренных профилей пока что нет ;(\nПопробуй ввести /match";
                     return;
@@ -136,7 +139,7 @@ public class CommandHandler implements Handler{
                 sender.setGlobalState(GlobalState.MATCHES);
                 sender.setLocalState(LocalState.CHOICE);
                 break;
-            case "/deleteProfile":
+            case "/deleteprofile":
                 reply[0] = "Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!";
                 reply[1] = "Если ты действительно этого хочешь, то введи свое имя пользователя(то что с собачкой)";
                 sender.setGlobalState(GlobalState.PROFILE_EDIT);

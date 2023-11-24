@@ -36,3 +36,6 @@ build/
 
 ### Dotenv file ###
 .env
+
+### Logging dir ###
+logs/

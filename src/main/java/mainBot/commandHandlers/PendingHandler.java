@@ -1,10 +1,10 @@
 package mainBot.commandHandlers;
 
-import database.Database;
+import database.main.Database;
 import database.models.Connection;
 import database.models.User;
-import mainBot.GlobalState;
-import mainBot.Notificator;
+import mainBot.states.GlobalState;
+import mainBot.notificator.Notificator;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class PendingHandler implements Handler{
         this.database = m_database;
         this.notificator = m_notificator;
     }
-    public void handleMessage(User sender, String[] reply, String message) {
+    public synchronized void handleMessage(User sender, String[] reply, String message) {
         List<Integer> pending = database.getPendingOf(sender.getId());
         Connection connection = database.getConnection(pending.get(0));
         if (message.equalsIgnoreCase("да")){

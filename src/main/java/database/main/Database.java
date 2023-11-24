@@ -1,4 +1,4 @@
-package database;
+package database.main;
 
 import database.models.Connection;
 import database.models.User;

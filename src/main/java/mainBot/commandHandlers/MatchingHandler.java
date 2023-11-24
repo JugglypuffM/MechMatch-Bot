@@ -1,9 +1,9 @@
 package mainBot.commandHandlers;
 
-import database.Database;
+import database.main.Database;
 import database.models.User;
-import mainBot.GlobalState;
-import mainBot.Notificator;
+import mainBot.states.GlobalState;
+import mainBot.notificator.Notificator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +20,7 @@ public class MatchingHandler implements Handler{
         this.database = m_database;
         this.notificator = m_notificator;
     }
-    public void handleMessage(User sender, String[] reply, String message) {
-        if (database.getUser(sender.getSuggestedFriendID()).getSuggestedFriendID() != null){
-            if (database.getUser(sender.getSuggestedFriendID()).getSuggestedFriendID().equals(sender.getId())){
-                return;
-            }
-        }
+    public synchronized void handleMessage(User sender, String[] reply, String message) {
         List<String> friendLikes = new ArrayList<>();
         for (Integer i: database.getLikesOf(sender.getSuggestedFriendID())){
             friendLikes.add(database.getConnection(i).getFriendID());

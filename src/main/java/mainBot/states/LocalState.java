@@ -1,4 +1,4 @@
-package mainBot;
+package mainBot.states;
 
 public enum LocalState {
     START("START"),
