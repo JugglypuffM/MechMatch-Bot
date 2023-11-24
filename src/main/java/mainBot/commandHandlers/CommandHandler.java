@@ -99,10 +99,10 @@ public class CommandHandler implements Handler{
                 reply[0] = "Не нашлось никого, кто соответствует твоей уникальности ;(";
                 while (tmpNum < fpl.size()) {
                     friend = database.getUser(fpl.get(tmpNum));
-                    boolean senderSexMatch = (sender.getExpectedSex().equals("без разницы")) || (friend.getSex().equals(sender.getExpectedSex()));
-                    boolean friendSexMatch = (friend.getExpectedSex().equals("без разницы")) || (sender.getSex().equals(friend.getExpectedSex()));
-                    boolean senderCityMatch = (sender.getExpectedCity().equals("любой")) || (friend.getCity().equals(sender.getExpectedCity()));
-                    boolean friendCityMatch = (friend.getExpectedCity().equals("любой")) || (sender.getCity().equals(friend.getExpectedCity()));
+                    boolean senderSexMatch = (sender.getExpectedSex().equalsIgnoreCase("без разницы")) || (friend.getSex().equals(sender.getExpectedSex()));
+                    boolean friendSexMatch = (friend.getExpectedSex().equalsIgnoreCase("без разницы")) || (sender.getSex().equals(friend.getExpectedSex()));
+                    boolean senderCityMatch = (sender.getExpectedCity().equalsIgnoreCase("любой")) || (friend.getCity().equalsIgnoreCase(sender.getExpectedCity()));
+                    boolean friendCityMatch = (friend.getExpectedCity().equalsIgnoreCase("любой")) || (sender.getCity().equalsIgnoreCase(friend.getExpectedCity()));
                     boolean senderAgeMatch = (friend.getAge() <= sender.getMaxExpectedAge()) && (friend.getAge() >= sender.getMinExpectedAge());
                     boolean friendAgeMatch = (sender.getAge() <= friend.getMaxExpectedAge()) && (sender.getAge() >= friend.getMinExpectedAge());
                     List<String> friendDislikes = new ArrayList<>();
