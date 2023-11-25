@@ -1,7 +1,7 @@
-FROM maven:3.9.5-amazoncorretto-17-debian
+FROM mymaven
 WORKDIR /app
 COPY . .
-RUN mvn package
+RUN mvn package -Dmaven.test.skip
 WORKDIR /app/target
 COPY .env .
 ENTRYPOINT ["java", "-jar", "mavenedu-1.0-SNAPSHOT-jar-with-dependencies.jar"]

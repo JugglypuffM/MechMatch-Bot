@@ -11,17 +11,17 @@ services:
             - localnet
         volumes:
             - bot_db:/var/lib/postgresql/data
-    bot:
+    app:
         build:
             dockerfile: ./Dockerfile
-        container_name: bot
+        container_name: app
         restart: unless-stopped
         env_file:
             - .env
         networks:
             - localnet
         volumes:
-            - /logs:/logs
+            - logs:/app/target/logs
         depends_on:
             - db
 networks:

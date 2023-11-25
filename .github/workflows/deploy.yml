@@ -47,5 +47,5 @@ jobs:
             sudo docker stop bot db;
             sudo docker rm bot db;
             sudo docker rmi oop-java-project-bot oop-java-project-db;
-            sudo docker compose up -d;
+            sudo docker compose up -p bot -d;
             sudo docker system prune --all --force;
