@@ -8,7 +8,10 @@ public class Main {
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.INFO);
         try {
-            Logger.getRootLogger().addAppender(new FileAppender(new SimpleLayout(), "./logs/logs.log"));
+            FileAppender appender = new FileAppender(new SimpleLayout(), "./logs/logs.log");
+            appender.setEncoding("UTF-8");
+            appender.activateOptions();
+            Logger.getRootLogger().addAppender(appender);
         }catch (IOException e){
             System.out.println("Failed to initialize logger.");
             e.printStackTrace(System.out);
