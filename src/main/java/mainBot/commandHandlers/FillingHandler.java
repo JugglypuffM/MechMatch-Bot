@@ -44,7 +44,6 @@ public class FillingHandler implements Handler{
             case FINISH -> {
                 if (message.equalsIgnoreCase("да")) {
                     database.addToFPL(sender.getId());
-                    sender.setProfileFilled(true);
                     reply[0] = "Отлично, теперь можно переходить к использованию.";
                     reply[1] = giveHelp();
                     sender.setGlobalState(GlobalState.COMMAND);

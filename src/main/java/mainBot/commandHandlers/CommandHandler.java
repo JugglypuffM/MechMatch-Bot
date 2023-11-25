@@ -37,20 +37,9 @@ public class CommandHandler implements Handler{
                """;
     }
     public void handleMessage(User sender, String[] reply, String message) {
-        message = message.toLowerCase();
-        if (database.getUser(sender.getId()).getExpectedCity() == null){
-            message = "/start";
-        }
-        if (!(message.charAt(0) == '/')){
-            reply[0] = "Что-то я тебя не понимаю, если не знаешь что я умею - введи /help";
-            return;
-        }
-        switch (message){
+        switch (message.toLowerCase()){
             default:
-                reply[0] = "Такой команды нет, введи /help, чтобы увидеть список всех команд";
-                break;
-            case "/start":
-                if (database.getUser(sender.getId()).getExpectedCity() != null){
+                if (database.getUser(sender.getId()).isProfileFilled()){
                     reply[0] = giveHelp();
                     break;
                 }
@@ -66,16 +55,13 @@ public class CommandHandler implements Handler{
                 reply[0] = giveHelp();
                 break;
             case "/changeprofile":
-                database.eraseProfileData(sender.getId());
                 database.deleteFromFPL(sender.getId());
-                sender.setProfileFilled(false);
                 reply[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
             case "/editprofile":
                 database.deleteFromFPL(sender.getId());
-                sender.setProfileFilled(false);
                 reply[0] = "Что хочешь изменить?";
                 reply[1] = "Вот список полей доступных для изменения:" +
                         " \n1 - Имя(" + sender.getName() +
@@ -144,7 +130,7 @@ public class CommandHandler implements Handler{
                 reply[1] = "Если ты действительно этого хочешь, то введи свое имя пользователя(то что с собачкой)";
                 sender.setGlobalState(GlobalState.PROFILE_EDIT);
                 sender.setLocalState(LocalState.DELETE);
-                sender.setProfileFilled(false);
+                database.deleteFromFPL(sender.getId());
                 break;
             case "/pending":
                 if(database.getPendingOf(sender.getId()).isEmpty()){

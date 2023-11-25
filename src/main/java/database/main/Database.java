@@ -76,11 +76,6 @@ public interface Database {
      * @return formatted user profile data
      */
     String profileData(String id);
-    /**
-     * Erase all profile data to fill it again
-     * @param id string representation of user id
-     */
-    void eraseProfileData(String id);
 
     void addToFPL(String id);
     void deleteFromFPL(String id);

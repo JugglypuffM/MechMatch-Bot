@@ -18,7 +18,7 @@ public class EditHandler implements Handler{
         this.stateFSM = m_stateFSM;
     }
     public void handleMessage(User sender, String[] reply, String message) {
-        if (sender.getLocalState().equals(LocalState.START)) {
+        if (sender.getLocalState() == LocalState.START) {
             if (!stateFSM.getStateDict().containsKey(message)) {
                 reply[0] = "Напиши либо цифру соответствующую полю, либо название поля.";
                 return;
@@ -36,7 +36,6 @@ public class EditHandler implements Handler{
             reply[0] = "Введено неверное значение, процедура удаления прекращена.";
             sender.setGlobalState(GlobalState.COMMAND);
             database.addToFPL(sender.getId());
-            sender.setProfileFilled(true);
         }
         else {
             if (sender.setField(message)) {

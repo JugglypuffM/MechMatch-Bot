@@ -20,7 +20,7 @@ public class MatchingHandler implements Handler{
         this.database = m_database;
         this.notificator = m_notificator;
     }
-    public synchronized void handleMessage(User sender, String[] reply, String message) {
+    public void handleMessage(User sender, String[] reply, String message) {
         List<String> friendLikes = new ArrayList<>();
         for (Integer i: database.getLikesOf(sender.getSuggestedFriendID())){
             friendLikes.add(database.getConnection(i).getFriendID());
