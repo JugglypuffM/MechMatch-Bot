@@ -151,29 +151,6 @@ public class DatabaseMock implements Database {
                 "\nГород собеседника: " + user.getExpectedCity();
     }
 
-    public void eraseProfileData(String id) {
-        userDict.get(id).setName(null);
-        userDict.get(id).setAge("0");
-        userDict.get(id).setSex("");
-        userDict.get(id).setCity(null);
-        userDict.get(id).setInformation(null);
-        userDict.get(id).setMinExpectedAge("0");
-        userDict.get(id).setMaxExpectedAge("999");
-        userDict.get(id).setExpectedSex("");
-        userDict.get(id).setExpectedCity(null);
-    }
-
-    /**
-     * Getter for list of all filled profiles id's
-     * @param id string representation of user id
-     * @return list of all users with filled profile id's, except given
-     */
-    public List<String> getFPL(String id){
-        List<String> tmpList = new ArrayList<>(filledProfilesList);
-        tmpList.remove(id);
-        return tmpList;
-    }
-
     /**
      * Add given user id to filled profiles list
      * @param id string representation of user id

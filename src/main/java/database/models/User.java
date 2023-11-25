@@ -123,7 +123,7 @@ public class User {
         }catch (NumberFormatException e){
             return false;
         }
-        if ((n_age > 14) && (n_age < 120)){
+        if ((n_age >= 14) && (n_age <= 120)){
             this.age = n_age;
             return true;
         }
@@ -144,7 +144,7 @@ public class User {
         }catch (NumberFormatException e){
             return false;
         }
-        if ((n_age > 14) && (n_age < 120)){
+        if ((n_age >= 14) && (n_age <= 120)){
             this. minExpectedAge = n_age;
             return true;
         }
@@ -165,7 +165,7 @@ public class User {
         }catch (NumberFormatException e){
             return false;
         }
-        if ((n_age > 14) && (n_age < 120)){
+        if ((n_age >= 14) && (n_age <= 120)){
             this. maxExpectedAge = n_age;
             return true;
         }

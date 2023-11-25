@@ -57,7 +57,7 @@ public class MessageProcessor {
      * @param message user message
      * @return reply to user message
      */
-    public String[] processMessage(String id, String message){
+    public synchronized String[] processMessage(String id, String message){
         String[] reply = new String[24];
         if (database.getUser(id) == null) {
             String username;
@@ -84,7 +84,7 @@ public class MessageProcessor {
      * @param photoID id of picture, which is going to be user's profile photo
      * @return reply to user message
      */
-    public String[] processPhoto(String id, String photoID){
+    public synchronized String[] processPhoto(String id, String photoID){
         String[] reply = new String[24];
         User sender = database.getUser(id);
         if (sender.getLocalState() != LocalState.PHOTO){

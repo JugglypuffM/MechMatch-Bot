@@ -7,7 +7,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.slf4j.Logger;
-import telegrammBot.Bot;
 
 /**
  * Session factory class.

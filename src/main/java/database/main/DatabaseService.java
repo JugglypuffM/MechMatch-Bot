@@ -23,11 +23,6 @@ public class DatabaseService implements Database {
      * Data Access Object class for connections.
      */
     private final ConnectionDAO connectionDAO = new ConnectionDAO(sessionFactory);
-    /**
-     * List with id's of users with filled profiles.
-     * Stored in memory for speed purposes.
-     */
-    private final List<String> filledProfilesList = new ArrayList<>();
     public void addUser(String id, String username){
         userDao.create(new User(id, username));
     }
@@ -107,13 +102,10 @@ public class DatabaseService implements Database {
         }
     }
     public List<String> getFilledProfilesList(String id){
-        if (filledProfilesList.isEmpty()){
-            List<User> users = userDao.getProfileFilledUsers();
-            for (User user : users){
-                filledProfilesList.add(user.getId());
-            }
+        List<String> tmpList = new ArrayList<>();
+        for (User user : userDao.getProfileFilledUsers()){
+            tmpList.add(user.getId());
         }
-        List<String> tmpList = new ArrayList<>(filledProfilesList);
         tmpList.remove(id);
         return tmpList;
     }
@@ -128,23 +120,16 @@ public class DatabaseService implements Database {
                 "\nПол собеседника: " + user.getExpectedSex() +
                 "\nГород собеседника: " + user.getExpectedCity();
     }
-    public void eraseProfileData(String id){
+
+    public void addToFPL(String id) {
         User user = getUser(id);
-        user.setName(null);
-        user.setAge("0");
-        user.setSex("");
-        user.setCity(null);
-        user.setInformation(null);
-        user.setMinExpectedAge("0");
-        user.setMaxExpectedAge("999");
-        user.setExpectedSex("");
-        user.setExpectedCity(null);
+        user.setProfileFilled(true);
+        updateUser(user);
     }
 
-    public void addToFPL(String id){
-        filledProfilesList.add(id);
-    }
-    public void deleteFromFPL(String id){
-        filledProfilesList.remove(id);
+    public void deleteFromFPL(String id) {
+        User user = getUser(id);
+        user.setProfileFilled(false);
+        updateUser(user);
     }
 }

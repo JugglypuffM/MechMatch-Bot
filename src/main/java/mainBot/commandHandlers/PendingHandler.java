@@ -19,7 +19,7 @@ public class PendingHandler implements Handler{
         this.database = m_database;
         this.notificator = m_notificator;
     }
-    public synchronized void handleMessage(User sender, String[] reply, String message) {
+    public void handleMessage(User sender, String[] reply, String message) {
         List<Integer> pending = database.getPendingOf(sender.getId());
         Connection connection = database.getConnection(pending.get(0));
         if (message.equalsIgnoreCase("да")){

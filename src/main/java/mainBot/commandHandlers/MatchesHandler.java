@@ -81,7 +81,7 @@ public class MatchesHandler implements Handler{
                 sender.setLocalState(LocalState.PROFILES);
             }
             case PROFILES -> {
-                switch (message) {
+                switch (message.toLowerCase()) {
                     default -> {
                         try {
                             int toDelete = Integer.parseInt(message);
@@ -125,6 +125,7 @@ public class MatchesHandler implements Handler{
                     }
                     case "выйти" -> {
                         reply[0] = "Процедура изменения списка отменена.";
+                        sender.setProfilesList(null);
                         sender.setGlobalState(GlobalState.COMMAND);
                     }
                 }
