@@ -44,8 +44,8 @@ jobs:
             cd ${{ secrets.PROJECT_FOLDER }};
             git checkout master;
             git pull;
-            sudo docker stop bot db;
-            sudo docker rm bot db;
-            sudo docker rmi oop-java-project-bot oop-java-project-db;
-            sudo docker compose up -p bot -d;
+            sudo docker stop app db;
+            sudo docker rm app db;
+            sudo docker rmi bot-app bot-db;
+            sudo docker compose -p bot up -d;
             sudo docker system prune --all --force;

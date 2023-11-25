@@ -21,7 +21,7 @@ services:
         networks:
             - localnet
         volumes:
-            - logs:/app/target/logs
+            - ./logs:/app/target/logs
         depends_on:
             - db
 networks:
