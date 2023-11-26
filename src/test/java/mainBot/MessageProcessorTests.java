@@ -276,7 +276,7 @@ public class MessageProcessorTests {
         processor.processMessage("0", "да");
         processor.processMessage("1", "да");
         Assertions.assertEquals("Какой список профилей вывести(лайки/дизлайки)?", processor.processMessage("0", "/myMatches")[0]);
-        Assertions.assertEquals("Такого списка нет, введи либо \"лайки\", либо \"дизлайки\".", processor.processMessage("0", "ыважлпдлавп")[0]);
+        Assertions.assertEquals("Такого списка нет, введи либо \"лайки\", либо \"дизлайки\". Или \"выйти\", если передумал.", processor.processMessage("0", "ыважлпдлавп")[0]);
         Assertions.assertEquals("Этот список пуст :(", processor.processMessage("0", "дизлайки")[0]);
         processor.processMessage("0", "/myMatches");
         String[] reply = processor.processMessage("0", "лайки");

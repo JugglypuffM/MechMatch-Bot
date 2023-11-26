@@ -51,16 +51,16 @@ public class CommandHandler implements Handler{
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
-            case "/help":
+            case "/help", "описание команд":
                 reply[0] = giveHelp();
                 break;
-            case "/changeprofile":
+            case "/changeprofile", "заполнить заново":
                 database.deleteFromFPL(sender.getId());
                 reply[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
-            case "/editprofile":
+            case "/editprofile", "изменить профиль":
                 database.deleteFromFPL(sender.getId());
                 reply[0] = "Что хочешь изменить?";
                 reply[1] = "Вот список полей доступных для изменения:" +
@@ -78,7 +78,7 @@ public class CommandHandler implements Handler{
                 sender.setGlobalState(GlobalState.PROFILE_EDIT);
                 sender.setLocalState(LocalState.START);
                 break;
-            case "/match":
+            case "/match", "подбор собеседника":
                 User friend;
                 List<String> fpl = database.getFilledProfilesList(sender.getId());
                 int tmpNum = 0;
@@ -110,11 +110,11 @@ public class CommandHandler implements Handler{
                     tmpNum++;
                 }
                 break;
-            case "/myprofile":
+            case "/myprofile", "мой профиль":
                 reply[0] = database.profileData(sender.getId());
                 reply[12] = sender.getPhotoID();
                 break;
-            case "/mymatches":
+            case "/mymatches", "просмотренные профили":
                 if (database.getAllConnectionsWith(sender.getId()).isEmpty()){
                     reply[0] = "Просмотренных профилей пока что нет ;(\nПопробуй ввести /match";
                     return;
@@ -125,14 +125,14 @@ public class CommandHandler implements Handler{
                 sender.setGlobalState(GlobalState.MATCHES);
                 sender.setLocalState(LocalState.CHOICE);
                 break;
-            case "/deleteprofile":
+            case "/deleteprofile", "удалить профиль":
                 reply[0] = "Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!";
                 reply[1] = "Если ты действительно этого хочешь, то введи свое имя пользователя(то что с собачкой)";
                 sender.setGlobalState(GlobalState.PROFILE_EDIT);
                 sender.setLocalState(LocalState.DELETE);
                 database.deleteFromFPL(sender.getId());
                 break;
-            case "/pending":
+            case "/pending", "ожидающие ответа":
                 if(database.getPendingOf(sender.getId()).isEmpty()){
                     reply[0] = "Нет профилей, ожидающих твоего ответа.";
                     return;
