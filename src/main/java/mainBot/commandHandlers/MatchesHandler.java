@@ -58,24 +58,32 @@ public class MatchesHandler implements Handler{
     public void handleMessage(User sender, String[] reply, String message) {
         switch (sender.getLocalState()){
             case CHOICE -> {
-                if (message.equalsIgnoreCase("лайки")) {
-                    if (database.getLikesOf(sender.getId()).isEmpty()) {
-                        reply[0] = "Этот список пуст :(";
+                switch (message.toLowerCase()){
+                    case "выйти" ->{
+                        reply[0] = "Процедура выбора списка отменена.";
+                        sender.setProfilesList(null);
                         sender.setGlobalState(GlobalState.COMMAND);
                         return;
                     }
-                    sender.setProfilesList(message);
-                } else if (message.equalsIgnoreCase("дизлайки")) {
-                    if (database.getDislikesOf(sender.getId()).isEmpty()) {
-                        reply[0] = "Этот список пуст :(";
-                        sender.setGlobalState(GlobalState.COMMAND);
+                    case "лайки" ->{
+                        if (database.getLikesOf(sender.getId()).isEmpty()) {
+                            reply[0] = "Этот список пуст :(";
+                            return;
+                        }
+                        sender.setProfilesList(message);
+                    }case "дизлайки" ->{
+                        if (database.getDislikesOf(sender.getId()).isEmpty()) {
+                            reply[0] = "Этот список пуст :(";
+                            return;
+                        }
+                        sender.setProfilesList(message);
+                    }
+                    default -> {
+                        reply[0] = "Такого списка нет, введи либо \"лайки\", либо \"дизлайки\". Или \"выйти\", если передумал.";
                         return;
                     }
-                    sender.setProfilesList(message);
-                } else {
-                    reply[0] = "Такого списка нет, введи либо \"лайки\", либо \"дизлайки\".";
-                    return;
                 }
+
                 sender.setProfilesPage(1);
                 getTenProfiles(sender, reply, getIdList(sender));
                 sender.setLocalState(LocalState.PROFILES);
@@ -119,7 +127,6 @@ public class MatchesHandler implements Handler{
                             } else {
                                 sender.setProfilesPage(sender.getProfilesPage() - 1);
                             }
-                            sender.setProfilesPage(sender.getProfilesPage() - 1);
                         }
                         getTenProfiles(sender, reply, getIdList(sender));
                     }
