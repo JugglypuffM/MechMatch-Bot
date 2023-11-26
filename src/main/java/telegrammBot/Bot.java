@@ -3,8 +3,9 @@ package telegrammBot;
 
 import database.main.Database;
 import database.main.DatabaseService;
-import io.github.cdimascio.dotenv.Dotenv;
 import mainBot.MessageProcessor;
+
+import io.github.cdimascio.dotenv.Dotenv;
 import org.slf4j.Logger;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -13,11 +14,16 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Bot extends TelegramLongPollingBot {
     private final Dotenv dotenv = Dotenv.load();
     private final Database database = new DatabaseService();
     private final MessageProcessor processor = new MessageProcessor(database);
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(Bot.class);
+    private final ButtonsHandler buttonsHandler = new ButtonsHandler(database);
     public Bot(){
         super(Dotenv.load().get("TG_BOT_TOKEN"));
     }
@@ -32,13 +38,17 @@ public class Bot extends TelegramLongPollingBot {
             if (reply[i] != null){
                 logger.info("-----------------------------------------------------------------------\n");
                 logger.info("-----------------------------------------------------------------------");
+                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                Date date = new Date();
+                logger.info(dateFormat.format(date));
                 logger.info(id);
                 logger.info(username);
-                logger.info(message);
+                logger.info("Message: " + message);
                 String text = reply[i].replace("_", "\\_");
                 if (reply[i+12] != null){
                     sendPhoto.setPhoto(new InputFile(reply[i+12]));
                     sendPhoto.setCaption(text);
+                    buttonsHandler.setKeyboard(id, sendMessage, sendPhoto);
                     logger.info("Has photo: TRUE");
                     logger.info(reply[i]);
                     logger.info(reply[i+12]);
@@ -52,6 +62,7 @@ public class Bot extends TelegramLongPollingBot {
                 }
                 else {
                     sendMessage.setText(text);
+                    buttonsHandler.setKeyboard(id, sendMessage, sendPhoto);
                     logger.info("Has photo: FALSE");
                     logger.info(reply[i]);
                     try {
@@ -99,7 +110,7 @@ public class Bot extends TelegramLongPollingBot {
                 logger.info(username);
                 logger.info(message);
                 logger.info("Has photo: FALSE");
-                logger.info("Длинна сообщения слишком большая, введите не более 150-и символов");
+                logger.info("Длинна сообщения слишком большая, введите не более 500 символов");
                 logger.info("-----------------------------------------------------------------------");
             } catch (TelegramApiException e) {
                 logger.error("Message send fail", e);
