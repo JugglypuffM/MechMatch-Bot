@@ -103,12 +103,12 @@ public class StateFSM {
         this.wrongReplies = new HashMap<>();
         wrongReplies.put(LocalState.NAME, "");
         wrongReplies.put(LocalState.AGE, "Этот возраст выглядит неправдоподобно, введи значение между 14 и 120.");
-        wrongReplies.put(LocalState.SEX, "Ввведи один из двух ответов: парень или девушка.");
+        wrongReplies.put(LocalState.SEX, "Введи один из двух ответов: парень или девушка.");
         wrongReplies.put(LocalState.CITY, "");
         wrongReplies.put(LocalState.ABOUT, "");
         wrongReplies.put(LocalState.EAGEMIN, "Этот возраст выглядит неправдоподобно, введи значение между 14 и 120, а еще оно должно быть не больше максимального.");
         wrongReplies.put(LocalState.EAGEMAX, "Этот возраст выглядит неправдоподобно, введи значение между 14 и 120, а еще оно должно быть не меньше минимального.");
-        wrongReplies.put(LocalState.ESEX, "Ввведи один из трех ответов: парень, девушка или без разницы.)");
+        wrongReplies.put(LocalState.ESEX, "Введи один из трех ответов: парень, девушка или без разницы.)");
         wrongReplies.put(LocalState.ECITY, "");
         wrongReplies.put(LocalState.PHOTO, "Пожалуйста, отправь картинку.");
 
