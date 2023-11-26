@@ -48,4 +48,3 @@ jobs:
             sudo docker rm app db;
             sudo docker rmi bot-app bot-db;
             sudo docker compose -p bot up -d;
-            sudo docker system prune --all --force;
