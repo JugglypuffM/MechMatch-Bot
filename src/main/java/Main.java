@@ -1,7 +1,16 @@
+import bots.Bot;
+import bots.BotDriver;
+import bots.discordBot.DsBot;
+import bots.platforms.Platform;
+import bots.telegrammBot.TgBot;
+import database.main.Database;
+import database.main.DatabaseService;
+import logic.MessageProcessor;
 import org.apache.log4j.*;
-import telegrammBot.BotRegistrar;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -13,10 +22,17 @@ public class Main {
             appender.activateOptions();
             Logger.getRootLogger().addAppender(appender);
         }catch (IOException e){
-            System.out.println("Failed to initialize logger.");
-            e.printStackTrace(System.out);
+            Logger.getRootLogger().error("Failed to initialize File Appender.", e);
         }
-        BotRegistrar registrar = new BotRegistrar();
-        registrar.start();
+        Database database = new DatabaseService();
+        BotDriver driver = new BotDriver(database);
+        MessageProcessor processor = new MessageProcessor(database, driver);
+        driver.setProcessor(processor);
+        TgBot tgBot = new TgBot(driver);
+        if (tgBot.start()) driver.addOnlineBot(Platform.TELEGRAM, tgBot);
+        else Logger.getRootLogger().error("Telegram bot start failed.");
+        DsBot dsBot = new DsBot(driver);
+        if (dsBot.start()) driver.addOnlineBot(Platform.DISCORD, dsBot);
+        else Logger.getRootLogger().error("Discord bot start failed.");
     }
 }

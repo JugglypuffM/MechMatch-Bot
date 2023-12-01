@@ -1,8 +1,8 @@
-package mainBot;
+package logic;
 
 import database.models.User;
-import mainBot.states.GlobalState;
-import mainBot.states.LocalState;
+import logic.states.GlobalState;
+import logic.states.LocalState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

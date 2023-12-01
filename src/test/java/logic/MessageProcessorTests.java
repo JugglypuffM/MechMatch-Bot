@@ -1,4 +1,4 @@
-package mainBot;
+package logic;
 
 import database.main.Database;
 import database.main.DatabaseMock;
@@ -47,7 +47,7 @@ public class MessageProcessorTests {
     @BeforeEach
     public void initialize(){
         this.database = new DatabaseMock();
-        this.processor = new MessageProcessor(database);
+        this.processor = new MessageProcessor(database, null);
         processor.processMessage(id, "/start");
         processor.processMessage(id, "usernamestas");
         processor.processMessage(id, "Стас");

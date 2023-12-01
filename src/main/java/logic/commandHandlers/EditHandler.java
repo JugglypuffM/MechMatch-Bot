@@ -1,10 +1,10 @@
-package mainBot.commandHandlers;
+package logic.commandHandlers;
 
 import database.main.Database;
 import database.models.User;
-import mainBot.states.GlobalState;
-import mainBot.states.LocalState;
-import mainBot.states.StateFSM;
+import logic.states.GlobalState;
+import logic.states.LocalState;
+import logic.states.StateFSM;
 
 /**
  * Profile editing procedure handler.

@@ -1,10 +1,11 @@
-package mainBot.commandHandlers;
+package logic.commandHandlers;
 
+import bots.platforms.Platform;
 import database.main.Database;
 import database.models.Connection;
 import database.models.User;
-import mainBot.states.GlobalState;
-import mainBot.notificator.Notificator;
+import logic.states.GlobalState;
+import logic.notificator.Notificator;
 
 import java.util.List;
 
@@ -28,7 +29,8 @@ public class PendingHandler implements Handler{
             database.updateConnection(connection);
             notification[0] = "Ура! Тебе ответили взаимностью, можно переходить к общению.";
             notification[1] = "Вот ссылка на профиль собеседника - @" + sender.getUsername();
-            notificator.notifyFriend(connection.getFriendID(), database.getUser(connection.getFriendID()).getUsername(), notification);
+            notificator.notifyFriend(database.getUser(connection.getFriendID()).getPlatform(), connection.getFriendID(),
+                    database.getUser(connection.getFriendID()).getUsername(), notification);
             reply[0] = "Ура! Теперь вы можете перейти к общению.";
             reply[1] = "Вот ссылка на профиль собеседника - @" + database.getUser(connection.getFriendID()).getUsername();
         }

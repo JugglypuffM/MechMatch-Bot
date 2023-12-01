@@ -39,3 +39,6 @@ build/
 
 ### Logging dir ###
 logs/
+
+### Temporary picture ###
+tmp.png

@@ -1,4 +1,4 @@
-package mainBot.states;
+package logic.states;
 
 public enum LocalState {
     START("START"),

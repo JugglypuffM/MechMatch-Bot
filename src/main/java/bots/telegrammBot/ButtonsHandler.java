@@ -1,7 +1,7 @@
-package telegrammBot;
+package bots.telegrammBot;
 
 import database.main.Database;
-import mainBot.states.GlobalState;
+import logic.states.GlobalState;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;

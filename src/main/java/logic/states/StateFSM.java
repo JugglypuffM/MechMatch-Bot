@@ -1,4 +1,4 @@
-package mainBot.states;
+package logic.states;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -110,7 +110,7 @@ public class StateFSM {
         wrongReplies.put(LocalState.EAGEMAX, "Этот возраст выглядит неправдоподобно, введи значение между 14 и 120, а еще оно должно быть не меньше минимального.");
         wrongReplies.put(LocalState.ESEX, "Введи один из трех ответов: парень, девушка или без разницы.)");
         wrongReplies.put(LocalState.ECITY, "");
-        wrongReplies.put(LocalState.PHOTO, "Пожалуйста, отправь картинку.");
+        wrongReplies.put(LocalState.PHOTO, "Пожалуйста, отправь картинку, желательно формата png.");
 
         this.globalStateMap = new HashMap<>();
         globalStateMap.put("COMMAND", GlobalState.COMMAND);

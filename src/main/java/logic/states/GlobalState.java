@@ -1,8 +1,8 @@
-package mainBot.states;
+package logic.states;
 
 public enum GlobalState {
     /**
-     * Default state of user, when bot waits for command to execute
+     * Default state of user, when tgBot waits for command to execute
      */
     COMMAND("COMMAND"),
     /**
