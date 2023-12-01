@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.FileUpload;
-import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -42,7 +41,7 @@ public class DsBot extends ListenerAdapter implements Bot {
     }
 
     @Override
-    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+    public void onMessageReceived(MessageReceivedEvent event) {
         if(event.getAuthor().isBot()){
             return;
         }
@@ -51,8 +50,8 @@ public class DsBot extends ListenerAdapter implements Bot {
         String username = event.getAuthor().getName();
         List<Message.Attachment> attachments = event.getMessage().getAttachments();
         String[] reply = (!attachments.isEmpty() && Objects.equals(attachments.get(0).getFileExtension(), "png")) ?
-                driver.handleUpdate(id, username, attachments.get(0).getUrl(), true) :
-                driver.handleUpdate(id, username, message, false);
+                driver.handleUpdate(id, username, attachments.get(0).getUrl(), Platform.DISCORD, true) :
+                driver.handleUpdate(id, username, message, Platform.DISCORD, false);
         driver.send(this, id, username, message, reply);
     }
 

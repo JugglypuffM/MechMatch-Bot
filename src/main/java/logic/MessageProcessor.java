@@ -63,14 +63,15 @@ public class MessageProcessor {
     public synchronized String[] processMessage(String id, String message){
         String[] reply = new String[24];
         if (database.getUser(id) == null) {
-            String username;
-            if (message.startsWith("username")) {
-                username = message.substring(8);
+            String username, platform;
+            if (message.startsWith("data")) {
+                username = message.split("\\|")[0].substring(4);
+                platform = message.split("\\|")[1];
             } else {
-                reply[0] = "требуется имя пользователя";
+                reply[0] = "требуются данные";
                 return reply;
             }
-            database.addUser(id, username);
+            database.addUser(id, username, platform);
         }
         User sender = database.getUser(id);
         Handler handler = chooseHandler(sender);

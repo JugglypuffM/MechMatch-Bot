@@ -19,7 +19,7 @@ public class BotDriver {
     public BotDriver(Database m_database){
         this.database = m_database;
     }
-    public String[] handleUpdate(String id, String username, String message, boolean hasPhoto){
+    public String[] handleUpdate(String id, String username, String message, Platform platform, boolean hasPhoto){
         if (this.processor == null){
             logger.error("MessageProcessor was not set up");
             return new String[24];
@@ -32,8 +32,8 @@ public class BotDriver {
             reply = processor.processPhoto(id, message);
         }else {
             reply = processor.processMessage(id, message);
-            if (reply[0].equals("требуется имя пользователя")){
-                reply = processor.processMessage(id, "username" + username);
+            if (reply[0].equals("требуются  данные")){
+                reply = processor.processMessage(id, "data" + username + "|" + platform.toString());
             }
         }
         return reply;
@@ -81,9 +81,6 @@ public class BotDriver {
 
     public Database getDatabase() {
         return database;
-    }
-    public MessageProcessor getProcessor() {
-        return processor;
     }
 
     public void setProcessor(MessageProcessor processor) {

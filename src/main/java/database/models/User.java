@@ -31,9 +31,10 @@ public class User {
     private Integer profilesPage;
     private String platform;
     public User(){}
-    public User(String m_id, String m_username){
+    public User(String m_id, String m_username, String m_platform){
         this.id = m_id;
         this.username = m_username;
+        this.platform = m_platform;
         this.globalState = "COMMAND";
         this.localState = "START";
         this.minExpectedAge = 0;

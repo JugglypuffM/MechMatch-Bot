@@ -40,8 +40,8 @@ public class TgBot extends TelegramLongPollingBot implements Bot {
         String id = update.getMessage().getChatId().toString();
         String username = update.getMessage().getFrom().getUserName();
         String[] reply = (update.getMessage().hasPhoto()) ?
-                driver.handleUpdate(id, username, update.getMessage().getPhoto().get(0).getFileId(), true) :
-                driver.handleUpdate(id, username, message, false);
+                driver.handleUpdate(id, username, update.getMessage().getPhoto().get(0).getFileId(), Platform.TELEGRAM, true) :
+                driver.handleUpdate(id, username, message, Platform.TELEGRAM, false);
         driver.send(this, id, username, message, reply);
     }
     @Override

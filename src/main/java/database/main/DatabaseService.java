@@ -23,8 +23,8 @@ public class DatabaseService implements Database {
      * Data Access Object class for connections.
      */
     private final ConnectionDAO connectionDAO = new ConnectionDAO(sessionFactory);
-    public void addUser(String id, String username){
-        userDao.create(new User(id, username));
+    public void addUser(String id, String username, String platform){
+        userDao.create(new User(id, username, platform));
     }
     public User getUser(String id){
         return userDao.read(id);

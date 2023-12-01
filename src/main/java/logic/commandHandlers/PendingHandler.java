@@ -1,6 +1,5 @@
 package logic.commandHandlers;
 
-import bots.platforms.Platform;
 import database.main.Database;
 import database.models.Connection;
 import database.models.User;

@@ -29,8 +29,8 @@ public class DatabaseMock implements Database {
      */
     private final List<String> filledProfilesList = new ArrayList<>();
 
-    public void addUser(String id, String username) {
-        User user = new User(id, username);
+    public void addUser(String id, String username, String platform) {
+        User user = new User(id, username, platform);
         userDict.put(id, user);
     }
 

@@ -1,4 +1,3 @@
-import bots.Bot;
 import bots.BotDriver;
 import bots.discordBot.DsBot;
 import bots.platforms.Platform;
@@ -9,8 +8,6 @@ import logic.MessageProcessor;
 import org.apache.log4j.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) {

@@ -26,7 +26,7 @@ public class MessageProcessorTests {
      */
     public void fillProfile(String id, MessageProcessor processor){
         processor.processMessage(id, "/start");
-        processor.processMessage(id, "usernamestas");
+        processor.processMessage(id, "datastas|TELEGRAM");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "19");
@@ -49,7 +49,7 @@ public class MessageProcessorTests {
         this.database = new DatabaseMock();
         this.processor = new MessageProcessor(database, null);
         processor.processMessage(id, "/start");
-        processor.processMessage(id, "usernamestas");
+        processor.processMessage(id, "datastas|TELEGRAM");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "19");
@@ -136,7 +136,7 @@ public class MessageProcessorTests {
         processor.processMessage(id, "да");
         processor.processMessage(id, "/editProfile");
         processor.processMessage(id, "10");
-        Assertions.assertEquals("Пожалуйста, отправь картинку.", processor.processMessage(id, "dfgsdfgsdfg")[0]);
+        Assertions.assertEquals("Пожалуйста, отправь картинку, желательно формата png.", processor.processMessage(id, "dfgsdfgsdfg")[0]);
         Assertions.assertEquals("Изменение внесено.", processor.processPhoto(id, "dfgsdfgsdfg")[0]);
         Assertions.assertEquals("dfgsdfgsdfg", processor.processMessage(id, "/myProfile")[12]);
     }
@@ -301,6 +301,6 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Введено неверное значение, процедура удаления прекращена.", processor.processMessage(id, "stas1")[0]);
         processor.processMessage(id, "/deleteProfile");
         Assertions.assertEquals("Профиль успешно удален.", processor.processMessage(id, "stas")[0]);
-        Assertions.assertEquals("требуется имя пользователя", processor.processMessage(id, "/start")[0]);
+        Assertions.assertEquals("требуются данные", processor.processMessage(id, "/start")[0]);
     }
 }
