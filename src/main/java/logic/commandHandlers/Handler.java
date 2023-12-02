@@ -1,4 +1,4 @@
-package mainBot.commandHandlers;
+package logic.commandHandlers;
 
 import database.models.User;
 

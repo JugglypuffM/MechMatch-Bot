@@ -1,9 +1,9 @@
-package mainBot.commandHandlers;
+package logic.commandHandlers;
 
 import database.main.Database;
 import database.models.User;
-import mainBot.states.GlobalState;
-import mainBot.states.LocalState;
+import logic.states.GlobalState;
+import logic.states.LocalState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +57,7 @@ public class CommandHandler implements Handler{
             case "/changeprofile", "заполнить заново":
                 database.deleteFromFPL(sender.getId());
                 reply[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
+                sender.setMaxExpectedAge("120");
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
@@ -99,7 +100,8 @@ public class CommandHandler implements Handler{
                             friendSexMatch && friendCityMatch && friendAgeMatch &&
                             !database.getAllConnectedUserIds(sender.getId()).contains(friend.getId()) &&
                             !friendDislikes.contains(sender.getId()) &&
-                            !(Objects.equals(friend.getSuggestedFriendID(), sender.getId()))) {
+                            !(Objects.equals(friend.getSuggestedFriendID(), sender.getId())) &&
+                            sender.getPlatform().equals(friend.getPlatform())) {
                         reply[0] = database.profileData(friend.getId());
                         reply[1] = "Напиши, понравился ли тебе пользователь(да/нет).";
                         reply[12] = database.getUser(fpl.get(tmpNum)).getPhotoID();

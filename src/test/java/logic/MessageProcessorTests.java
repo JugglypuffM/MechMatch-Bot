@@ -1,4 +1,4 @@
-package mainBot;
+package logic;
 
 import database.main.Database;
 import database.main.DatabaseMock;
@@ -26,7 +26,7 @@ public class MessageProcessorTests {
      */
     public void fillProfile(String id, MessageProcessor processor){
         processor.processMessage(id, "/start");
-        processor.processMessage(id, "usernamestas");
+        processor.processMessage(id, "datastas|TELEGRAM");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "19");
@@ -47,9 +47,9 @@ public class MessageProcessorTests {
     @BeforeEach
     public void initialize(){
         this.database = new DatabaseMock();
-        this.processor = new MessageProcessor(database);
+        this.processor = new MessageProcessor(database, null);
         processor.processMessage(id, "/start");
-        processor.processMessage(id, "usernamestas");
+        processor.processMessage(id, "datastas|TELEGRAM");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "Стас");
         processor.processMessage(id, "19");
@@ -301,6 +301,6 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Введено неверное значение, процедура удаления прекращена.", processor.processMessage(id, "stas1")[0]);
         processor.processMessage(id, "/deleteProfile");
         Assertions.assertEquals("Профиль успешно удален.", processor.processMessage(id, "stas")[0]);
-        Assertions.assertEquals("требуется имя пользователя", processor.processMessage(id, "/start")[0]);
+        Assertions.assertEquals("требуются данные", processor.processMessage(id, "/start")[0]);
     }
 }

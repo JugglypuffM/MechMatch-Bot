@@ -1,8 +1,8 @@
-package mainBot;
+package logic;
 
 import database.models.User;
-import mainBot.states.GlobalState;
-import mainBot.states.LocalState;
+import logic.states.GlobalState;
+import logic.states.LocalState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ public class UserTests {
      */
     @Test
     public void initUserTest(){
-        User user = new User("0", "stats");
+        User user = new User("0", "stats", "TELEGRAM");
         Assertions.assertEquals("0", user.getId());
         Assertions.assertEquals("stats", user.getUsername());
         Assertions.assertEquals(user.getGlobalState(), GlobalState.COMMAND);
@@ -26,7 +26,7 @@ public class UserTests {
      */
     @Test
     public void sexVerificationTest(){
-        User user = new User("0", "stas");
+        User user = new User("0", "stas", "TELEGRAM");
         String lastSex = user.getSex();
         Assertions.assertFalse(user.setSex("asdfasdf"));
         Assertions.assertEquals(lastSex, user.getSex());
@@ -45,7 +45,7 @@ public class UserTests {
      */
     @Test
     public void ageVerificationTest(){
-        User user = new User("0", "stas");
+        User user = new User("0", "stas", "TELEGRAM");
         int lastAge = user.getAge();
         Assertions.assertFalse(user.setAge("14"));
         Assertions.assertFalse(user.setAge("-23"));

@@ -1,4 +1,4 @@
-package mainBot.states;
+package logic.states;
 
 import java.util.HashMap;
 import java.util.Map;

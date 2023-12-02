@@ -6,7 +6,7 @@ import database.models.User;
 import java.util.List;
 
 public interface Database {
-    void addUser(String id, String username);
+    void addUser(String id, String username, String platform);
     /**
      * Get user from Database.
      * Checks if user exists.

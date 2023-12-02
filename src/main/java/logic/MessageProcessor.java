@@ -1,12 +1,13 @@
-package mainBot;
+package logic;
 
+import bots.BotDriver;
 import database.main.Database;
 import database.models.User;
-import mainBot.commandHandlers.*;
-import mainBot.notificator.Notificator;
-import mainBot.states.GlobalState;
-import mainBot.states.LocalState;
-import mainBot.states.StateFSM;
+import logic.commandHandlers.*;
+import logic.notificator.Notificator;
+import logic.states.GlobalState;
+import logic.states.LocalState;
+import logic.states.StateFSM;
 
 
 public class MessageProcessor {
@@ -15,20 +16,22 @@ public class MessageProcessor {
      * Database interface.
      */
     private final Database database;
+    private final Notificator notificator;
     private final CommandHandler caseCommand;
     private final FillingHandler caseProfileFill;
     private final EditHandler caseProfileEdit;
     private final MatchesHandler caseMatches;
     private final MatchingHandler caseMatching;
     private final PendingHandler casePending;
-    public MessageProcessor(Database database){
-        this.database = database;
-        this.caseCommand = new CommandHandler(database);
-        this.caseProfileFill = new FillingHandler(database, stateFSM);
-        this.caseProfileEdit = new EditHandler(database, stateFSM);
-        this.caseMatches = new MatchesHandler(database);
-        this.caseMatching = new MatchingHandler(database, new Notificator());
-        this.casePending = new PendingHandler(database, new Notificator());
+    public MessageProcessor(Database m_database, BotDriver m_driver){
+        this.database = m_database;
+        this.notificator = new Notificator(m_driver);
+        this.caseCommand = new CommandHandler(m_database);
+        this.caseProfileFill = new FillingHandler(m_database, stateFSM);
+        this.caseProfileEdit = new EditHandler(m_database, stateFSM);
+        this.caseMatches = new MatchesHandler(m_database);
+        this.caseMatching = new MatchingHandler(m_database, notificator);
+        this.casePending = new PendingHandler(m_database, notificator);
     }
     private Handler chooseHandler(User sender){
         Handler handler;
@@ -60,14 +63,15 @@ public class MessageProcessor {
     public synchronized String[] processMessage(String id, String message){
         String[] reply = new String[24];
         if (database.getUser(id) == null) {
-            String username;
-            if (message.startsWith("username")) {
-                username = message.substring(8);
+            String username, platform;
+            if (message.startsWith("data")) {
+                username = message.split("\\|")[0].substring(4);
+                platform = message.split("\\|")[1];
             } else {
-                reply[0] = "требуется имя пользователя";
+                reply[0] = "требуются данные";
                 return reply;
             }
-            database.addUser(id, username);
+            database.addUser(id, username, platform);
         }
         User sender = database.getUser(id);
         Handler handler = chooseHandler(sender);

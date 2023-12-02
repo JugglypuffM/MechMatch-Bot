@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS public.users
     suggestedfriendid text COLLATE pg_catalog."default",
     profileslist text COLLATE pg_catalog."default",
     profilespage integer,
+    platform text COLLATE pg_catalog."default",
     CONSTRAINT id PRIMARY KEY (id)
     )
 

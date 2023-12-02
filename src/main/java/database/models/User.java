@@ -1,11 +1,13 @@
 package database.models;
 
+import bots.platforms.Platform;
+import bots.platforms.PlatformFSM;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import mainBot.states.GlobalState;
-import mainBot.states.LocalState;
-import mainBot.states.StateFSM;
+import logic.states.GlobalState;
+import logic.states.LocalState;
+import logic.states.StateFSM;
 
 /**
  * Main user class.
@@ -27,10 +29,12 @@ public class User {
     private String suggestedFriendID;
     private String profilesList;
     private Integer profilesPage;
+    private String platform;
     public User(){}
-    public User(String m_id, String m_username){
+    public User(String m_id, String m_username, String m_platform){
         this.id = m_id;
         this.username = m_username;
+        this.platform = m_platform;
         this.globalState = "COMMAND";
         this.localState = "START";
         this.minExpectedAge = 0;
@@ -144,7 +148,7 @@ public class User {
         }catch (NumberFormatException e){
             return false;
         }
-        if ((n_age >= 14) && (n_age <= 120)){
+        if ((n_age >= 14) && (n_age <= 120) && (n_age <= maxExpectedAge)){
             this. minExpectedAge = n_age;
             return true;
         }
@@ -165,22 +169,22 @@ public class User {
         }catch (NumberFormatException e){
             return false;
         }
-        if ((n_age >= 14) && (n_age <= 120)){
+        if ((n_age >= 14) && (n_age <= 120) && (n_age >= minExpectedAge)){
             this. maxExpectedAge = n_age;
             return true;
         }
         return false;
     }
     public GlobalState getGlobalState(){
-        StateFSM util = new StateFSM();
-        return util.getGlobalStateMap().get(this.globalState);
+        StateFSM stateFSM = new StateFSM();
+        return stateFSM.getGlobalStateMap().get(this.globalState);
     }
     public void setGlobalState(GlobalState m_globalState){
         this.globalState = m_globalState.toString();
     }
     public LocalState getLocalState(){
-        StateFSM util = new StateFSM();
-        return util.getLocalStateMap().get(this.localState);
+        StateFSM stateFSM = new StateFSM();
+        return stateFSM.getLocalStateMap().get(this.localState);
     }
     public void setLocalState(LocalState m_localState){
         this.localState = m_localState.toString();
@@ -221,6 +225,14 @@ public class User {
     public void setProfilesPage(Integer profilesPage) {
         this.profilesPage = profilesPage;
     }
+    public void setPlatform(Platform platform) {
+        this.platform = platform.toString();
+    }
+    public Platform getPlatform() {
+        PlatformFSM platformFSM = new PlatformFSM();
+        return platformFSM.getPlatformMap().get(this.platform);
+    }
+
 
     /**
      * Method to unify field filling.
