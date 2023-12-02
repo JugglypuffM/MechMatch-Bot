@@ -148,7 +148,7 @@ public class User {
         }catch (NumberFormatException e){
             return false;
         }
-        if ((n_age >= 14) && (n_age <= 120)){
+        if ((n_age >= 14) && (n_age <= 120) && (n_age <= maxExpectedAge)){
             this. minExpectedAge = n_age;
             return true;
         }
@@ -169,7 +169,7 @@ public class User {
         }catch (NumberFormatException e){
             return false;
         }
-        if ((n_age >= 14) && (n_age <= 120)){
+        if ((n_age >= 14) && (n_age <= 120) && (n_age >= minExpectedAge)){
             this. maxExpectedAge = n_age;
             return true;
         }
