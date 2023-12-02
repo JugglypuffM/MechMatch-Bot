@@ -110,7 +110,7 @@ public class StateFSM {
         wrongReplies.put(LocalState.EAGEMAX, "Этот возраст выглядит неправдоподобно, введи значение между 14 и 120, а еще оно должно быть не меньше минимального.");
         wrongReplies.put(LocalState.ESEX, "Введи один из трех ответов: парень, девушка или без разницы.)");
         wrongReplies.put(LocalState.ECITY, "");
-        wrongReplies.put(LocalState.PHOTO, "Пожалуйста, отправь картинку, желательно формата png.");
+        wrongReplies.put(LocalState.PHOTO, "Пожалуйста, отправь картинку.");
 
         this.globalStateMap = new HashMap<>();
         globalStateMap.put("COMMAND", GlobalState.COMMAND);

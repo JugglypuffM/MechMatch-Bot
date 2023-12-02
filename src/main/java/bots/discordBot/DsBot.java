@@ -8,10 +8,12 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.FileUpload;
+import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -49,7 +51,7 @@ public class DsBot extends ListenerAdapter implements Bot {
         String id = event.getChannel().getId();
         String username = event.getAuthor().getName();
         List<Message.Attachment> attachments = event.getMessage().getAttachments();
-        String[] reply = (!attachments.isEmpty() && Objects.equals(attachments.get(0).getFileExtension(), "png")) ?
+        String[] reply = (!attachments.isEmpty() && attachments.get(0).isImage()) ?
                 driver.handleUpdate(id, username, attachments.get(0).getUrl(), Platform.DISCORD, true) :
                 driver.handleUpdate(id, username, message, Platform.DISCORD, false);
         driver.send(this, id, username, message, reply);
@@ -57,15 +59,18 @@ public class DsBot extends ListenerAdapter implements Bot {
 
 
     @Override
-    public boolean executePhoto(String id, String message, String photo) {
+    public synchronized boolean executePhoto(String id, String message, String photo) {
         try {
             PrivateChannel channel = jda.getPrivateChannelById(id);
             if (channel == null) return false;
             URL url = new URL(photo);
             BufferedImage img = ImageIO.read(url);
-            File file = new File("./tmp.png");
-            ImageIO.write(img, "png", file);
+            String[] filename = photo.split("\\?ex")[0].split("/")[6].split("\\.");
+            String extension = filename[filename.length-1];
+            File file = new File("./tmp." + extension);
+            ImageIO.write(img, extension, file);
             channel.sendMessage(message).addFiles(FileUpload.fromData(file)).queue();
+            while (!file.delete()) {}
             return true;
         }catch (Exception e){
             driver.getLogger().error("Failed to handle the image.", e);
