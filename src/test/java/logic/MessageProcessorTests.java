@@ -136,7 +136,7 @@ public class MessageProcessorTests {
         processor.processMessage(id, "да");
         processor.processMessage(id, "/editProfile");
         processor.processMessage(id, "10");
-        Assertions.assertEquals("Пожалуйста, отправь картинку, желательно формата png.", processor.processMessage(id, "dfgsdfgsdfg")[0]);
+        Assertions.assertEquals("Пожалуйста, отправь картинку.", processor.processMessage(id, "dfgsdfgsdfg")[0]);
         Assertions.assertEquals("Изменение внесено.", processor.processPhoto(id, "dfgsdfgsdfg")[0]);
         Assertions.assertEquals("dfgsdfgsdfg", processor.processMessage(id, "/myProfile")[12]);
     }

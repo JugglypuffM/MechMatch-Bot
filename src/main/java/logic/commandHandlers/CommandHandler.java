@@ -57,7 +57,7 @@ public class CommandHandler implements Handler{
             case "/changeprofile", "заполнить заново":
                 database.deleteFromFPL(sender.getId());
                 reply[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
-                sender.setMaxExpectedAge("999");
+                sender.setMaxExpectedAge("120");
                 sender.setGlobalState(GlobalState.PROFILE_FILL);
                 sender.setLocalState(LocalState.START);
                 break;
