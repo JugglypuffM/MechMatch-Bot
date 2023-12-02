@@ -32,7 +32,7 @@ public class BotDriver {
             reply = processor.processPhoto(id, message);
         }else {
             reply = processor.processMessage(id, message);
-            if (reply[0].equals("требуются  данные")){
+            if (reply[0].equals("требуются данные")){
                 reply = processor.processMessage(id, "data" + username + "|" + platform.toString());
             }
         }
