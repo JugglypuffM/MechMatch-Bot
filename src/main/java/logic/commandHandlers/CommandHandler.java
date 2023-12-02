@@ -100,7 +100,8 @@ public class CommandHandler implements Handler{
                             friendSexMatch && friendCityMatch && friendAgeMatch &&
                             !database.getAllConnectedUserIds(sender.getId()).contains(friend.getId()) &&
                             !friendDislikes.contains(sender.getId()) &&
-                            !(Objects.equals(friend.getSuggestedFriendID(), sender.getId()))) {
+                            !(Objects.equals(friend.getSuggestedFriendID(), sender.getId())) &&
+                            sender.getPlatform().equals(friend.getPlatform())) {
                         reply[0] = database.profileData(friend.getId());
                         reply[1] = "Напиши, понравился ли тебе пользователь(да/нет).";
                         reply[12] = database.getUser(fpl.get(tmpNum)).getPhotoID();
