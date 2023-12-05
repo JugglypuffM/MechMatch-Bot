@@ -2,8 +2,8 @@ package logic.commandHandlers;
 
 import database.main.Database;
 import database.models.User;
-import logic.states.GlobalState;
 import logic.notificator.Notificator;
+import logic.states.GlobalState;
 
 import java.util.ArrayList;
 import java.util.List;

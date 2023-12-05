@@ -6,6 +6,7 @@ import database.models.Connection;
 import database.models.User;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
 import java.util.List;
 
 /**
