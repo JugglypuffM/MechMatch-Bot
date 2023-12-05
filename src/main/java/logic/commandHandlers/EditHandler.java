@@ -38,12 +38,15 @@ public class EditHandler implements Handler{
             database.addToFPL(sender.getId());
         }
         else {
-            if (sender.setField(message)) {
+            Boolean result = sender.setField(message);
+            if (result) {
                 reply[0] = "Изменение внесено.";
                 sender.setGlobalState(GlobalState.COMMAND);
                 database.addToFPL(sender.getId());
                 sender.setProfileFilled(true);
-            } else {
+            }else if (result == null){
+                reply[0] = "Похоже ты не совсем честен по поводу пола.";
+            }else {
                 reply[0] = stateFSM.getWrongReplies().get(sender.getLocalState());
             }
         }

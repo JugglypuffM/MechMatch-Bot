@@ -26,7 +26,7 @@ public class HibernateSessionFactory {
             Configuration configuration = new Configuration().configure();
             configuration.addAnnotatedClass(User.class);
             configuration.addAnnotatedClass(Connection.class);
-            configuration.setProperty("hibernate.connection.username", "postgres");
+            configuration.setProperty("hibernate.connection.username", dotenv.get("POSTGRES_USER"));
             configuration.setProperty("hibernate.connection.password", dotenv.get("POSTGRES_PASSWORD"));
             try {
                 logger.info("Trying to connect to container db:");
