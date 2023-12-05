@@ -10,9 +10,9 @@ name: CI\CD with Maven on VPS
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "CI-CD" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "CI-CD" ]
 
 jobs:
   test:
@@ -48,3 +48,19 @@ jobs:
             sudo docker rm app db;
             sudo docker rmi bot-app bot-db;
             sudo docker compose -p bot up -d;
+  deploy-test:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/CI-CD'
+    steps:
+      - name: Run command on remote server
+        uses: D3rHase/ssh-command-action@v0.2.2
+        with:
+          host: ${{secrets.SSH_HOST}}
+          user: ${{secrets.SSH_USER}}
+          private_key: ${{secrets.SSH_PRIVATE_KEY}}
+          command: |
+            cd ${{ secrets.PROJECT_FOLDER }};
+            git checkout CI-CD;
+            git pull;
+            sudo docker compose down;

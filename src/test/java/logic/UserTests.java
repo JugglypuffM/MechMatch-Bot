@@ -47,9 +47,9 @@ public class UserTests {
     public void ageVerificationTest(){
         User user = new User("0", "stas", "TELEGRAM");
         int lastAge = user.getAge();
-        Assertions.assertFalse(user.setAge("14"));
+        Assertions.assertFalse(user.setAge("13"));
         Assertions.assertFalse(user.setAge("-23"));
-        Assertions.assertFalse(user.setAge("120"));
+        Assertions.assertFalse(user.setAge("121"));
         Assertions.assertEquals(lastAge, user.getAge());
         Assertions.assertTrue(user.setAge("15"));
         Assertions.assertEquals(15, user.getAge());
