@@ -39,13 +39,13 @@ public class EditHandler implements Handler{
         }
         else {
             Boolean result = sender.setField(message);
-            if (result) {
+            if (result == null){
+                reply[0] = "Похоже ты не совсем честен по поводу пола.";
+            }else if (result) {
                 reply[0] = "Изменение внесено.";
                 sender.setGlobalState(GlobalState.COMMAND);
                 database.addToFPL(sender.getId());
                 sender.setProfileFilled(true);
-            }else if (result == null){
-                reply[0] = "Похоже ты не совсем честен по поводу пола.";
             }else {
                 reply[0] = stateFSM.getWrongReplies().get(sender.getLocalState());
             }
