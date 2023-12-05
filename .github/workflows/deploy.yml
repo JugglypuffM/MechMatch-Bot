@@ -32,7 +32,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' or github.ref == 'refs/heads/CI-CD'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/CI-CD'
     steps:
       - name: Run command on remote server
         uses: D3rHase/ssh-command-action@v0.2.2
