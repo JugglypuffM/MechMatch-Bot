@@ -332,7 +332,6 @@ public class User {
             throw new RuntimeException(e);
         }
         JSONArray array = (JSONArray) json.get("suggestions");
-        System.out.println(array.toJSONString());
         Map<String, String> genderDict = new HashMap<>();
         genderDict.put("MALE", "девушка");
         genderDict.put("FEMALE", "парень");

@@ -67,10 +67,13 @@ public class FillingHandler implements Handler{
                 }
             }
             default -> {
-                if (sender.setField(message)) {
+                Boolean result = sender.setField(message);
+                if (result == null){
+                    reply[0] = "Кажется ты меня обманываешь.";
+                }else if (result) {
                     reply[0] = stateFSM.getRightReplies().get(sender.getLocalState());
                     sender.setLocalState(stateFSM.getNextDict().get(sender.getLocalState()));
-                } else {
+                }else {
                     reply[0] = stateFSM.getWrongReplies().get(sender.getLocalState());
                 }
             }
