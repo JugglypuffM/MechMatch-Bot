@@ -63,9 +63,6 @@ jobs:
             cd ${{ secrets.PROJECT_FOLDER }};
             git checkout CI-CD;
             git pull;
-            sudo docker stop app db;
-            sudo docker rm app db;
-            sudo docker rmi bot-app bot-db;
             sudo docker compose -p bot up -d;
             git checkout master;
             git pull;
