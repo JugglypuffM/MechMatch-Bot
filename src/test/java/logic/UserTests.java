@@ -61,4 +61,10 @@ public class UserTests {
         Assertions.assertFalse(user.setAge("140"));
         Assertions.assertEquals(lastAge, user.getAge());
     }
+
+    @Test
+    public void sexValidation(){
+        User user = new User("0", "stas", "TELEGRAM");
+        System.out.println(user.validateSex("Татьяна", "парень"));
+    }
 }

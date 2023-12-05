@@ -2,12 +2,41 @@ package database.models;
 
 import bots.platforms.Platform;
 import bots.platforms.PlatformFSM;
+import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import logic.states.GlobalState;
 import logic.states.LocalState;
 import logic.states.StateFSM;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Main user class.
@@ -87,10 +116,13 @@ public class User {
      * @param m_sex string, which should be equal to "Парень" if sex is male or to "Девушка" if sex female.
      * @return true if {@link User#sex} filled successfully and false if not.
      */
-    public boolean setSex(String m_sex) {
+    public Boolean setSex(String m_sex) {
         if (m_sex.equalsIgnoreCase("парень") ||
                 m_sex.equalsIgnoreCase("девушка")){
             this.sex = m_sex.toLowerCase();
+            if (!validateSex(name, sex)){
+                return null;
+            }
             return true;
         }
         return false;
@@ -103,7 +135,7 @@ public class User {
      * @param m_expectedSex string, which should be equal to "Парень" if sex is male or to "Девушка" if sex female.
      * @return true if {@link User#expectedSex} filled successfully and false if not.
      */
-    public boolean setExpectedSex(String m_expectedSex) {
+    public Boolean setExpectedSex(String m_expectedSex) {
         if (m_expectedSex.equalsIgnoreCase("парень") ||
                 m_expectedSex.equalsIgnoreCase("девушка") ||
                 m_expectedSex.equalsIgnoreCase("без разницы")){
@@ -240,7 +272,7 @@ public class User {
      * @param value user's message
      * @return true if field was filled successfully and false if not
      */
-    public boolean setField(String value){
+    public Boolean setField(String value){
         switch (this.getLocalState()){
             case NAME:
                 this.setName(value);
@@ -270,6 +302,49 @@ public class User {
         return false;
     }
 
+    public boolean validateSex(String name, String sex){
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httppost = new HttpPost("http://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/fio");
+        httppost.setHeader("Content-Type", "application/json");
+        httppost.setHeader("Accept", "application/json");
+        httppost.setHeader("Authorization", "Token 992551514f0c3981d2d3fff1201d86b093612eeb");
+        httppost.setEntity(new StringEntity("{ \"query\": \"" + name + "\",\n" +
+                "\"parts\": [\"NAME\"] }", StandardCharsets.UTF_8));
+        CloseableHttpResponse response = null;
+        try {
+            response = httpclient.execute(httppost);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        HttpEntity entity = response.getEntity();
+        String result = "none";
+        if (entity != null) {
+            try (InputStream inputStream = entity.getContent()) {
+                result = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        JSONObject json = null;
+        try {
+            json = (JSONObject) JSONValue.parseWithException(result);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        JSONArray array = (JSONArray) json.get("suggestions");
+        System.out.println(array.toJSONString());
+        Map<String, String> genderDict = new HashMap<>();
+        genderDict.put("MALE", "девушка");
+        genderDict.put("FEMALE", "парень");
+        genderDict.put("UNKNOWN", "");
+        for (Object value: array){
+            JSONObject data = (JSONObject) ((JSONObject) value).get("data");
+            if (data.get("name").equals(name) && (genderDict.get(((String) data.get("gender"))).equals(sex))){
+                return false;
+            }
+        }
+        return true;
+    }
     @Override
     public String toString() {
         return "User{" +
