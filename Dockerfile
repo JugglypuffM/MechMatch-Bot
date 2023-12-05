@@ -4,4 +4,5 @@ COPY . .
 RUN mvn package -Dmaven.test.skip
 WORKDIR /app/target
 COPY .env .
-ENTRYPOINT ["java", "-jar", "*-jar-with-dependencies.jar"]
+RUN mv *-jar-with-dependencies.jar executable.jar
+ENTRYPOINT ["java", "-jar", "executable.jar"]
