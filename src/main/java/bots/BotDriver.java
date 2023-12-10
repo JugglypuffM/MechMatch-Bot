@@ -33,7 +33,7 @@ public class BotDriver {
         }else {
             reply = processor.processMessage(id, message);
             if (reply[0].equals("требуются данные")){
-                reply = processor.processMessage(id, "data" + username + "|" + platform.toString());
+                reply = processor.processMessage(id, "data" + username + "|" + platform.stringRepresentation());
             }
         }
         return reply;

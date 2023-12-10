@@ -23,8 +23,7 @@ public enum GlobalState {
     GlobalState(String m_value){
         this.value = m_value;
     }
-    @Override
-    public String toString() {
+    public String stringRepresentation() {
         return value;
     }
 }

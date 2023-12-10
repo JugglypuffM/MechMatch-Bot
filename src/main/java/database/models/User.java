@@ -200,14 +200,14 @@ public class User {
         return stateFSM.getGlobalStateMap().get(this.globalState);
     }
     public void setGlobalState(GlobalState m_globalState){
-        this.globalState = m_globalState.toString();
+        this.globalState = m_globalState.stringRepresentation();
     }
     public LocalState getLocalState(){
         StateFSM stateFSM = new StateFSM();
         return stateFSM.getLocalStateMap().get(this.localState);
     }
     public void setLocalState(LocalState m_localState){
-        this.localState = m_localState.toString();
+        this.localState = m_localState.stringRepresentation();
     }
     public String getInformation(){
         return information;
@@ -246,7 +246,7 @@ public class User {
         this.profilesPage = profilesPage;
     }
     public void setPlatform(Platform platform) {
-        this.platform = platform.toString();
+        this.platform = platform.stringRepresentation();
     }
     public Platform getPlatform() {
         PlatformFSM platformFSM = new PlatformFSM();
