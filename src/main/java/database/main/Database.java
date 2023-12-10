@@ -1,5 +1,7 @@
 package database.main;
 
+import bots.platforms.Platform;
+import database.models.Account;
 import database.models.Connection;
 import database.models.User;
 
@@ -21,6 +23,9 @@ public interface Database {
      * @param id string representation of user id
      */
     void deleteUser(String id);
+
+
+
     void addConnection(String userID, String friendID, Boolean isLiked);
     /**
      * Get connection from Database.
@@ -62,6 +67,13 @@ public interface Database {
      */
     List<Integer> getDislikesOf(String id);
     void deleteAllConnectionsWith(String id);
+
+
+    void addAccount(String login);
+    Account getAccount(Integer id);
+    void updateAccount(Account account);
+    void deleteAccount(Integer id);
+    Account getAccountWithPlatformId(String id, Platform platform);
     /**
      * Get filledProfilesList.
      * Checks if it is initialized and initializes if not.

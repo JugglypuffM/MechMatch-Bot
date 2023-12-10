@@ -17,6 +17,7 @@ public class UserDAO implements DAO<User, String>{
     public UserDAO(HibernateSessionFactory hsf){
         this.sessionFactory = hsf;
     }
+    @Override
     public void create(User user) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
@@ -24,9 +25,11 @@ public class UserDAO implements DAO<User, String>{
         tx1.commit();
         session.close();
     }
+    @Override
     public User read(String id) {
         return sessionFactory.getSessionFactory().openSession().get(User.class, id);
     }
+    @Override
     public void update(User user) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
@@ -34,6 +37,7 @@ public class UserDAO implements DAO<User, String>{
         tx1.commit();
         session.close();
     }
+    @Override
     public void delete(User user) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();

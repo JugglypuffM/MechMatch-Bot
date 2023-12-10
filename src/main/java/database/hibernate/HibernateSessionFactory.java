@@ -1,5 +1,6 @@
 package database.hibernate;
 
+import database.models.Account;
 import database.models.Connection;
 import database.models.User;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -26,6 +27,7 @@ public class HibernateSessionFactory {
             Configuration configuration = new Configuration().configure();
             configuration.addAnnotatedClass(User.class);
             configuration.addAnnotatedClass(Connection.class);
+            configuration.addAnnotatedClass(Account.class);
             configuration.setProperty("hibernate.connection.username", dotenv.get("POSTGRES_USER"));
             configuration.setProperty("hibernate.connection.password", dotenv.get("POSTGRES_PASSWORD"));
             try {

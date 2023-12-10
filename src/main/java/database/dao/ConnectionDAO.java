@@ -18,6 +18,7 @@ public class ConnectionDAO implements DAO<Connection, Integer>{
      * Checks if owner of this connection has less, than 100 likes and dislikes, else deletes the earliest one
      * @param connection new connection
      */
+    @Override
     public void create(Connection connection) {
         List<Connection> likes = getLikesOf(connection.getUserID());
         if (likes.size() > 100){
@@ -33,9 +34,11 @@ public class ConnectionDAO implements DAO<Connection, Integer>{
         tx1.commit();
         session.close();
     }
+    @Override
     public Connection read(Integer id) {
         return sessionFactory.getSessionFactory().openSession().get(Connection.class, id);
     }
+    @Override
     public void update(Connection connection) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
@@ -43,6 +46,7 @@ public class ConnectionDAO implements DAO<Connection, Integer>{
         tx1.commit();
         session.close();
     }
+    @Override
     public void delete(Connection connection) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
