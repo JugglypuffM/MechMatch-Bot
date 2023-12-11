@@ -12,9 +12,8 @@ public class UserTests {
      */
     @Test
     public void initUserTest(){
-        User user = new User("0", "stats", "TELEGRAM");
+        User user = new User("0", "stas", "TELEGRAM");
         Assertions.assertEquals("0", user.getId());
-        Assertions.assertEquals("stats", user.getUsername());
         Assertions.assertEquals(user.getGlobalState(), GlobalState.COMMAND);
         Assertions.assertEquals(user.getLocalState(), LocalState.START);
         Assertions.assertEquals(0, user.getMinExpectedAge());

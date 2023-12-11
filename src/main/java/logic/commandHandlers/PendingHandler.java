@@ -1,6 +1,7 @@
 package logic.commandHandlers;
 
 import database.main.Database;
+import database.models.Account;
 import database.models.Connection;
 import database.models.User;
 import logic.notificator.Notificator;
@@ -19,6 +20,15 @@ public class PendingHandler implements Handler{
         this.database = m_database;
         this.notificator = m_notificator;
     }
+    private String getUserUsernames(Integer id){
+        String result = "";
+        Account acc = database.getAccount(id);
+        if (acc.getTgusermane() != null)
+            result += "\nВот ссылка на телеграмм профиль собеседника - @" + acc.getTgusermane();
+        if (acc.getDsusername() != null)
+            result += "\nВот discord ник твоего собеседника - " + acc.getDsusername();
+        return result;
+    }
     public void handleMessage(User sender, String[] reply, String message) {
         List<Integer> pending = database.getPendingOf(sender.getId());
         Connection connection = database.getConnection(pending.get(0));
@@ -27,11 +37,10 @@ public class PendingHandler implements Handler{
             connection.setIsLiked(true);
             database.updateConnection(connection);
             notification[0] = "Ура! Тебе ответили взаимностью, можно переходить к общению.";
-            notification[1] = "Вот ссылка на профиль собеседника - @" + sender.getUsername();
-            notificator.notifyFriend(database.getUser(connection.getFriendID()).getPlatform(), connection.getFriendID(),
-                    database.getUser(connection.getFriendID()).getUsername(), notification);
+            notification[1] = getUserUsernames(Integer.parseInt(sender.getId()));
+            notificator.notifyFriend(connection.getFriendID(), notification);
             reply[0] = "Ура! Теперь вы можете перейти к общению.";
-            reply[1] = "Вот ссылка на профиль собеседника - @" + database.getUser(connection.getFriendID()).getUsername();
+            reply[1] = getUserUsernames(Integer.parseInt(sender.getSuggestedFriendID()));
         }
         else if (message.equalsIgnoreCase("нет") || message.equals("\uD83D\uDC4E")){
             connection.setIsLiked(false);

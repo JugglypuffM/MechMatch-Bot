@@ -4,7 +4,6 @@ import bots.platforms.Platform;
 import database.models.Connection;
 import database.models.Account;
 import database.models.User;
-import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;

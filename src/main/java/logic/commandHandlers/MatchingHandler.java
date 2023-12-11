@@ -1,6 +1,7 @@
 package logic.commandHandlers;
 
 import database.main.Database;
+import database.models.Account;
 import database.models.User;
 import logic.notificator.Notificator;
 import logic.states.GlobalState;
@@ -20,6 +21,15 @@ public class MatchingHandler implements Handler{
         this.database = m_database;
         this.notificator = m_notificator;
     }
+    private String getUserUsernames(Integer id){
+        String result = "";
+        Account acc = database.getAccount(id);
+        if (acc.getTgusermane() != null)
+            result += "\nВот ссылка на телеграмм профиль собеседника - @" + acc.getTgusermane();
+        if (acc.getDsusername() != null)
+            result += "\nВот discord ник твоего собеседника - " + acc.getDsusername();
+        return result;
+    }
     public void handleMessage(User sender, String[] reply, String message) {
         List<String> friendLikes = new ArrayList<>();
         for (Integer i: database.getLikesOf(sender.getSuggestedFriendID())){
@@ -30,10 +40,10 @@ public class MatchingHandler implements Handler{
                 String[] notification = new String[24];
                 database.addConnection(sender.getId(), sender.getSuggestedFriendID(), true);
                 notification[0] = "Ура! Тебе ответили взаимностью, можно переходить к общению.";
-                notification[1] = "Вот ссылка на профиль собеседника - @" + sender.getUsername();
-                notificator.notifyFriend(database.getUser(sender.getSuggestedFriendID()).getPlatform(), sender.getSuggestedFriendID(), database.getUser(sender.getSuggestedFriendID()).getUsername(), notification);
+                notification[1] = getUserUsernames(Integer.parseInt(sender.getId()));
+                notificator.notifyFriend(sender.getSuggestedFriendID(), notification);
                 reply[0] = "Ура! Этот пользователь когда-то уже отвечал взаимностью, теперь вы можете перейти к общению.";
-                reply[1] = "Вот ссылка на профиль собеседника - @" + database.getUser(sender.getSuggestedFriendID()).getUsername();
+                reply[1] = getUserUsernames(Integer.parseInt(sender.getSuggestedFriendID()));
             }
             else {
                 String[] notification = new String[24];
@@ -46,7 +56,7 @@ public class MatchingHandler implements Handler{
                 notification[1] = database.profileData(sender.getId());
                 notification[2] = "Напиши, хочешь ли ты начать общение с эти человеком(да/нет)?.";
                 notification[13] = sender.getPhotoID();
-                notificator.notifyFriend(database.getUser(sender.getSuggestedFriendID()).getPlatform(), sender.getSuggestedFriendID(), database.getUser(sender.getSuggestedFriendID()).getUsername(), notification);
+                notificator.notifyFriend(sender.getSuggestedFriendID(), notification);
                 reply[0] = "Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!";
             }
         }

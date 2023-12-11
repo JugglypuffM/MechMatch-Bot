@@ -1,6 +1,7 @@
 package logic.commandHandlers;
 
 import database.main.Database;
+import database.models.Account;
 import database.models.User;
 import logic.states.GlobalState;
 import logic.states.LocalState;
@@ -34,6 +35,15 @@ public class MatchesHandler implements Handler{
         }
         return idList;
     }
+    private String getUserUsernames(Integer id){
+        String result = "";
+        Account acc = database.getAccount(id);
+        if (acc.getTgusermane() != null)
+            result += "\nВот ссылка на телеграмм профиль этого пользователя - @" + acc.getTgusermane();
+        if (acc.getDsusername() != null)
+            result += "\nВот discord ник этого пользователя - " + acc.getDsusername();
+        return result;
+    }
     private void getTenProfiles(User sender, String[] reply, List<String> idList){
         int page = sender.getProfilesPage()-1;
         reply[0] = "Профили на странице " + (page+1) + ":";
@@ -46,7 +56,7 @@ public class MatchesHandler implements Handler{
                         friendLikes.add(database.getConnection(j).getFriendID());
                     }
                     if (friendLikes.contains(sender.getId())){
-                        reply[2+i] = reply[2+i] + "\nВот ссылка на профиль этого пользователя - @" + database.getUser(idList.get(i+page*10)).getUsername();
+                        reply[2+i] = reply[2+i] + getUserUsernames(Integer.parseInt(sender.getId()));
                     }
                 }
                 reply[14+i] = database.getUser(idList.get(i+page*10)).getPhotoID();
