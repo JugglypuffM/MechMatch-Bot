@@ -7,12 +7,18 @@ import bots.platforms.Platform;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.net.URL;
 
 public class TgBot extends TelegramLongPollingBot implements Bot {
     private final Dotenv dotenv = Dotenv.load();
@@ -38,9 +44,18 @@ public class TgBot extends TelegramLongPollingBot implements Bot {
         String message = update.getMessage().getText();
         String id = update.getMessage().getChatId().toString();
         String username = update.getMessage().getFrom().getUserName();
-        String[] reply = (update.getMessage().hasPhoto()) ?
-                driver.handleUpdate(id, username, update.getMessage().getPhoto().get(0).getFileId(), Platform.TELEGRAM, true) :
-                driver.handleUpdate(id, username, message, Platform.TELEGRAM, false);
+        String[] reply = new String[24];
+        if (update.getMessage().hasPhoto()){
+            try {
+                String picture =  driver.getDatabase().getUser(id).getId() + ".jpg";
+                downloadFile(execute(new GetFile(update.getMessage().getPhoto().get(2).getFileId())).getFilePath(),
+                                     new File("./pictures/" + picture));
+                reply = driver.handleUpdate(id, username, picture, Platform.TELEGRAM, true);
+            }catch (Exception e){
+                driver.getLogger().error("Failed to download the image.", e);
+                reply[0] = "Не удалось загрузить твою фотографию, отправь другую или попробуй еще раз.";
+            }
+        }else reply = driver.handleUpdate(id, username, message, Platform.TELEGRAM, false);
         driver.send(this, id, username, message, reply);
     }
     @Override
@@ -53,7 +68,8 @@ public class TgBot extends TelegramLongPollingBot implements Bot {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(id);
         String text = message.replace("_", "\\_");
-        sendPhoto.setPhoto(new InputFile(photo));
+        File file = new File("./pictures/" + photo);
+        sendPhoto.setPhoto(new InputFile(file));
         sendPhoto.setCaption(text);
         buttonsHandler.setKeyboard(id, null, sendPhoto);
         try {

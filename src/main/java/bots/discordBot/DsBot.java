@@ -48,9 +48,24 @@ public class DsBot extends ListenerAdapter implements Bot {
         String id = event.getChannel().getId();
         String username = event.getAuthor().getName();
         List<Message.Attachment> attachments = event.getMessage().getAttachments();
-        String[] reply = (!attachments.isEmpty() && attachments.get(0).isImage()) ?
-                driver.handleUpdate(id, username, attachments.get(0).getUrl(), Platform.DISCORD, true) :
-                driver.handleUpdate(id, username, message, Platform.DISCORD, false);
+        boolean hasPhoto = (!attachments.isEmpty() && attachments.get(0).isImage());
+        String[] reply = new String[24];
+        if (hasPhoto){
+            try {
+                String photo = attachments.get(0).getUrl();
+                URL url = new URL(photo);
+                BufferedImage img = ImageIO.read(url);
+                String[] filename = photo.split("\\?ex")[0].split("/")[6].split("\\.");
+                String extension = filename[filename.length-1];
+                String picture =  driver.getDatabase().getUser(id).getId() + "." + extension;
+                File file = new File("./pictures/" + picture);
+                ImageIO.write(img, extension, file);
+                reply = driver.handleUpdate(id, username, picture, Platform.DISCORD, true);
+            }catch (Exception e){
+                driver.getLogger().error("Failed to download the image.", e);
+                reply[0] = "Не удалось загрузить твою фотографию, отправь другую или попробуй еще раз.";
+            }
+        }else reply = driver.handleUpdate(id, username, message, Platform.DISCORD, false);
         driver.send(this, id, username, message, reply);
     }
 
@@ -60,17 +75,11 @@ public class DsBot extends ListenerAdapter implements Bot {
         try {
             PrivateChannel channel = jda.getPrivateChannelById(id);
             if (channel == null) return false;
-            URL url = new URL(photo);
-            BufferedImage img = ImageIO.read(url);
-            String[] filename = photo.split("\\?ex")[0].split("/")[6].split("\\.");
-            String extension = filename[filename.length-1];
-            File file = new File("./tmp." + extension);
-            ImageIO.write(img, extension, file);
+            File file = new File("./pictures/" + photo);
             channel.sendMessage(message).addFiles(FileUpload.fromData(file)).queue();
-            while (!file.delete()) {}
             return true;
         }catch (Exception e){
-            driver.getLogger().error("Failed to handle the image.", e);
+            driver.getLogger().error("Failed to send the image.", e);
             return false;
         }
     }
