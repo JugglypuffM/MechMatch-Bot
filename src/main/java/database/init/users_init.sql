@@ -1,32 +1,18 @@
-CREATE TABLE IF NOT EXISTS public.users
+create table public.users
 (
-    id text COLLATE pg_catalog."default" NOT NULL,
-    name text COLLATE pg_catalog."default",
-    age integer,
-    sex text COLLATE pg_catalog."default",
-    city text COLLATE pg_catalog."default",
-    information text COLLATE pg_catalog."default",
-    minexpectedage integer,
-    maxexpectedage integer,
-    expectedsex text COLLATE pg_catalog."default",
-    expectedcity text COLLATE pg_catalog."default",
-    photoid text COLLATE pg_catalog."default",
-    localstate text COLLATE pg_catalog."default",
-    globalstate text COLLATE pg_catalog."default",
-    profilefilled boolean,
-    username text COLLATE pg_catalog."default",
-    suggestedfriendid text COLLATE pg_catalog."default",
-    profileslist text COLLATE pg_catalog."default",
+    id integer not null
+        constraint users_pkey
+            primary key,
+    localstate text,
+    globalstate text,
+    suggestedfriendid text,
+    profileslist text,
     profilespage integer,
-    platform text COLLATE pg_catalog."default",
-    CONSTRAINT id PRIMARY KEY (id)
-    )
+    platform text,
+    username text
+);
 
-    TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.users
-    OWNER to postgres;
-
+alter table public.users owner to postgres;
 
 
 
