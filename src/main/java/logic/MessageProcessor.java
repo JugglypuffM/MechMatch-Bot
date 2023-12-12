@@ -2,6 +2,7 @@ package logic;
 
 import bots.BotDriver;
 import database.main.Database;
+import database.models.Profile;
 import database.models.User;
 import logic.commandHandlers.*;
 import logic.notificator.Notificator;
@@ -16,7 +17,6 @@ public class MessageProcessor {
      * Database interface.
      */
     private final Database database;
-    private final Notificator notificator;
     private final CommandHandler caseCommand;
     private final FillingHandler caseProfileFill;
     private final EditHandler caseProfileEdit;
@@ -25,7 +25,7 @@ public class MessageProcessor {
     private final PendingHandler casePending;
     public MessageProcessor(Database m_database, BotDriver m_driver){
         this.database = m_database;
-        this.notificator = new Notificator(m_driver);
+        Notificator notificator = new Notificator(m_driver);
         this.caseCommand = new CommandHandler(m_database);
         this.caseProfileFill = new FillingHandler(m_database, stateFSM);
         this.caseProfileEdit = new EditHandler(m_database, stateFSM);
@@ -56,12 +56,13 @@ public class MessageProcessor {
      * Every string from 12 to 23 is an optional photoID, these photos are bounded to messages with shift = -12.
      * <p>For example, 12th photo will be bounded to 12-12=0 message<p>
      * Checks if user with given id exists and creates new one if not.
-     * @param id string presentation of user id
+     * @param platformId string presentation of user id
      * @param message user message
      * @return reply to user message
      */
-    public synchronized String[] processMessage(String id, String message){
+    public synchronized String[] processMessage(String platformId, String message){
         String[] reply = new String[24];
+        Integer id = Integer.parseInt(platformId);
         if (database.getUser(id) == null) {
             String username, platform;
             if (message.startsWith("data")) {
@@ -72,10 +73,11 @@ public class MessageProcessor {
                 return reply;
             }
             database.addUser(id, username, platform);
+            database.addProfile(id);
         }
         User sender = database.getUser(id);
         Handler handler = chooseHandler(sender);
-        handler.handleMessage(sender, reply, message);
+        handler.handleMessage(id, reply, message);
         database.updateUser(sender);
         return reply;
     }
@@ -84,29 +86,31 @@ public class MessageProcessor {
      * Photo handler.
      * Asks to send a message if {@link LocalState} of user with given id is not {@link LocalState#PHOTO}.
      * If it is sets user's photoID with given photoID
-     * @param id string presentation of user id
+     * @param platformId string presentation of user id
      * @param photoID id of picture, which is going to be user's profile photo
      * @return reply to user message
      */
-    public synchronized String[] processPhoto(String id, String photoID){
+    public synchronized String[] processPhoto(String platformId, String photoID){
         String[] reply = new String[24];
+        Integer id = Integer.parseInt(platformId);
         User sender = database.getUser(id);
+        Profile profile = database.getProfile(id);
         if (sender.getLocalState() != LocalState.PHOTO){
             reply[0] = "Пожалуйста, отправь сообщение.";
             return reply;
         }
-        sender.setPhotoID(photoID);
+        profile.setPhotoID(photoID);
         sender.setLocalState(stateFSM.getNextDict().get(LocalState.PHOTO));
         if (sender.getGlobalState() == GlobalState.PROFILE_EDIT){
             reply[0] = "Изменение внесено.";
             sender.setGlobalState(GlobalState.COMMAND);
             database.addToFPL(id);
-            sender.setProfileFilled(true);
+            profile.setProfileFilled(true);
         }
         else {
             reply[0] = stateFSM.getRightReplies().get(LocalState.PHOTO);
             reply[2] = database.profileData(id);
-            reply[14] = sender.getPhotoID();
+            reply[14] = profile.getPhotoID();
         }
         database.updateUser(sender);
         return reply;

@@ -3,6 +3,7 @@ package database.main;
 import bots.platforms.Platform;
 import database.models.Connection;
 import database.models.Account;
+import database.models.Profile;
 import database.models.User;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class DatabaseMock implements Database {
     /**
      * Dictionary of users, where user id is key and the instance of {@link User} is value
      */
-    private final Map<String, User> userDict = new HashMap<>();
+    private final Map<Integer, User> userDict = new HashMap<>();
     /**
      * Dictionary of connections, where connection id is key and the instance of {@link Connection} is value
      */
@@ -26,6 +27,10 @@ public class DatabaseMock implements Database {
      * Dictionary of accounts, where account id is key and the instance of {@link Account} is value
      */
     private final Map<Integer, Account> accountDict = new HashMap<>();
+    /**
+     * Dictionary of profiles, where profile id is key and the instance of {@link Profile} is value
+     */
+    private final Map<Integer, Profile> profileDict = new HashMap<>();
     /**
      * Auto incrementing on every new connection id
      */
@@ -37,16 +42,16 @@ public class DatabaseMock implements Database {
     /**
      * List of users with fully filled profiles id's
      */
-    private final List<String> filledProfilesList = new ArrayList<>();
+    private final List<Integer> filledProfilesList = new ArrayList<>();
 
     @Override
-    public void addUser(String id, String username, String platform) {
+    public void addUser(Integer id, String username, String platform) {
         User user = new User(id, username, platform);
         userDict.put(id, user);
     }
 
     @Override
-    public User getUser(String id) {
+    public User getUser(Integer id) {
         if (!userDict.containsKey(id)){
             return null;
         }
@@ -60,12 +65,12 @@ public class DatabaseMock implements Database {
     }
 
     @Override
-    public void deleteUser(String id) {
+    public void deleteUser(Integer id) {
         userDict.remove(id);
     }
 
     @Override
-    public void addConnection(String userID, String friendID, Boolean isLiked) {
+    public void addConnection(Integer userID, Integer friendID, Boolean isLiked) {
         connectionDict.put(lastConnectionID, new Connection(lastConnectionID, userID, friendID, isLiked));
         lastConnectionID++;
     }
@@ -90,8 +95,8 @@ public class DatabaseMock implements Database {
     }
 
     @Override
-    public List<String> getAllConnectedUserIds(String id) {
-        List<String> result = new ArrayList<>();
+    public List<Integer> getAllConnectedUserIds(Integer id) {
+        List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
             if (connection.getUserID().equals(id)){
                 result.add(connection.getFriendID());
@@ -101,7 +106,7 @@ public class DatabaseMock implements Database {
     }
 
     @Override
-    public List<Integer> getAllConnectionsWith(String id) {
+    public List<Integer> getAllConnectionsWith(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
             if (connection.getUserID().equals(id)){
@@ -112,7 +117,7 @@ public class DatabaseMock implements Database {
     }
 
     @Override
-    public List<Integer> getPendingOf(String id) {
+    public List<Integer> getPendingOf(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
             if (connection.getUserID().equals(id) && (connection.getLiked() == null)){
@@ -123,7 +128,7 @@ public class DatabaseMock implements Database {
     }
 
     @Override
-    public List<Integer> getLikesOf(String id) {
+    public List<Integer> getLikesOf(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
             if (connection.getLiked() == null){
@@ -137,7 +142,7 @@ public class DatabaseMock implements Database {
     }
 
     @Override
-    public List<Integer> getDislikesOf(String id) {
+    public List<Integer> getDislikesOf(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
             if (connection.getLiked() == null){
@@ -151,7 +156,7 @@ public class DatabaseMock implements Database {
     }
 
     @Override
-    public void deleteAllConnectionsWith(String id) {
+    public void deleteAllConnectionsWith(Integer id) {
         for (Integer i: getAllConnectionsWith(id)){
             connectionDict.remove(i);
         }
@@ -182,34 +187,56 @@ public class DatabaseMock implements Database {
     }
 
     @Override
-    public Account getAccountWithPlatformId(String id, Platform platform) {
+    public void addProfile(Integer id) {
+        profileDict.put(id, new Profile(id));
+    }
+
+    @Override
+    public Profile getProfile(Integer id) {
+        return profileDict.get(id);
+    }
+
+    @Override
+    public void updateProfile(Profile profile) {
+        if (!profileDict.containsKey(profile.getId())) return;
+        profileDict.put(profile.getId(), profile);
+    }
+
+    @Override
+    public void deleteProfile(Integer id) {
+        if (!profileDict.containsKey(id)) return;
+        profileDict.remove(id);
+    }
+
+    @Override
+    public Account getAccountWithPlatformId(String platformId, Platform platform) {
         for (Account account: accountDict.values()){
             switch (platform){
-                case TELEGRAM -> {if (account.getTgid().equals(id)) return account;}
-                case DISCORD -> {if (account.getDsid().equals(id)) return account;}
+                case TELEGRAM -> {if (account.getTgid().equals(platformId)) return account;}
+                case DISCORD -> {if (account.getDsid().equals(platformId)) return account;}
             }
         }
         return null;
     }
 
     @Override
-    public List<String> getFilledProfilesList(String id) {
-        List<String> tmpList = new ArrayList<>(filledProfilesList);
+    public List<Integer> getFilledProfilesList(Integer id) {
+        List<Integer> tmpList = new ArrayList<>(filledProfilesList);
         tmpList.remove(id);
         return tmpList;
     }
 
     @Override
-    public String profileData(String id) {
-        User user = getUser(id);
-        return "Имя: " + user.getName() +
-                "\nВозраст: " + user.getAge() +
-                "\nПол: " + user.getSex() +
-                "\nГород: " + user.getCity() +
-                "\nИнформация о себе: " + user.getInformation() +
-                "\nДиапазон возраста собеседника: " + user.getMinExpectedAge() + " - " + user.getMaxExpectedAge() +
-                "\nПол собеседника: " + user.getExpectedSex() +
-                "\nГород собеседника: " + user.getExpectedCity();
+    public String profileData(Integer id) {
+        Profile profile = getProfile(id);
+        return "Имя: " + profile.getName() +
+                "\nВозраст: " + profile.getAge() +
+                "\nПол: " + profile.getSex() +
+                "\nГород: " + profile.getCity() +
+                "\nИнформация о себе: " + profile.getInformation() +
+                "\nДиапазон возраста собеседника: " + profile.getMinExpectedAge() + " - " + profile.getMaxExpectedAge() +
+                "\nПол собеседника: " + profile.getExpectedSex() +
+                "\nГород собеседника: " + profile.getExpectedCity();
     }
 
     /**
@@ -217,7 +244,7 @@ public class DatabaseMock implements Database {
      * @param id string representation of user id
      */
     @Override
-    public void addToFPL(String id){
+    public void addToFPL(Integer id){
         filledProfilesList.add(id);
     }
 
@@ -226,7 +253,7 @@ public class DatabaseMock implements Database {
      * @param id string representation of user id
      */
     @Override
-    public void deleteFromFPL(String id){
+    public void deleteFromFPL(Integer id){
         filledProfilesList.remove(id);
     }
 }

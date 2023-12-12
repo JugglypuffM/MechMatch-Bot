@@ -26,3 +26,8 @@ CREATE TABLE IF NOT EXISTS public.users
 
 ALTER TABLE IF EXISTS public.users
     OWNER to postgres;
+
+
+
+
+

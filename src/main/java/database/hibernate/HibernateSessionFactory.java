@@ -2,6 +2,7 @@ package database.hibernate;
 
 import database.models.Account;
 import database.models.Connection;
+import database.models.Profile;
 import database.models.User;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.hibernate.SessionFactory;
@@ -26,6 +27,7 @@ public class HibernateSessionFactory {
         if (sessionFactory == null) {
             Configuration configuration = new Configuration().configure();
             configuration.addAnnotatedClass(User.class);
+            configuration.addAnnotatedClass(Profile.class);
             configuration.addAnnotatedClass(Connection.class);
             configuration.addAnnotatedClass(Account.class);
             configuration.setProperty("hibernate.connection.username", dotenv.get("POSTGRES_USER"));

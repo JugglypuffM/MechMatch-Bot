@@ -1,5 +1,6 @@
 package bots.telegrammBot;
 
+import bots.platforms.Platform;
 import database.main.Database;
 import logic.states.GlobalState;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -108,8 +109,9 @@ public class ButtonsHandler {
         row1.add(new KeyboardButton("Нет"));
         this.simpleKeyboard.add(row1);
     }
-    public void setKeyboard(String id, SendMessage sendMessage, SendPhoto sendPhoto){
+    public void setKeyboard(String telegramId, SendMessage sendMessage, SendPhoto sendPhoto){
         ReplyKeyboard replyKeyboard;
+        Integer id = database.getAccountWithPlatformId(telegramId, Platform.TELEGRAM).getId();
         switch (database.getUser(id).getGlobalState()){
             default -> replyKeyboard = new ReplyKeyboardRemove(true);
             case COMMAND -> replyKeyboard = new ReplyKeyboardMarkup(commandKeyboard);

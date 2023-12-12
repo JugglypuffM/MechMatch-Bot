@@ -21,8 +21,8 @@ public class MatchesHandler implements Handler{
     public MatchesHandler(Database m_database){
         this.database = m_database;
     }
-    private List<String> getIdList(User sender){
-        List<String> idList = new ArrayList<>();
+    private List<Integer> getIdList(User sender){
+        List<Integer> idList = new ArrayList<>();
         if (sender.getProfilesList().equalsIgnoreCase("лайки")){
             for (Integer i: database.getLikesOf(sender.getId())){
                 idList.add(database.getConnection(i).getFriendID());
@@ -44,28 +44,30 @@ public class MatchesHandler implements Handler{
             result += "\nВот discord ник этого пользователя - " + acc.getDsusername();
         return result;
     }
-    private void getTenProfiles(User sender, String[] reply, List<String> idList){
+    private void getTenProfiles(Integer id, String[] reply, List<Integer> idList){
+        User sender = database.getUser(id);
         int page = sender.getProfilesPage()-1;
         reply[0] = "Профили на странице " + (page+1) + ":";
         for (int i = 0; i < 10; i++){
             if (i+page*10 < idList.size()){
                 reply[2+i] = "Профиль " + (1+i+page*10) + ":\n" + database.profileData(idList.get(i+page*10));
                 if (sender.getProfilesList().equalsIgnoreCase("лайки")){
-                    List<String> friendLikes = new ArrayList<>();
+                    List<Integer> friendLikes = new ArrayList<>();
                     for (Integer j: database.getLikesOf(idList.get(i+page*10))){
                         friendLikes.add(database.getConnection(j).getFriendID());
                     }
-                    if (friendLikes.contains(sender.getId())){
-                        reply[2+i] = reply[2+i] + getUserUsernames(Integer.parseInt(sender.getId()));
+                    if (friendLikes.contains(id)){
+                        reply[2+i] = reply[2+i] + getUserUsernames(id);
                     }
                 }
-                reply[14+i] = database.getUser(idList.get(i+page*10)).getPhotoID();
+                reply[14+i] = database.getProfile(idList.get(i+page*10)).getPhotoID();
             }else {
                 break;
             }
         }
     }
-    public void handleMessage(User sender, String[] reply, String message) {
+    public void handleMessage(Integer id, String[] reply, String message) {
+        User sender = database.getUser(id);
         switch (sender.getLocalState()){
             case CHOICE -> {
                 switch (message.toLowerCase()){
@@ -76,13 +78,13 @@ public class MatchesHandler implements Handler{
                         return;
                     }
                     case "лайки" ->{
-                        if (database.getLikesOf(sender.getId()).isEmpty()) {
+                        if (database.getLikesOf(id).isEmpty()) {
                             reply[0] = "Этот список пуст :(";
                             return;
                         }
                         sender.setProfilesList(message);
                     }case "дизлайки" ->{
-                        if (database.getDislikesOf(sender.getId()).isEmpty()) {
+                        if (database.getDislikesOf(id).isEmpty()) {
                             reply[0] = "Этот список пуст :(";
                             return;
                         }
@@ -95,7 +97,7 @@ public class MatchesHandler implements Handler{
                 }
 
                 sender.setProfilesPage(1);
-                getTenProfiles(sender, reply, getIdList(sender));
+                getTenProfiles(id, reply, getIdList(sender));
                 sender.setLocalState(LocalState.PROFILES);
             }
             case PROFILES -> {
@@ -105,9 +107,9 @@ public class MatchesHandler implements Handler{
                             int toDelete = Integer.parseInt(message);
                             List<Integer> connectionIDs;
                             if (sender.getProfilesList().equalsIgnoreCase("лайки")) {
-                                connectionIDs = database.getLikesOf(sender.getId());
+                                connectionIDs = database.getLikesOf(id);
                             } else {
-                                connectionIDs = database.getDislikesOf(sender.getId());
+                                connectionIDs = database.getDislikesOf(id);
                             }
                             if ((toDelete < 1) || (toDelete > connectionIDs.size())) {
                                 reply[0] = "Нет профиля с таким номером.";
@@ -138,7 +140,7 @@ public class MatchesHandler implements Handler{
                                 sender.setProfilesPage(sender.getProfilesPage() - 1);
                             }
                         }
-                        getTenProfiles(sender, reply, getIdList(sender));
+                        getTenProfiles(id, reply, getIdList(sender));
                     }
                     case "выйти" -> {
                         reply[0] = "Процедура изменения списка отменена.";

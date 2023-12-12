@@ -42,21 +42,21 @@ public class TgBot extends TelegramLongPollingBot implements Bot {
     @Override
     public void onUpdateReceived(Update update) {
         String message = update.getMessage().getText();
-        String id = update.getMessage().getChatId().toString();
+        String platformId = update.getMessage().getChatId().toString();
         String username = update.getMessage().getFrom().getUserName();
         String[] reply = new String[24];
         if (update.getMessage().hasPhoto()){
             try {
-                String picture =  driver.getDatabase().getUser(id).getId() + ".jpg";
+                String picture =  driver.getDatabase().getAccountWithPlatformId(platformId, Platform.TELEGRAM).getId() + ".jpg";
                 downloadFile(execute(new GetFile(update.getMessage().getPhoto().get(2).getFileId())).getFilePath(),
                                      new File("./pictures/" + picture));
-                reply = driver.handleUpdate(id, username, picture, Platform.TELEGRAM, true);
+                reply = driver.handleUpdate(platformId, username, picture, Platform.TELEGRAM, true);
             }catch (Exception e){
                 driver.getLogger().error("Failed to download the image.", e);
                 reply[0] = "Не удалось загрузить твою фотографию, отправь другую или попробуй еще раз.";
             }
-        }else reply = driver.handleUpdate(id, username, message, Platform.TELEGRAM, false);
-        driver.send(this, id, username, message, reply);
+        }else reply = driver.handleUpdate(platformId, username, message, Platform.TELEGRAM, false);
+        driver.send(this, platformId, username, message, reply);
     }
     @Override
     public String getBotUsername() {
@@ -64,14 +64,14 @@ public class TgBot extends TelegramLongPollingBot implements Bot {
     }
 
     @Override
-    public boolean executePhoto(String id, String message, String photo) {
+    public boolean executePhoto(String platformId, String message, String photo) {
         SendPhoto sendPhoto = new SendPhoto();
-        sendPhoto.setChatId(id);
+        sendPhoto.setChatId(platformId);
         String text = message.replace("_", "\\_");
         File file = new File("./pictures/" + photo);
         sendPhoto.setPhoto(new InputFile(file));
         sendPhoto.setCaption(text);
-        buttonsHandler.setKeyboard(id, null, sendPhoto);
+        buttonsHandler.setKeyboard(platformId, null, sendPhoto);
         try {
             execute(sendPhoto);
         } catch (TelegramApiException e) {
@@ -82,12 +82,12 @@ public class TgBot extends TelegramLongPollingBot implements Bot {
     }
 
     @Override
-    public boolean executeText(String id, String message) {
+    public boolean executeText(String platformId, String message) {
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(id);
+        sendMessage.setChatId(platformId);
         String text = message.replace("_", "\\_");
         sendMessage.setText(text);
-        buttonsHandler.setKeyboard(id, sendMessage, null);
+        buttonsHandler.setKeyboard(platformId, sendMessage, null);
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {

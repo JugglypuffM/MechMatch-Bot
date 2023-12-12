@@ -45,7 +45,7 @@ public class DsBot extends ListenerAdapter implements Bot {
             return;
         }
         String message = event.getMessage().getContentDisplay();
-        String id = event.getChannel().getId();
+        String platformId = event.getChannel().getId();
         String username = event.getAuthor().getName();
         List<Message.Attachment> attachments = event.getMessage().getAttachments();
         boolean hasPhoto = (!attachments.isEmpty() && attachments.get(0).isImage());
@@ -57,23 +57,23 @@ public class DsBot extends ListenerAdapter implements Bot {
                 BufferedImage img = ImageIO.read(url);
                 String[] filename = photo.split("\\?ex")[0].split("/")[6].split("\\.");
                 String extension = filename[filename.length-1];
-                String picture =  driver.getDatabase().getUser(id).getId() + "." + extension;
+                String picture =  driver.getDatabase().getAccountWithPlatformId(platformId, Platform.DISCORD).getId() + "." + extension;
                 File file = new File("./pictures/" + picture);
                 ImageIO.write(img, extension, file);
-                reply = driver.handleUpdate(id, username, picture, Platform.DISCORD, true);
+                reply = driver.handleUpdate(platformId, username, picture, Platform.DISCORD, true);
             }catch (Exception e){
                 driver.getLogger().error("Failed to download the image.", e);
                 reply[0] = "Не удалось загрузить твою фотографию, отправь другую или попробуй еще раз.";
             }
-        }else reply = driver.handleUpdate(id, username, message, Platform.DISCORD, false);
-        driver.send(this, id, username, message, reply);
+        }else reply = driver.handleUpdate(platformId, username, message, Platform.DISCORD, false);
+        driver.send(this, platformId, username, message, reply);
     }
 
 
     @Override
-    public synchronized boolean executePhoto(String id, String message, String photo) {
+    public synchronized boolean executePhoto(String platformId, String message, String photo) {
         try {
-            PrivateChannel channel = jda.getPrivateChannelById(id);
+            PrivateChannel channel = jda.getPrivateChannelById(platformId);
             if (channel == null) return false;
             File file = new File("./pictures/" + photo);
             channel.sendMessage(message).addFiles(FileUpload.fromData(file)).queue();
@@ -85,8 +85,8 @@ public class DsBot extends ListenerAdapter implements Bot {
     }
 
     @Override
-    public boolean executeText(String id, String message) {
-        PrivateChannel channel = jda.getPrivateChannelById(id);
+    public boolean executeText(String platformId, String message) {
+        PrivateChannel channel = jda.getPrivateChannelById(platformId);
         if (channel != null){
             channel.sendMessage(message).queue();
             return true;

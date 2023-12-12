@@ -3,6 +3,7 @@ package logic.commandHandlers;
 import database.main.Database;
 import database.models.Account;
 import database.models.Connection;
+import database.models.Profile;
 import database.models.User;
 import logic.notificator.Notificator;
 import logic.states.GlobalState;
@@ -29,18 +30,19 @@ public class PendingHandler implements Handler{
             result += "\nВот discord ник твоего собеседника - " + acc.getDsusername();
         return result;
     }
-    public void handleMessage(User sender, String[] reply, String message) {
-        List<Integer> pending = database.getPendingOf(sender.getId());
+    public void handleMessage(Integer id, String[] reply, String message) {
+        User sender = database.getUser(id);
+        List<Integer> pending = database.getPendingOf(id);
         Connection connection = database.getConnection(pending.get(0));
         if (message.equalsIgnoreCase("да") || message.equals("❤️")){
             String[] notification = new String[24];
             connection.setIsLiked(true);
             database.updateConnection(connection);
             notification[0] = "Ура! Тебе ответили взаимностью, можно переходить к общению.";
-            notification[1] = getUserUsernames(Integer.parseInt(sender.getId()));
+            notification[1] = getUserUsernames(id);
             notificator.notifyFriend(connection.getFriendID(), notification);
             reply[0] = "Ура! Теперь вы можете перейти к общению.";
-            reply[1] = getUserUsernames(Integer.parseInt(sender.getSuggestedFriendID()));
+            reply[1] = getUserUsernames(sender.getSuggestedFriendID());
         }
         else if (message.equalsIgnoreCase("нет") || message.equals("\uD83D\uDC4E")){
             connection.setIsLiked(false);

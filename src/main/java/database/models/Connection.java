@@ -7,17 +7,16 @@ import jakarta.persistence.*;
 public class Connection {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String userID, friendID;
+    private Integer id, userID, friendID;
     private Boolean isLiked;
     public Connection(){}
-    public Connection(Integer id, String userID, String friendID, Boolean isLiked) {
+    public Connection(Integer id, Integer userID, Integer friendID, Boolean isLiked) {
         this.id = id;
         this.userID = userID;
         this.friendID = friendID;
         this.isLiked = isLiked;
     }
-    public Connection(String userID, String friendID, Boolean isLiked) {
+    public Connection(Integer userID, Integer friendID, Boolean isLiked) {
         this.userID = userID;
         this.friendID = friendID;
         this.isLiked = isLiked;
@@ -26,10 +25,10 @@ public class Connection {
     public int getId() {
         return id;
     }
-    public String getUserID() {
+    public Integer getUserID() {
         return userID;
     }
-    public String getFriendID() {
+    public Integer getFriendID() {
         return friendID;
     }
 

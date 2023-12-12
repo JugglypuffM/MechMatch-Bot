@@ -3,10 +3,12 @@ package database.main;
 import bots.platforms.Platform;
 import database.dao.AccountDAO;
 import database.dao.ConnectionDAO;
+import database.dao.ProfileDAO;
 import database.dao.UserDAO;
 import database.hibernate.HibernateSessionFactory;
 import database.models.Account;
 import database.models.Connection;
+import database.models.Profile;
 import database.models.User;
 
 import java.util.ArrayList;
@@ -30,12 +32,16 @@ public class DatabaseService implements Database {
      * Data Access Object class for accounts.
      */
     private final AccountDAO accountDAO = new AccountDAO(sessionFactory);
+    /**
+     * Data Access Object class for profile.
+     */
+    private final ProfileDAO profileDAO = new ProfileDAO(sessionFactory);
     @Override
-    public void addUser(String id, String username, String platform){
+    public void addUser(Integer id, String username, String platform){
         userDao.create(new User(id, username, platform));
     }
     @Override
-    public User getUser(String id){
+    public User getUser(Integer id){
         return userDao.read(id);
     }
     @Override
@@ -44,13 +50,13 @@ public class DatabaseService implements Database {
         userDao.update(user);
     }
     @Override
-    public void deleteUser(String id){
+    public void deleteUser(Integer id){
         User user = userDao.read(id);
         if (user == null) return;
         userDao.delete(user);
     }
     @Override
-    public void addConnection(String userID, String friendID, Boolean isLiked){
+    public void addConnection(Integer userID, Integer friendID, Boolean isLiked){
         connectionDAO.create(new Connection(userID, friendID, isLiked));
     }
     @Override
@@ -68,15 +74,15 @@ public class DatabaseService implements Database {
         connectionDAO.delete(connection);
     }
     @Override
-    public List<String> getAllConnectedUserIds(String id){
-        List<String> connections = new ArrayList<>();
+    public List<Integer> getAllConnectedUserIds(Integer id){
+        List<Integer> connections = new ArrayList<>();
         for (Connection connection: connectionDAO.getConnectionsWith(id)){
             connections.add(connection.getFriendID());
         }
         return connections;
     }
     @Override
-    public List<Integer> getAllConnectionsWith(String id){
+    public List<Integer> getAllConnectionsWith(Integer id){
         List<Integer> connections = new ArrayList<>();
         for (Connection connection: connectionDAO.getConnectionsWith(id)){
             connections.add(connection.getId());
@@ -84,7 +90,7 @@ public class DatabaseService implements Database {
         return connections;
     }
     @Override
-    public List<Integer> getPendingOf(String id){
+    public List<Integer> getPendingOf(Integer id){
         List<Integer> connections = new ArrayList<>();
         for (Connection connection: connectionDAO.getPendingOf(id)){
             connections.add(connection.getId());
@@ -92,7 +98,7 @@ public class DatabaseService implements Database {
         return connections;
     }
     @Override
-    public List<Integer> getLikesOf(String id){
+    public List<Integer> getLikesOf(Integer id){
         List<Integer> connections = new ArrayList<>();
         for (Connection connection: connectionDAO.getLikesOf(id)){
             connections.add(connection.getId());
@@ -100,7 +106,7 @@ public class DatabaseService implements Database {
         return connections;
     }
     @Override
-    public List<Integer> getDislikesOf(String id){
+    public List<Integer> getDislikesOf(Integer id){
         List<Integer> connections = new ArrayList<>();
         for (Connection connection: connectionDAO.getDislikesOf(id)){
             connections.add(connection.getId());
@@ -108,7 +114,7 @@ public class DatabaseService implements Database {
         return connections;
     }
     @Override
-    public void deleteAllConnectionsWith(String id){
+    public void deleteAllConnectionsWith(Integer id){
         for (Connection connection: connectionDAO.getConnectionsWith(id)){
             connectionDAO.delete(connection);
         }
@@ -132,43 +138,68 @@ public class DatabaseService implements Database {
         if (account == null) return;
         accountDAO.delete(account);
     }
+    @Override
+    public Account getAccountWithPlatformId(String platformId, Platform platform) {
+        return accountDAO.getAccountWithPlatformId(platformId, platform);
+    }
+
+
 
     @Override
-    public Account getAccountWithPlatformId(String id, Platform platform) {
-        return accountDAO.getAccountWithPlatformId(id, platform);
+    public void addProfile(Integer id) {
+        profileDAO.create(new Profile(id));
     }
 
     @Override
-    public List<String> getFilledProfilesList(String id){
-        List<String> tmpList = new ArrayList<>();
-        for (User user : userDao.getProfileFilledUsers()){
+    public Profile getProfile(Integer id) {
+        return profileDAO.read(id);
+    }
+
+    @Override
+    public void updateProfile(Profile profile) {
+        if (profileDAO.read(profile.getId()) == null) return;
+        profileDAO.update(profile);
+    }
+
+    @Override
+    public void deleteProfile(Integer id) {
+        Profile profile = profileDAO.read(id);
+        if (profile == null) return;
+        profileDAO.delete(profile);
+    }
+
+
+    @Override
+    public List<Integer> getFilledProfilesList(Integer id){
+        List<Integer> tmpList = new ArrayList<>();
+        for (User user : profileDAO.getProfileFilledUsers()){
             tmpList.add(user.getId());
         }
         tmpList.remove(id);
         return tmpList;
     }
     @Override
-    public String profileData(String id){
-        User user = getUser(id);
-        return "Имя: " + user.getName() +
-                "\nВозраст: " + user.getAge() +
-                "\nПол: " + user.getSex() +
-                "\nГород: " + user.getCity() +
-                "\nИнформация о себе: " + user.getInformation() +
-                "\nДиапазон возраста собеседника: " + user.getMinExpectedAge() + " - " + user.getMaxExpectedAge() +
-                "\nПол собеседника: " + user.getExpectedSex() +
-                "\nГород собеседника: " + user.getExpectedCity();
+    public String profileData(Integer id){
+        Profile profile = getProfile(id);
+        return "Имя: " + profile.getName() +
+                "\nВозраст: " + profile.getAge() +
+                "\nПол: " + profile.getSex() +
+                "\nГород: " + profile.getCity() +
+                "\nИнформация о себе: " + profile.getInformation() +
+                "\nДиапазон возраста собеседника: " + profile.getMinExpectedAge() + " - " + profile.getMaxExpectedAge() +
+                "\nПол собеседника: " + profile.getExpectedSex() +
+                "\nГород собеседника: " + profile.getExpectedCity();
     }
     @Override
-    public void addToFPL(String id) {
-        User user = getUser(id);
-        user.setProfileFilled(true);
-        updateUser(user);
+    public void addToFPL(Integer id) {
+        Profile profile = getProfile(id);
+        profile.setProfileFilled(true);
+        updateProfile(profile);
     }
     @Override
-    public void deleteFromFPL(String id) {
-        User user = getUser(id);
-        user.setProfileFilled(false);
-        updateUser(user);
+    public void deleteFromFPL(Integer id) {
+        Profile profile = getProfile(id);
+        profile.setProfileFilled(false);
+        updateProfile(profile);
     }
 }

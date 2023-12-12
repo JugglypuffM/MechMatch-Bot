@@ -18,27 +18,27 @@ public class MessageProcessorTests {
      * Used to process all test messages.
      */
     private MessageProcessor processor;
-    String id = "0";
+    String platformId = "0";
     /**
      * Utility method to fill all profile data at once
-     * @param id user id
+     * @param platformId user id
      * @param processor instance of {@link MessageProcessor}
      */
-    public void fillProfile(String id, MessageProcessor processor){
-        processor.processMessage(id, "/start");
-        processor.processMessage(id, "datastas|TELEGRAM");
-        processor.processMessage(id, "Стас");
-        processor.processMessage(id, "Стас");
-        processor.processMessage(id, "19");
-        processor.processMessage(id, "Парень");
-        processor.processMessage(id, "Екатеринбург");
-        processor.processMessage(id, "просто круд");
-        processor.processMessage(id, "17");
-        processor.processMessage(id, "23");
-        processor.processMessage(id, "Девушка");
-        processor.processMessage(id, "Екатеринбург");
-        processor.processPhoto(id, "Екатеринбург");
-        processor.processMessage(id, "да");
+    public void fillProfile(String platformId, MessageProcessor processor){
+        processor.processMessage(platformId, "/start");
+        processor.processMessage(platformId, "datastas|TELEGRAM");
+        processor.processMessage(platformId, "Стас");
+        processor.processMessage(platformId, "Стас");
+        processor.processMessage(platformId, "19");
+        processor.processMessage(platformId, "Парень");
+        processor.processMessage(platformId, "Екатеринбург");
+        processor.processMessage(platformId, "просто круд");
+        processor.processMessage(platformId, "17");
+        processor.processMessage(platformId, "23");
+        processor.processMessage(platformId, "Девушка");
+        processor.processMessage(platformId, "Екатеринбург");
+        processor.processPhoto(platformId, "Екатеринбург");
+        processor.processMessage(platformId, "да");
     }
 
     /**
@@ -48,19 +48,19 @@ public class MessageProcessorTests {
     public void initialize(){
         this.database = new DatabaseMock();
         this.processor = new MessageProcessor(database, null);
-        processor.processMessage(id, "/start");
-        processor.processMessage(id, "datastas|TELEGRAM");
-        processor.processMessage(id, "Стас");
-        processor.processMessage(id, "Стас");
-        processor.processMessage(id, "19");
-        processor.processMessage(id, "Парень");
-        processor.processMessage(id, "Екатеринбург");
-        processor.processMessage(id, "просто круд");
-        processor.processMessage(id, "17");
-        processor.processMessage(id, "23");
-        processor.processMessage(id, "Девушка");
-        processor.processMessage(id, "Екатеринбург");
-        processor.processPhoto(id, "Екатеринбург");
+        processor.processMessage(platformId, "/start");
+        processor.processMessage(platformId, "datastas|TELEGRAM");
+        processor.processMessage(platformId, "Стас");
+        processor.processMessage(platformId, "Стас");
+        processor.processMessage(platformId, "19");
+        processor.processMessage(platformId, "Парень");
+        processor.processMessage(platformId, "Екатеринбург");
+        processor.processMessage(platformId, "просто круд");
+        processor.processMessage(platformId, "17");
+        processor.processMessage(platformId, "23");
+        processor.processMessage(platformId, "Девушка");
+        processor.processMessage(platformId, "Екатеринбург");
+        processor.processPhoto(platformId, "Екатеринбург");
     }
     /**
      * Test of profile filling procedure.
@@ -68,8 +68,8 @@ public class MessageProcessorTests {
      */
     @Test
     public void profileFillTest(){
-        processor.processMessage(id, "да");
-        String[] reply = processor.processMessage(id, "/myProfile");
+        processor.processMessage(platformId, "да");
+        String[] reply = processor.processMessage(platformId, "/myProfile");
         Assertions.assertEquals("""
                 Имя: Стас
                 Возраст: 19
@@ -87,7 +87,7 @@ public class MessageProcessorTests {
      */
     @Test
     public void editAfterFillTest(){
-        String[] reply = processor.processMessage(id, "нет");
+        String[] reply = processor.processMessage(platformId, "нет");
         Assertions.assertEquals("Что хочешь изменить?", reply[0]);
         Assertions.assertEquals("""
                 Вот список полей доступных для изменения:\s
@@ -101,8 +101,8 @@ public class MessageProcessorTests {
                 8 - Пол собеседника(девушка)
                 9 - Город собеседника(Екатеринбург)
                 10 - Фото""", reply[1]);
-        processor.processMessage(id, "2");
-        processor.processMessage(id, "18");
+        processor.processMessage(platformId, "2");
+        processor.processMessage(platformId, "18");
     }
 
     /**
@@ -111,11 +111,11 @@ public class MessageProcessorTests {
      */
     @Test
     public void profileEditTest(){
-        processor.processMessage(id, "да");
-        processor.processMessage(id, "/editProfile");
-        Assertions.assertEquals("Напиши либо цифру соответствующую полю, либо название поля.", processor.processMessage(id, "svfand")[0]);
-        Assertions.assertEquals("Напиши цифрами новый возраст.", processor.processMessage(id, "2")[0]);
-        Assertions.assertEquals("Изменение внесено.", processor.processMessage(id, "18")[0]);
+        processor.processMessage(platformId, "да");
+        processor.processMessage(platformId, "/editProfile");
+        Assertions.assertEquals("Напиши либо цифру соответствующую полю, либо название поля.", processor.processMessage(platformId, "svfand")[0]);
+        Assertions.assertEquals("Напиши цифрами новый возраст.", processor.processMessage(platformId, "2")[0]);
+        Assertions.assertEquals("Изменение внесено.", processor.processMessage(platformId, "18")[0]);
         Assertions.assertEquals("""
                 Имя: Стас
                 Возраст: 18
@@ -124,7 +124,7 @@ public class MessageProcessorTests {
                 Информация о себе: просто круд
                 Диапазон возраста собеседника: 17 - 23
                 Пол собеседника: девушка
-                Город собеседника: Екатеринбург""", processor.processMessage(id, "/myProfile")[0]);
+                Город собеседника: Екатеринбург""", processor.processMessage(platformId, "/myProfile")[0]);
     }
 
     /**
@@ -133,12 +133,12 @@ public class MessageProcessorTests {
      */
     @Test
     public void photoEditTest(){
-        processor.processMessage(id, "да");
-        processor.processMessage(id, "/editProfile");
-        processor.processMessage(id, "10");
-        Assertions.assertEquals("Пожалуйста, отправь картинку.", processor.processMessage(id, "dfgsdfgsdfg")[0]);
-        Assertions.assertEquals("Изменение внесено.", processor.processPhoto(id, "dfgsdfgsdfg")[0]);
-        Assertions.assertEquals("dfgsdfgsdfg", processor.processMessage(id, "/myProfile")[12]);
+        processor.processMessage(platformId, "да");
+        processor.processMessage(platformId, "/editProfile");
+        processor.processMessage(platformId, "10");
+        Assertions.assertEquals("Пожалуйста, отправь картинку.", processor.processMessage(platformId, "dfgsdfgsdfg")[0]);
+        Assertions.assertEquals("Изменение внесено.", processor.processPhoto(platformId, "dfgsdfgsdfg")[0]);
+        Assertions.assertEquals("dfgsdfgsdfg", processor.processMessage(platformId, "/myProfile")[12]);
     }
 
     /**
@@ -147,23 +147,23 @@ public class MessageProcessorTests {
      */
     @Test
     public void changeProfileTest(){
-        processor.processMessage(id, "да");
-        processor.processMessage(id, "/editProfile");
-        processor.processMessage(id, "2");
-        processor.processMessage(id, "18");
-        processor.processMessage(id, "/changeProfile");
-        processor.processMessage(id, "Стас");
-        processor.processMessage(id, "сатС");
-        processor.processMessage(id, "91");
-        processor.processMessage(id, "Девушка");
-        processor.processMessage(id, "грубниретакЕ");
-        processor.processMessage(id, "дурк отсорп");
-        processor.processMessage(id, "71");
-        processor.processMessage(id, "82");
-        processor.processMessage(id, "Парень");
-        processor.processMessage(id, "грубниретакЕ");
-        processor.processPhoto(id, "грубниретакЕ");
-        processor.processMessage(id, "да");
+        processor.processMessage(platformId, "да");
+        processor.processMessage(platformId, "/editProfile");
+        processor.processMessage(platformId, "2");
+        processor.processMessage(platformId, "18");
+        processor.processMessage(platformId, "/changeProfile");
+        processor.processMessage(platformId, "Стас");
+        processor.processMessage(platformId, "сатС");
+        processor.processMessage(platformId, "91");
+        processor.processMessage(platformId, "Девушка");
+        processor.processMessage(platformId, "грубниретакЕ");
+        processor.processMessage(platformId, "дурк отсорп");
+        processor.processMessage(platformId, "71");
+        processor.processMessage(platformId, "82");
+        processor.processMessage(platformId, "Парень");
+        processor.processMessage(platformId, "грубниретакЕ");
+        processor.processPhoto(platformId, "грубниретакЕ");
+        processor.processMessage(platformId, "да");
         Assertions.assertEquals("""
                 Имя: сатС
                 Возраст: 91
@@ -172,8 +172,8 @@ public class MessageProcessorTests {
                 Информация о себе: дурк отсорп
                 Диапазон возраста собеседника: 71 - 82
                 Пол собеседника: парень
-                Город собеседника: грубниретакЕ""", processor.processMessage(id, "/myProfile")[0]);
-        Assertions.assertEquals("грубниретакЕ", processor.processMessage(id, "/myProfile")[12]);
+                Город собеседника: грубниретакЕ""", processor.processMessage(platformId, "/myProfile")[0]);
+        Assertions.assertEquals("грубниретакЕ", processor.processMessage(platformId, "/myProfile")[12]);
     }
 
     /**
@@ -181,7 +181,7 @@ public class MessageProcessorTests {
      */
     @Test
     public void matchingFailTest(){
-        processor.processMessage(id, "да");
+        processor.processMessage(platformId, "да");
         fillProfile("1", processor);
         Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(", processor.processMessage("0", "/match")[0]);
     }
@@ -191,7 +191,7 @@ public class MessageProcessorTests {
      */
     @Test
     public void matchingLikeLikeTest(){
-        processor.processMessage(id, "да");
+        processor.processMessage(platformId, "да");
         fillProfile("1", processor);
         processor.processMessage("0", "/editProfile");
         processor.processMessage("0", "8");
@@ -213,7 +213,7 @@ public class MessageProcessorTests {
      */
     @Test
     public void matchingLikeDislikeTest(){
-        processor.processMessage(id, "да");
+        processor.processMessage(platformId, "да");
         fillProfile("1", processor);
         processor.processMessage("0", "/editProfile");
         processor.processMessage("0", "8");
@@ -232,7 +232,7 @@ public class MessageProcessorTests {
      */
     @Test
     public void matchingDislikeTest(){
-        processor.processMessage(id, "да");
+        processor.processMessage(platformId, "да");
         fillProfile("1", processor);
         processor.processMessage("0", "/editProfile");
         processor.processMessage("0", "8");
@@ -245,7 +245,7 @@ public class MessageProcessorTests {
     }
     @Test
     public void TwoUsersMatchTest(){
-        processor.processMessage(id, "да");
+        processor.processMessage(platformId, "да");
         fillProfile("1", processor);
         processor.processMessage("0", "/editProfile");
         processor.processMessage("0", "8");
@@ -263,7 +263,7 @@ public class MessageProcessorTests {
      */
     @Test
     public void myMatchesTest(){
-        processor.processMessage(id, "да");
+        processor.processMessage(platformId, "да");
         fillProfile("1", processor);
         processor.processMessage("0", "/editProfile");
         processor.processMessage("0", "8");
@@ -296,11 +296,11 @@ public class MessageProcessorTests {
      */
     @Test
     public void deleteTest(){
-        processor.processMessage(id, "да");
-        Assertions.assertEquals("Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!", processor.processMessage(id, "/deleteProfile")[0]);
-        Assertions.assertEquals("Введено неверное значение, процедура удаления прекращена.", processor.processMessage(id, "stas1")[0]);
-        processor.processMessage(id, "/deleteProfile");
-        Assertions.assertEquals("Профиль успешно удален.", processor.processMessage(id, "stas")[0]);
-        Assertions.assertEquals("требуются данные", processor.processMessage(id, "/start")[0]);
+        processor.processMessage(platformId, "да");
+        Assertions.assertEquals("Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!", processor.processMessage(platformId, "/deleteProfile")[0]);
+        Assertions.assertEquals("Введено неверное значение, процедура удаления прекращена.", processor.processMessage(platformId, "stas1")[0]);
+        processor.processMessage(platformId, "/deleteProfile");
+        Assertions.assertEquals("Профиль успешно удален.", processor.processMessage(platformId, "stas")[0]);
+        Assertions.assertEquals("требуются данные", processor.processMessage(platformId, "/start")[0]);
     }
 }
