@@ -38,8 +38,8 @@ public class MatchesHandler implements Handler{
     private String getUserUsernames(Integer id){
         String result = "";
         Account acc = database.getAccount(id);
-        if (acc.getTgusermane() != null)
-            result += "\nВот ссылка на телеграмм профиль этого пользователя - @" + acc.getTgusermane();
+        if (acc.getTgusername() != null)
+            result += "\nВот ссылка на телеграмм профиль этого пользователя - @" + acc.getTgusername();
         if (acc.getDsusername() != null)
             result += "\nВот discord ник этого пользователя - " + acc.getDsusername();
         return result;

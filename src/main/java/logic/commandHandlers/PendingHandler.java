@@ -3,7 +3,6 @@ package logic.commandHandlers;
 import database.main.Database;
 import database.models.Account;
 import database.models.Connection;
-import database.models.Profile;
 import database.models.User;
 import logic.notificator.Notificator;
 import logic.states.GlobalState;
@@ -24,8 +23,8 @@ public class PendingHandler implements Handler{
     private String getUserUsernames(Integer id){
         String result = "";
         Account acc = database.getAccount(id);
-        if (acc.getTgusermane() != null)
-            result += "\nВот ссылка на телеграмм профиль собеседника - @" + acc.getTgusermane();
+        if (acc.getTgusername() != null)
+            result += "\nВот ссылка на телеграмм профиль собеседника - @" + acc.getTgusername();
         if (acc.getDsusername() != null)
             result += "\nВот discord ник твоего собеседника - " + acc.getDsusername();
         return result;

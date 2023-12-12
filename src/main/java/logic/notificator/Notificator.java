@@ -1,6 +1,5 @@
 package logic.notificator;
 
-import bots.Bot;
 import bots.BotDriver;
 import bots.platforms.Platform;
 import database.models.Account;
@@ -28,7 +27,7 @@ public class Notificator {
         if (account.getTgid() != null)
             if (driver.getOnlineBots().containsKey(Platform.TELEGRAM))
                 driver.send(driver.getOnlineBots().get(Platform.TELEGRAM), account.getTgid(),
-                        account.getTgusermane(), "notification", notification);
+                        account.getTgusername(), "notification", notification);
             else driver.getLogger().warn("Notification failed: TELEGRAM bot is offline");
         else driver.getLogger().warn("Notification failed: user is not authorized on platform TELEGRAM");
         if (account.getDsid() != null)

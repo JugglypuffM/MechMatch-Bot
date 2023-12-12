@@ -9,7 +9,7 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String login, passhash, tgid, tgusermane, dsid, dsusername;
+    private String login, passhash, tgid, tgusername, dsid, dsusername;
     public Account() {
     }
     public Account(String login){
@@ -40,11 +40,11 @@ public class Account {
     public void setDsid(String dsid) {
         this.dsid = dsid;
     }
-    public String getTgusermane() {
-        return tgusermane;
+    public String getTgusername() {
+        return tgusername;
     }
-    public void setTgusermane(String tgusermane) {
-        this.tgusermane = tgusermane;
+    public void setTgusername(String tgusermane) {
+        this.tgusername = tgusermane;
     }
     public String getDsusername() {
         return dsusername;
@@ -54,7 +54,7 @@ public class Account {
     }
     public String getUsernameByPlatform(Platform platform){
         switch (platform){
-            case TELEGRAM -> {return tgusermane;}
+            case TELEGRAM -> {return tgusername;}
             case DISCORD -> {return dsusername;}
         }
         return null;
