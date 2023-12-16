@@ -86,12 +86,8 @@ public class Account {
      */
     public void setPlatformId(String platformId, Platform platform){
         switch (platform){
-            case TELEGRAM -> {
-                tgid = platformId;
-            }
-            case DISCORD -> {
-                dsid = platformId;
-            }
+            case TELEGRAM -> tgid = platformId;
+            case DISCORD -> dsid = platformId;
         }
     }
     /**
@@ -101,12 +97,8 @@ public class Account {
      */
     public void setPlatformUsername(String username, Platform platform){
         switch (platform){
-            case TELEGRAM -> {
-                tgusername = username;
-            }
-            case DISCORD -> {
-                dsusername = username;
-            }
+            case TELEGRAM -> tgusername = username;
+            case DISCORD -> dsusername = username;
         }
     }
     /**

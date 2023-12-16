@@ -19,8 +19,8 @@ public class MessageProcessorTests {
      * Used to process all test messages.
      */
     private MessageProcessor processor;
-    String platformId = "0";
-    Platform platform = Platform.TELEGRAM;
+    final String platformId = "0";
+    final Platform platform = Platform.TELEGRAM;
 
     /**
      * Utility method to register an account

@@ -7,9 +7,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class AccountDAO implements DAO<Account, Integer>{
     private final HibernateSessionFactory sessionFactory;
     public AccountDAO(HibernateSessionFactory hsf){

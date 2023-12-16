@@ -188,7 +188,7 @@ public class Profile {
         httppost.setHeader("Authorization", "Token 992551514f0c3981d2d3fff1201d86b093612eeb");
         httppost.setEntity(new StringEntity("{ \"query\": \"" + name + "\",\n" +
                 "\"parts\": [\"NAME\"] }", StandardCharsets.UTF_8));
-        CloseableHttpResponse response = null;
+        CloseableHttpResponse response;
         try {
             response = httpclient.execute(httppost);
         } catch (IOException e) {
@@ -203,7 +203,7 @@ public class Profile {
                 throw new RuntimeException(e);
             }
         }
-        JSONObject json = null;
+        JSONObject json;
         try {
             json = (JSONObject) JSONValue.parseWithException(result);
         } catch (ParseException e) {

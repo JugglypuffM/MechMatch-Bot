@@ -7,7 +7,7 @@ import logic.states.GlobalState;
 import logic.states.LocalState;
 
 public class AuthorizationHandler {
-    Database database;
+    final Database database;
     public AuthorizationHandler(Database database){
         this.database = database;
     }

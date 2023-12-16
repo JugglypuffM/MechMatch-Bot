@@ -15,10 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.net.URL;
 
 public class TgBot extends TelegramLongPollingBot implements Bot {
     private final Dotenv dotenv = Dotenv.load();

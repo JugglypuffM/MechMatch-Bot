@@ -22,8 +22,8 @@ public class AuthorizationTests {
      * Used to process all test messages.
      */
     private AuthorizationHandler handler;
-    Client client1 = new Client("0", "TELEGRAM");
-    Client client2 = new Client("1", "DISCORD");
+    final Client client1 = new Client("0", "TELEGRAM");
+    final Client client2 = new Client("1", "DISCORD");
 
     /**
      * Initialization of handler and database classes.
