@@ -1,10 +1,10 @@
 package database.main;
 
 import bots.platforms.Platform;
-import database.models.Connection;
-import database.models.Account;
-import database.models.Profile;
-import database.models.User;
+import database.entities.Connection;
+import database.entities.Account;
+import database.entities.Profile;
+import database.entities.Client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class crated to store users in memory using {@link DatabaseMock#userDict} dictionary.
+ * Class crated to mock database service dictionary.
  */
 public class DatabaseMock implements Database {
     /**
-     * Dictionary of users, where user id is key and the instance of {@link User} is value
+     * Dictionary of users, where user id is key and the instance of {@link Client} is value
      */
-    private final Map<Integer, User> userDict = new HashMap<>();
+    private final Map<String, Client> clientDict = new HashMap<>();
     /**
      * Dictionary of connections, where connection id is key and the instance of {@link Connection} is value
      */
@@ -45,28 +45,28 @@ public class DatabaseMock implements Database {
     private final List<Integer> filledProfilesList = new ArrayList<>();
 
     @Override
-    public void addUser(Integer id, String username, String platform) {
-        User user = new User(id, username, platform);
-        userDict.put(id, user);
+    public void addClient(String id, String platform) {
+        Client client = new Client(id, platform);
+        clientDict.put(id, client);
     }
 
     @Override
-    public User getUser(Integer id) {
-        if (!userDict.containsKey(id)){
+    public Client getClient(String platformId) {
+        if (!clientDict.containsKey(platformId)){
             return null;
         }
-        return userDict.get(id);
+        return clientDict.get(platformId);
     }
 
     @Override
-    public void updateUser(User user) {
-        if (!userDict.containsKey(user.getId())) return;
-        userDict.put(user.getId(), user);
+    public void updateClient(Client client) {
+        if (!clientDict.containsKey(client.getPlatformId())) return;
+        clientDict.put(client.getPlatformId(), client);
     }
 
     @Override
-    public void deleteUser(Integer id) {
-        userDict.remove(id);
+    public void deleteClient(String id) {
+        clientDict.remove(id);
     }
 
     @Override
@@ -164,7 +164,7 @@ public class DatabaseMock implements Database {
 
     @Override
     public void addAccount(String login) {
-        accountDict.put(lastAcountID, new Account(login));
+        accountDict.put(lastAcountID, new Account(lastAcountID, login));
         lastAcountID++;
     }
 
@@ -211,10 +211,15 @@ public class DatabaseMock implements Database {
     @Override
     public Account getAccountWithPlatformId(String platformId, Platform platform) {
         for (Account account: accountDict.values()){
-            switch (platform){
-                case TELEGRAM -> {if (account.getTgid().equals(platformId)) return account;}
-                case DISCORD -> {if (account.getDsid().equals(platformId)) return account;}
-            }
+            if (account.getPlatformId(platform).equals(platformId)) return account;
+        }
+        return null;
+    }
+
+    @Override
+    public Account getAccountWithLogin(String login) {
+        for (Account account: accountDict.values()){
+            if (account.getLogin().equals(login)) return account;
         }
         return null;
     }

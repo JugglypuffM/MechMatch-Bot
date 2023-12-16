@@ -2,6 +2,7 @@ package bots;
 
 import bots.platforms.Platform;
 import database.main.Database;
+import database.entities.Account;
 import logic.MessageProcessor;
 import org.slf4j.Logger;
 
@@ -29,11 +30,15 @@ public class BotDriver {
             reply[0] = "Длинна сообщения слишком большая, введите не более 500 символов.";
         }
         else if (hasPhoto){
-            reply = processor.processPhoto(platformId, message);
+            reply = processor.processPhoto(platformId, platform, message);
         }else {
-            reply = processor.processMessage(platformId, message);
-            if (reply[0].equals("требуются данные")){
-                reply = processor.processMessage(platformId, "data" + username + "|" + platform.stringRepresentation());
+            reply = processor.processMessage(platformId, platform, message);
+            if (reply[0].startsWith("data")){
+                Account account = database.getAccountWithLogin(reply[0].substring(4));
+                account.setPlatformUsername(username, platform);
+                account.setPlatformId(platformId, platform);
+                database.updateAccount(account);
+                reply = processor.processMessage(platformId, platform, message);
             }
         }
         return reply;

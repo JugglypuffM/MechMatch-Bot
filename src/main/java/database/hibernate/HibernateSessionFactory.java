@@ -1,9 +1,9 @@
 package database.hibernate;
 
-import database.models.Account;
-import database.models.Connection;
-import database.models.Profile;
-import database.models.User;
+import database.entities.Account;
+import database.entities.Connection;
+import database.entities.Profile;
+import database.entities.Client;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -26,7 +26,7 @@ public class HibernateSessionFactory {
     public SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             Configuration configuration = new Configuration().configure();
-            configuration.addAnnotatedClass(User.class);
+            configuration.addAnnotatedClass(Client.class);
             configuration.addAnnotatedClass(Profile.class);
             configuration.addAnnotatedClass(Connection.class);
             configuration.addAnnotatedClass(Account.class);

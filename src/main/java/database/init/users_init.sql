@@ -1,18 +1,15 @@
-create table public.users
+create table public.clients
 (
-    id integer not null
-        constraint users_pkey
-            primary key,
-    localstate text,
-    globalstate text,
-    suggestedfriendid text,
-    profileslist text,
-    profilespage integer,
+    platformid text not null
+        primary key,
+    "globalState" text,
+    "localState" text,
+    login text,
     platform text,
-    username text
+    loggedin boolean
 );
 
-alter table public.users owner to postgres;
+alter table public.clients owner to postgres;
 
 
 

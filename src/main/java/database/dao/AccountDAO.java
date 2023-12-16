@@ -2,10 +2,13 @@ package database.dao;
 
 import bots.platforms.Platform;
 import database.hibernate.HibernateSessionFactory;
-import database.models.Account;
+import database.entities.Account;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AccountDAO implements DAO<Account, Integer>{
     private final HibernateSessionFactory sessionFactory;
@@ -53,6 +56,21 @@ public class AccountDAO implements DAO<Account, Integer>{
             case DISCORD -> query = session.createQuery("From Account where dsid = :paramid");
         }
         query.setParameter("paramid", id);
-        return query.list().get(0);
+        try {
+            return query.list().get(0);
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    public Account getAccountWithLogin(String login) {
+        Session session = sessionFactory.getSessionFactory().openSession();
+        Query<Account> query = session.createQuery("From Account where login = :paramlogin");
+        query.setParameter("paramlogin", login);
+        try {
+            return query.list().get(0);
+        }catch (Exception e){
+            return null;
+        }
     }
 }

@@ -1,8 +1,7 @@
 package database.dao;
 
 import database.hibernate.HibernateSessionFactory;
-import database.models.Profile;
-import database.models.User;
+import database.entities.Profile;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -46,7 +45,7 @@ public class ProfileDAO implements DAO<Profile, Integer>{
      * Get list of users, who already filled profiles.
      * @return list of users
      */
-    public List<User> getProfileFilledUsers(){
+    public List<Profile> getProfileFilledAccounts(){
         return sessionFactory.getSessionFactory().openSession().createQuery("From Profile WHERE profileFilled").list();
     }
 }

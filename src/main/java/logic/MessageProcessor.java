@@ -1,10 +1,12 @@
 package logic;
 
 import bots.BotDriver;
+import bots.platforms.Platform;
 import database.main.Database;
-import database.models.Profile;
-import database.models.User;
-import logic.commandHandlers.*;
+import database.entities.Account;
+import database.entities.Client;
+import database.entities.Profile;
+import logic.handlers.*;
 import logic.notificator.Notificator;
 import logic.states.GlobalState;
 import logic.states.LocalState;
@@ -23,6 +25,7 @@ public class MessageProcessor {
     private final MatchesHandler caseMatches;
     private final MatchingHandler caseMatching;
     private final PendingHandler casePending;
+    private final AuthorizationHandler caseAuthorization;
     public MessageProcessor(Database m_database, BotDriver m_driver){
         this.database = m_database;
         Notificator notificator = new Notificator(m_driver);
@@ -32,8 +35,9 @@ public class MessageProcessor {
         this.caseMatches = new MatchesHandler(m_database);
         this.caseMatching = new MatchingHandler(m_database, notificator);
         this.casePending = new PendingHandler(m_database, notificator);
+        this.caseAuthorization = new AuthorizationHandler(m_database);
     }
-    private Handler chooseHandler(User sender){
+    private Handler chooseHandler(Account sender){
         Handler handler;
         switch (sender.getGlobalState()){
             default -> {
@@ -60,25 +64,24 @@ public class MessageProcessor {
      * @param message user message
      * @return reply to user message
      */
-    public synchronized String[] processMessage(String platformId, String message){
+    public synchronized String[] processMessage(String platformId, Platform platform, String message){
         String[] reply = new String[24];
-        Integer id = Integer.parseInt(platformId);
-        if (database.getUser(id) == null) {
-            String username, platform;
-            if (message.startsWith("data")) {
-                username = message.split("\\|")[0].substring(4);
-                platform = message.split("\\|")[1];
-            } else {
-                reply[0] = "требуются данные";
-                return reply;
-            }
-            database.addUser(id, username, platform);
-            database.addProfile(id);
+        Client sender = database.getClient(platformId);
+        if (sender == null){
+            database.addClient(platformId, platform.stringRepresentation());
+            sender = database.getClient(platformId);
         }
-        User sender = database.getUser(id);
-        Handler handler = chooseHandler(sender);
-        handler.handleMessage(id, reply, message);
-        database.updateUser(sender);
+        if (!sender.isLoggedIn()){
+            caseAuthorization.handleData(sender, reply, message);
+            database.updateClient(sender);
+            return reply;
+        }
+        Account user = database.getAccountWithPlatformId(platformId, platform);
+        Profile profile = database.getProfile(user.getId());
+        Handler handler = chooseHandler(user);
+        handler.handleMessage(user, profile, reply, message, platform);
+        database.updateAccount(user);
+        database.updateProfile(profile);
         return reply;
     }
 
@@ -90,29 +93,29 @@ public class MessageProcessor {
      * @param photoID id of picture, which is going to be user's profile photo
      * @return reply to user message
      */
-    public synchronized String[] processPhoto(String platformId, String photoID){
+    public synchronized String[] processPhoto(String platformId, Platform platform, String photoID){
         String[] reply = new String[24];
-        Integer id = Integer.parseInt(platformId);
-        User sender = database.getUser(id);
-        Profile profile = database.getProfile(id);
-        if (sender.getLocalState() != LocalState.PHOTO){
+        Account user = database.getAccountWithPlatformId(platformId, platform);
+        if ((user == null) || (user.getLocalState() != LocalState.PHOTO)){
             reply[0] = "Пожалуйста, отправь сообщение.";
             return reply;
         }
+        Profile profile = database.getProfile(user.getId());
         profile.setPhotoID(photoID);
-        sender.setLocalState(stateFSM.getNextDict().get(LocalState.PHOTO));
-        if (sender.getGlobalState() == GlobalState.PROFILE_EDIT){
+        user.setLocalState(stateFSM.getNextDict().get(LocalState.PHOTO));
+        if (user.getGlobalState() == GlobalState.PROFILE_EDIT){
             reply[0] = "Изменение внесено.";
-            sender.setGlobalState(GlobalState.COMMAND);
-            database.addToFPL(id);
+            user.setGlobalState(GlobalState.COMMAND);
+            database.addToFPL(user.getId());
             profile.setProfileFilled(true);
         }
         else {
             reply[0] = stateFSM.getRightReplies().get(LocalState.PHOTO);
-            reply[2] = database.profileData(id);
+            reply[2] = database.profileData(user.getId());
             reply[14] = profile.getPhotoID();
         }
-        database.updateUser(sender);
+        database.updateAccount(user);
+        database.updateProfile(profile);
         return reply;
     }
 }

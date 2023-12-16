@@ -2,7 +2,10 @@ package logic.notificator;
 
 import bots.BotDriver;
 import bots.platforms.Platform;
-import database.models.Account;
+import database.entities.Account;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Notification class to work with API's and send notifications, whenever it needed
@@ -24,17 +27,16 @@ public class Notificator {
             return;
         }
         Account account = driver.getDatabase().getAccount(friendId);
-        if (account.getTgid() != null)
-            if (driver.getOnlineBots().containsKey(Platform.TELEGRAM))
-                driver.send(driver.getOnlineBots().get(Platform.TELEGRAM), account.getTgid(),
-                        account.getTgusername(), "notification", notification);
-            else driver.getLogger().warn("Notification failed: TELEGRAM bot is offline");
-        else driver.getLogger().warn("Notification failed: user is not authorized on platform TELEGRAM");
-        if (account.getDsid() != null)
-            if (driver.getOnlineBots().containsKey(Platform.DISCORD))
-                driver.send(driver.getOnlineBots().get(Platform.DISCORD), account.getDsid(),
-                        account.getDsusername(), "notification", notification);
-            else driver.getLogger().warn("Notification failed: DISCORD bot is offline");
-        else driver.getLogger().warn("Notification failed: user is not authorized on platform DISCORD");
+        List<Platform> platforms = new ArrayList<>();
+        platforms.add(Platform.TELEGRAM);
+        platforms.add(Platform.DISCORD);
+        for (Platform platform: platforms){
+            if (account.getPlatformId(platform) != null)
+                if (driver.getOnlineBots().containsKey(platform))
+                    driver.send(driver.getOnlineBots().get(platform), account.getPlatformId(platform) ,
+                            account.getPlatformUsername(platform), "notification", notification);
+                else driver.getLogger().warn("Notification failed:" + platform.stringRepresentation() + "bot is offline");
+            else driver.getLogger().warn("Notification failed: user is not authorized on platform" + platform.stringRepresentation());
+        }
     }
 }

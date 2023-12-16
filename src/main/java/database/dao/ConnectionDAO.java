@@ -1,7 +1,7 @@
 package database.dao;
 
 import database.hibernate.HibernateSessionFactory;
-import database.models.Connection;
+import database.entities.Connection;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;

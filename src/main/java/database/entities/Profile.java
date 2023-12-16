@@ -1,4 +1,4 @@
-package database.models;
+package database.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -21,6 +21,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Contains all user profile data.
+ * Is always related to one account.
+ * Its id is an id of related account.
+ */
 @Entity
 @Table(name = "profiles", schema = "public")
 public class Profile {

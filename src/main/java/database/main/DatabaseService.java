@@ -4,12 +4,12 @@ import bots.platforms.Platform;
 import database.dao.AccountDAO;
 import database.dao.ConnectionDAO;
 import database.dao.ProfileDAO;
-import database.dao.UserDAO;
+import database.dao.ClientDAO;
 import database.hibernate.HibernateSessionFactory;
-import database.models.Account;
-import database.models.Connection;
-import database.models.Profile;
-import database.models.User;
+import database.entities.Account;
+import database.entities.Connection;
+import database.entities.Profile;
+import database.entities.Client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public class DatabaseService implements Database {
     /**
      * Data Access Object class for users.
      */
-    private final UserDAO userDao = new UserDAO(sessionFactory);
+    private final ClientDAO clientDao = new ClientDAO(sessionFactory);
     /**
      * Data Access Object class for connections.
      */
@@ -37,23 +37,23 @@ public class DatabaseService implements Database {
      */
     private final ProfileDAO profileDAO = new ProfileDAO(sessionFactory);
     @Override
-    public void addUser(Integer id, String username, String platform){
-        userDao.create(new User(id, username, platform));
+    public void addClient(String id, String platform){
+        clientDao.create(new Client(id, platform));
     }
     @Override
-    public User getUser(Integer id){
-        return userDao.read(id);
+    public Client getClient(String platformId){
+        return clientDao.read(platformId);
     }
     @Override
-    public void updateUser(User user){
-        if (userDao.read(user.getId()) == null) return;
-        userDao.update(user);
+    public void updateClient(Client client){
+        if (clientDao.read(client.getPlatformId()) == null) return;
+        clientDao.update(client);
     }
     @Override
-    public void deleteUser(Integer id){
-        User user = userDao.read(id);
-        if (user == null) return;
-        userDao.delete(user);
+    public void deleteClient(String id){
+        Client client = clientDao.read(id);
+        if (client == null) return;
+        clientDao.delete(client);
     }
     @Override
     public void addConnection(Integer userID, Integer friendID, Boolean isLiked){
@@ -143,6 +143,10 @@ public class DatabaseService implements Database {
         return accountDAO.getAccountWithPlatformId(platformId, platform);
     }
 
+    @Override
+    public Account getAccountWithLogin(String login) {
+        return accountDAO.getAccountWithLogin(login);
+    }
 
 
     @Override
@@ -168,12 +172,11 @@ public class DatabaseService implements Database {
         profileDAO.delete(profile);
     }
 
-
     @Override
     public List<Integer> getFilledProfilesList(Integer id){
         List<Integer> tmpList = new ArrayList<>();
-        for (User user : profileDAO.getProfileFilledUsers()){
-            tmpList.add(user.getId());
+        for (Profile profile : profileDAO.getProfileFilledAccounts()){
+            tmpList.add(profile.getId());
         }
         tmpList.remove(id);
         return tmpList;

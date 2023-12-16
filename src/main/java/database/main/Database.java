@@ -1,29 +1,30 @@
 package database.main;
 
 import bots.platforms.Platform;
-import database.models.Account;
-import database.models.Connection;
-import database.models.Profile;
-import database.models.User;
+import database.entities.Account;
+import database.entities.Connection;
+import database.entities.Profile;
+import database.entities.Client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface Database {
-    void addUser(Integer id, String username, String platform);
+    void addClient(String id, String platform);
     /**
      * Get user from Database.
      * Checks if user exists.
-     * @param id string representation of user id
-     * @return {@link User} if exists, null if not
+     * @param platformId string representation of user platformId
+     * @return {@link Client} if exists, null if not
      */
-    User getUser(Integer id);
-    void updateUser(User user);
+    Client getClient(String platformId);
+    void updateClient(Client client);
     /**
      * Delete user from Database.
      * Checks if user exists.
      * @param id string representation of user id
      */
-    void deleteUser(Integer id);
+    void deleteClient(String id);
 
 
 
@@ -75,11 +76,61 @@ public interface Database {
     Account getAccount(Integer id);
     void updateAccount(Account account);
     void deleteAccount(Integer id);
+    Account getAccountWithPlatformId(String platformId, Platform platform);
+    Account getAccountWithLogin(String login);
+
+
     void addProfile(Integer id);
     Profile getProfile(Integer id);
     void updateProfile(Profile profile);
     void deleteProfile(Integer id);
-    Account getAccountWithPlatformId(String platformId, Platform platform);
+    /**
+     * Method to unify field filling.
+     * Uses different setters depending on current local state.
+     * @param value user's message
+     * @return true if field was filled successfully and false if not
+     */
+    default Boolean setField(Profile profile, String value){
+        Boolean result;
+        result = switch (getAccount(profile.getId()).getLocalState()) {
+            case NAME -> {
+                profile.setName(value);
+                yield true;
+            }
+            case AGE -> profile.setAge(value);
+            case SEX -> profile.setSex(value);
+            case CITY -> {
+                profile.setCity(value);
+                yield true;
+            }
+            case ABOUT -> {
+                profile.setInformation(value);
+                yield true;
+            }
+            case EAGEMIN -> profile.setMinExpectedAge(value);
+            case EAGEMAX -> profile.setMaxExpectedAge(value);
+            case ESEX -> profile.setExpectedSex(value);
+            case ECITY -> {
+                profile.setExpectedCity(value);
+                yield true;
+            }
+            default -> false;
+        };
+        return result;
+    }
+    default String getUserUsernames(Integer id){
+        StringBuilder result = new StringBuilder("Вот имена этого пользователя на разных платформах:\n");
+        Account user = getAccount(id);
+        List<Platform> platforms = new ArrayList<>();
+        platforms.add(Platform.TELEGRAM);
+        platforms.add(Platform.DISCORD);
+        for (Platform platform: platforms){
+            if (user.getPlatformUsername(platform) != null){
+                result.append(platform.stringRepresentation()).append(" - ").append(user.getPlatformUsername(platform));
+            }
+        }
+        return result.toString();
+    }
     /**
      * Get filledProfilesList.
      * Checks if it is initialized and initializes if not.

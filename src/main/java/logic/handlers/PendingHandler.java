@@ -1,9 +1,10 @@
-package logic.commandHandlers;
+package logic.handlers;
 
+import bots.platforms.Platform;
+import database.entities.Profile;
 import database.main.Database;
-import database.models.Account;
-import database.models.Connection;
-import database.models.User;
+import database.entities.Account;
+import database.entities.Connection;
 import logic.notificator.Notificator;
 import logic.states.GlobalState;
 
@@ -20,28 +21,18 @@ public class PendingHandler implements Handler{
         this.database = m_database;
         this.notificator = m_notificator;
     }
-    private String getUserUsernames(Integer id){
-        String result = "";
-        Account acc = database.getAccount(id);
-        if (acc.getTgusername() != null)
-            result += "\nВот ссылка на телеграмм профиль собеседника - @" + acc.getTgusername();
-        if (acc.getDsusername() != null)
-            result += "\nВот discord ник твоего собеседника - " + acc.getDsusername();
-        return result;
-    }
-    public void handleMessage(Integer id, String[] reply, String message) {
-        User sender = database.getUser(id);
-        List<Integer> pending = database.getPendingOf(id);
+    public void handleMessage(Account user, Profile profile, String[] reply, String message, Platform platform) {
+        List<Integer> pending = database.getPendingOf(user.getId());
         Connection connection = database.getConnection(pending.get(0));
         if (message.equalsIgnoreCase("да") || message.equals("❤️")){
             String[] notification = new String[24];
             connection.setIsLiked(true);
             database.updateConnection(connection);
             notification[0] = "Ура! Тебе ответили взаимностью, можно переходить к общению.";
-            notification[1] = getUserUsernames(id);
+            notification[1] = database.getUserUsernames(user.getId());
             notificator.notifyFriend(connection.getFriendID(), notification);
             reply[0] = "Ура! Теперь вы можете перейти к общению.";
-            reply[1] = getUserUsernames(sender.getSuggestedFriendID());
+            reply[1] = database.getUserUsernames(connection.getFriendID());
         }
         else if (message.equalsIgnoreCase("нет") || message.equals("\uD83D\uDC4E")){
             connection.setIsLiked(false);
@@ -52,6 +43,6 @@ public class PendingHandler implements Handler{
             reply[0] = "Введи да или нет.";
             return;
         }
-        sender.setGlobalState(GlobalState.COMMAND);
+        user.setGlobalState(GlobalState.COMMAND);
     }
 }

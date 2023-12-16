@@ -1,6 +1,6 @@
 package logic;
 
-import database.models.Profile;
+import database.entities.Profile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

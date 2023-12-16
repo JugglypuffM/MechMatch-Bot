@@ -1,8 +1,9 @@
-package logic.commandHandlers;
+package logic.handlers;
 
+import bots.platforms.Platform;
 import database.main.Database;
-import database.models.Profile;
-import database.models.User;
+import database.entities.Account;
+import database.entities.Profile;
 import logic.states.GlobalState;
 import logic.states.LocalState;
 import logic.states.StateFSM;
@@ -35,57 +36,19 @@ public class FillingHandler implements Handler{
                 /deleteProfile - полностью удалить профиль
                """;
     }
-    /**
-     * Method to unify field filling.
-     * Uses different setters depending on current local state.
-     * @param value user's message
-     * @return true if field was filled successfully and false if not
-     */
-    public Boolean setField(Integer id, String value){
-        Profile profile = database.getProfile(id);
-        switch (database.getUser(id).getLocalState()){
-            case NAME:
-                profile.setName(value);
-                return true;
-            case AGE:
-                return profile.setAge(value);
-            case SEX:
-                return profile.setSex(value);
-            case CITY:
-                profile.setCity(value);
-                return true;
-            case ABOUT:
-                profile.setInformation(value);
-                return true;
-            case EAGEMIN:
-                return profile.setMinExpectedAge(value);
-            case EAGEMAX:
-                return profile.setMaxExpectedAge(value);
-            case ESEX:
-                return profile.setExpectedSex(value);
-            case ECITY:
-                profile.setExpectedCity(value);
-                return true;
-            case PHOTO:
-                return false;
-        }
-        return false;
-    }
-    public void handleMessage(Integer id, String[] reply, String message) {
-        User sender = database.getUser(id);
-        Profile profile = database.getProfile(id);
-        switch (sender.getLocalState()) {
+    public void handleMessage(Account user, Profile profile, String[] reply, String message, Platform platform) {
+        switch (user.getLocalState()) {
             case START -> {
                 reply[0] = "А теперь перейдем к заполнению анкеты.";
                 reply[1] = "Введи свое имя";
-                sender.setLocalState(LocalState.NAME);
+                user.setLocalState(LocalState.NAME);
             }
             case FINISH -> {
                 if (message.equalsIgnoreCase("да")) {
-                    database.addToFPL(id);
+                    database.addToFPL(user.getId());
                     reply[0] = "Отлично, теперь можно переходить к использованию.";
                     reply[1] = giveHelp();
-                    sender.setGlobalState(GlobalState.COMMAND);
+                    user.setGlobalState(GlobalState.COMMAND);
                 } else if (message.equalsIgnoreCase("нет")) {
                     reply[0] = "Что хочешь изменить?";
                     reply[1] = "Вот список полей доступных для изменения:" +
@@ -99,21 +62,21 @@ public class FillingHandler implements Handler{
                             ")\n8 - Пол собеседника(" + profile.getExpectedSex() +
                             ")\n9 - Город собеседника(" + profile.getExpectedCity() +
                             ")\n10 - Фото";
-                    sender.setGlobalState(GlobalState.PROFILE_EDIT);
-                    sender.setLocalState(LocalState.START);
+                    user.setGlobalState(GlobalState.PROFILE_EDIT);
+                    user.setLocalState(LocalState.START);
                 } else {
                     reply[0] = "Пожалуйста, напиши либо да, либо нет";
                 }
             }
             default -> {
-                Boolean result = setField(id, message);
+                Boolean result = database.setField(profile, message);
                 if (result == null){
                     reply[0] = "Кажется ты меня обманываешь.";
                 }else if (result) {
-                    reply[0] = stateFSM.getRightReplies().get(sender.getLocalState());
-                    sender.setLocalState(stateFSM.getNextDict().get(sender.getLocalState()));
+                    reply[0] = stateFSM.getRightReplies().get(user.getLocalState());
+                    user.setLocalState(stateFSM.getNextDict().get(user.getLocalState()));
                 }else {
-                    reply[0] = stateFSM.getWrongReplies().get(sender.getLocalState());
+                    reply[0] = stateFSM.getWrongReplies().get(user.getLocalState());
                 }
             }
         }

@@ -1,7 +1,11 @@
-package database.models;
+package database.entities;
 
 import jakarta.persistence.*;
 
+/**
+ * Contains all data of relations between users.
+ * Has automatically generated id.
+ */
 @Entity
 @Table(name = "matches", schema = "public")
 public class Connection {
