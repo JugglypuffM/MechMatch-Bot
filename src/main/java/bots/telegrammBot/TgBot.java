@@ -64,10 +64,9 @@ public class TgBot extends TelegramLongPollingBot implements Bot {
     public boolean executePhoto(String platformId, String message, String photo) {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(platformId);
-        String text = message.replace("_", "\\_");
         File file = new File("./pictures/" + photo);
         sendPhoto.setPhoto(new InputFile(file));
-        sendPhoto.setCaption(text);
+        sendPhoto.setCaption(message);
         buttonsHandler.setKeyboard(platformId, null, sendPhoto);
         try {
             execute(sendPhoto);

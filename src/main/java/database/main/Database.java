@@ -126,7 +126,7 @@ public interface Database {
         platforms.add(Platform.DISCORD);
         for (Platform platform: platforms){
             if (user.getPlatformUsername(platform) != null){
-                result.append(platform.stringRepresentation()).append(" - ").append(user.getPlatformUsername(platform));
+                result.append(platform.stringRepresentation()).append(" - ").append(user.getPlatformUsername(platform)).append("\n");
             }
         }
         return result.toString();
