@@ -11,7 +11,8 @@ import jakarta.persistence.*;
 public class Connection {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id, userID, friendID;
+    private Integer id;
+    private Integer userID, friendID;
     private Boolean isLiked;
     public Connection(){}
     public Connection(Integer id, Integer userID, Integer friendID, Boolean isLiked) {
