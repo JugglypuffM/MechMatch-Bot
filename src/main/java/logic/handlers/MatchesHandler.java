@@ -36,8 +36,7 @@ public class MatchesHandler implements Handler{
         }
         return idList;
     }
-    private void getTenProfiles(Integer id, String[] reply, List<Integer> idList){
-        Account user = database.getAccount(id);
+    private void getTenProfiles(Account user, String[] reply, List<Integer> idList){
         int page = user.getProfilesPage()-1;
         reply[0] = "Профили на странице " + (page+1) + ":";
         for (int i = 0; i < 10; i++){
@@ -88,7 +87,7 @@ public class MatchesHandler implements Handler{
                 }
 
                 user.setProfilesPage(1);
-                getTenProfiles(user.getId(), reply, getIdList(user));
+                getTenProfiles(user, reply, getIdList(user));
                 user.setLocalState(LocalState.PROFILES);
             }
             case PROFILES -> {
@@ -131,7 +130,7 @@ public class MatchesHandler implements Handler{
                                 user.setProfilesPage(user.getProfilesPage() - 1);
                             }
                         }
-                        getTenProfiles(user.getId(), reply, getIdList(user));
+                        getTenProfiles(user, reply, getIdList(user));
                     }
                     case "выйти" -> {
                         reply[0] = "Процедура изменения списка отменена.";
