@@ -231,7 +231,7 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Введи да или нет.", processor.processMessage("1", platform, "дварыера")[0]);
         String[] reply = processor.processMessage("1", platform, "да");
         Assertions.assertEquals("Ура! Теперь вы можете перейти к общению.", reply[0]);
-        Assertions.assertEquals("Вот имена этого пользователя на разных платформах:\nTELEGRAM - stas", reply[1]);
+        Assertions.assertEquals("Вот имена этого пользователя на разных платформах:\nTELEGRAM - stas\n", reply[1]);
     }
 
     /**
@@ -317,7 +317,7 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Профили на странице 1:", reply[0]);
         Assertions.assertEquals("Профиль 1:\n" + processor.processMessage("1", platform, "/myProfile")[0] +
                 "\nВот имена этого пользователя на разных платформах:\n" +
-                "TELEGRAM - stas", reply[2]);
+                "TELEGRAM - stas\n", reply[2]);
         Assertions.assertEquals("Больше страниц нет.", processor.processMessage("0", platform, "далее")[0]);
         Assertions.assertEquals("Это первая страница.", processor.processMessage("0", platform, "назад")[0]);
         Assertions.assertEquals("Введи \"далее\" или \"назад\" для смены страниц, \"выйти\" для выхода или номер профиля, который хочешь удалить.", processor.processMessage("0", platform, "выфжадвыьфа")[0]);

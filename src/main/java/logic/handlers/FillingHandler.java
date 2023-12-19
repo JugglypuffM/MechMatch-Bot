@@ -49,6 +49,7 @@ public class FillingHandler implements Handler{
                     reply[0] = "Отлично, теперь можно переходить к использованию.";
                     reply[1] = giveHelp();
                     user.setGlobalState(GlobalState.COMMAND);
+                    profile.setProfileFilled(true);
                 } else if (message.equalsIgnoreCase("нет")) {
                     reply[0] = "Что хочешь изменить?";
                     reply[1] = "Вот список полей доступных для изменения:" +
