@@ -83,17 +83,19 @@ public class CommandHandler implements Handler{
                 break;
             case "/match", "подбор собеседника":
                 Account friend;
+                Profile friendProfile;
                 List<Integer> fpl = database.getFilledProfilesList(user.getId());
                 int tmpNum = 0;
                 reply[0] = "Не нашлось никого, кто соответствует твоей уникальности ;(";
                 while (tmpNum < fpl.size()) {
                     friend = database.getAccount(fpl.get(tmpNum));
-                    boolean userSexMatch = (profile.getExpectedSex().equalsIgnoreCase("без разницы")) || (profile.getSex().equals(profile.getExpectedSex()));
-                    boolean friendSexMatch = (profile.getExpectedSex().equalsIgnoreCase("без разницы")) || (profile.getSex().equals(profile.getExpectedSex()));
-                    boolean userCityMatch = (profile.getExpectedCity().equalsIgnoreCase("любой")) || (profile.getCity().equalsIgnoreCase(profile.getExpectedCity()));
-                    boolean friendCityMatch = (profile.getExpectedCity().equalsIgnoreCase("любой")) || (profile.getCity().equalsIgnoreCase(profile.getExpectedCity()));
-                    boolean userAgeMatch = (profile.getAge() <= profile.getMaxExpectedAge()) && (profile.getAge() >= profile.getMinExpectedAge());
-                    boolean friendAgeMatch = (profile.getAge() <= profile.getMaxExpectedAge()) && (profile.getAge() >= profile.getMinExpectedAge());
+                    friendProfile = database.getProfile(fpl.get(tmpNum));
+                    boolean userSexMatch = (profile.getExpectedSex().equalsIgnoreCase("без разницы")) || (friendProfile.getSex().equals(profile.getExpectedSex()));
+                    boolean friendSexMatch = (friendProfile.getExpectedSex().equalsIgnoreCase("без разницы")) || (profile.getSex().equals(friendProfile.getExpectedSex()));
+                    boolean userCityMatch = (profile.getExpectedCity().equalsIgnoreCase("любой")) || (friendProfile.getCity().equalsIgnoreCase(profile.getExpectedCity()));
+                    boolean friendCityMatch = (friendProfile.getExpectedCity().equalsIgnoreCase("любой")) || (profile.getCity().equalsIgnoreCase(friendProfile.getExpectedCity()));
+                    boolean userAgeMatch = (friendProfile.getAge() <= profile.getMaxExpectedAge()) && (friendProfile.getAge() >= profile.getMinExpectedAge());
+                    boolean friendAgeMatch = (profile.getAge() <= friendProfile.getMaxExpectedAge()) && (profile.getAge() >= friendProfile.getMinExpectedAge());
                     List<Integer> friendDislikes = new ArrayList<>();
                     for (Integer i: database.getDislikesOf(friend.getId())){
                         friendDislikes.add(database.getConnection(i).getFriendID());
