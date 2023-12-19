@@ -16,7 +16,7 @@ create table public.accounts
     localstate text,
     globalstate text,
     suggestedfriendid text,
-    pofileslist text,
+    profileslist text,
     profilespage integer
 );
 

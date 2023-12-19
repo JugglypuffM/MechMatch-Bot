@@ -2,8 +2,8 @@ create table public.clients
 (
     platformid text not null
         primary key,
-    "globalState" text,
-    "localState" text,
+    globalstate text,
+    localstate text,
     login text,
     platform text,
     loggedin boolean
