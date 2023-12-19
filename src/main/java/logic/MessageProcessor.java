@@ -25,7 +25,6 @@ public class MessageProcessor {
     private final MatchesHandler caseMatches;
     private final MatchingHandler caseMatching;
     private final PendingHandler casePending;
-    private final AuthorizationHandler caseAuthorization;
     public MessageProcessor(Database m_database, BotDriver m_driver){
         this.database = m_database;
         Notificator notificator = new Notificator(m_driver);
@@ -35,7 +34,6 @@ public class MessageProcessor {
         this.caseMatches = new MatchesHandler(m_database);
         this.caseMatching = new MatchingHandler(m_database, notificator);
         this.casePending = new PendingHandler(m_database, notificator);
-        this.caseAuthorization = new AuthorizationHandler(m_database);
     }
     private Handler chooseHandler(Account sender){
         Handler handler;
@@ -68,13 +66,8 @@ public class MessageProcessor {
         String[] reply = new String[24];
         Client sender = database.getClient(platformId);
         if (sender == null){
-            database.addClient(platformId, platform.stringRepresentation());
-            sender = database.getClient(platformId);
         }
         if (!sender.isLoggedIn()){
-            caseAuthorization.handleData(sender, reply, message);
-            database.updateClient(sender);
-            return reply;
         }
         Account user = database.getAccountWithPlatformId(platformId, platform);
         Profile profile = database.getProfile(user.getId());
