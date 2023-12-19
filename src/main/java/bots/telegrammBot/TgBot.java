@@ -45,7 +45,7 @@ public class TgBot extends TelegramLongPollingBot implements Bot {
         if (update.getMessage().hasPhoto()){
             try {
                 String picture =  driver.getDatabase().getAccountWithPlatformId(platformId, Platform.TELEGRAM).getId() + ".jpg";
-                downloadFile(execute(new GetFile(update.getMessage().getPhoto().get(2).getFileId())).getFilePath(),
+                downloadFile(execute(new GetFile(update.getMessage().getPhoto().get(update.getMessage().getPhoto().size()-1).getFileId())).getFilePath(),
                                      new File("./pictures/" + picture));
                 reply = driver.handleUpdate(platformId, username, picture, Platform.TELEGRAM, true);
             }catch (Exception e){
