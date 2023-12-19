@@ -35,6 +35,7 @@ public class EditHandler implements Handler{
                 reply[0] = "Профиль успешно удален.";
                 database.updateClient(new Client(user.getPlatformId(platform), platform.stringRepresentation()));
                 database.deleteAccount(user.getId());
+                database.deleteProfile(user.getId());
                 database.deleteAllConnectionsWith(user.getId());
                 return;
             }

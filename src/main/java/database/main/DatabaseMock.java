@@ -116,6 +116,16 @@ public class DatabaseMock implements Database {
         return result;
     }
 
+    public List<Integer> getAllConnectionsOf(Integer id) {
+        List<Integer> result = new ArrayList<>();
+        for (Connection connection: connectionDict.values()){
+            if (connection.getUserID().equals(id) || connection.getFriendID().equals(id)){
+                result.add(connection.getId());
+            }
+        }
+        return result;
+    }
+
     @Override
     public List<Integer> getPendingOf(Integer id) {
         List<Integer> result = new ArrayList<>();
@@ -157,7 +167,7 @@ public class DatabaseMock implements Database {
 
     @Override
     public void deleteAllConnectionsWith(Integer id) {
-        for (Integer i: getAllConnectionsWith(id)){
+        for (Integer i: getAllConnectionsOf(id)){
             connectionDict.remove(i);
         }
     }

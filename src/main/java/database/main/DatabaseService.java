@@ -115,7 +115,7 @@ public class DatabaseService implements Database {
     }
     @Override
     public void deleteAllConnectionsWith(Integer id){
-        for (Connection connection: connectionDAO.getConnectionsWith(id)){
+        for (Connection connection: connectionDAO.getConnectionsOf(id)){
             connectionDAO.delete(connection);
         }
     }
@@ -175,7 +175,7 @@ public class DatabaseService implements Database {
     @Override
     public List<Integer> getFilledProfilesList(Integer id){
         List<Integer> tmpList = new ArrayList<>();
-        for (Profile profile : profileDAO.getProfileFilledAccounts()){
+        for (Profile profile : profileDAO.getFilledProfiles()){
             tmpList.add(profile.getId());
         }
         tmpList.remove(id);

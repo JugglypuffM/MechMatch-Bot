@@ -64,6 +64,12 @@ public class ConnectionDAO implements DAO<Connection, Integer>{
         query.setParameter("paramid", id);
         return query.list();
     }
+    public List<Connection> getConnectionsOf(Integer id) {
+        Session session = sessionFactory.getSessionFactory().openSession();
+        Query<Connection> query = session.createQuery("From Connection where userID = :paramid or friendID = :paramid");
+        query.setParameter("paramid", id);
+        return query.list();
+    }
     /**
      * Get list with connections of given user with other users, which were not set to like or dislike
      * @return connections list
