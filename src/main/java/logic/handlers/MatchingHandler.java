@@ -1,7 +1,9 @@
-package logic.commandHandlers;
+package logic.handlers;
 
+import bots.platforms.Platform;
+import database.entities.Profile;
 import database.main.Database;
-import database.models.User;
+import database.entities.Account;
 import logic.notificator.Notificator;
 import logic.states.GlobalState;
 
@@ -20,45 +22,45 @@ public class MatchingHandler implements Handler{
         this.database = m_database;
         this.notificator = m_notificator;
     }
-    public void handleMessage(User sender, String[] reply, String message) {
-        List<String> friendLikes = new ArrayList<>();
-        for (Integer i: database.getLikesOf(sender.getSuggestedFriendID())){
+    public void handleMessage(Account user, Profile profile, String[] reply, String message, Platform platform) {
+        List<Integer> friendLikes = new ArrayList<>();
+        for (Integer i: database.getLikesOf(user.getSuggestedFriendID())){
             friendLikes.add(database.getConnection(i).getFriendID());
         }
         if (message.equalsIgnoreCase("да") || message.equals("❤️")){
-            if (friendLikes.contains(sender.getId())){
+            if (friendLikes.contains(user.getId())){
                 String[] notification = new String[24];
-                database.addConnection(sender.getId(), sender.getSuggestedFriendID(), true);
+                database.addConnection(user.getId(), user.getSuggestedFriendID(), true);
                 notification[0] = "Ура! Тебе ответили взаимностью, можно переходить к общению.";
-                notification[1] = "Вот ссылка на профиль собеседника - @" + sender.getUsername();
-                notificator.notifyFriend(database.getUser(sender.getSuggestedFriendID()).getPlatform(), sender.getSuggestedFriendID(), database.getUser(sender.getSuggestedFriendID()).getUsername(), notification);
+                notification[1] = database.getUserUsernames(user.getId());
+                notificator.notifyFriend(user.getSuggestedFriendID(), notification);
                 reply[0] = "Ура! Этот пользователь когда-то уже отвечал взаимностью, теперь вы можете перейти к общению.";
-                reply[1] = "Вот ссылка на профиль собеседника - @" + database.getUser(sender.getSuggestedFriendID()).getUsername();
+                reply[1] = database.getUserUsernames(user.getSuggestedFriendID());
             }
             else {
                 String[] notification = new String[24];
-                database.addConnection(sender.getId(), sender.getSuggestedFriendID(), true);
-                database.addConnection(sender.getSuggestedFriendID(), sender.getId(), null);
-                User friend = database.getUser(sender.getSuggestedFriendID());
+                database.addConnection(user.getId(), user.getSuggestedFriendID(), true);
+                database.addConnection(user.getSuggestedFriendID(), user.getId(), null);
+                Account friend = database.getAccount(user.getSuggestedFriendID());
                 friend.setGlobalState(GlobalState.PENDING);
-                database.updateUser(friend);
+                database.updateAccount(friend);
                 notification[0] = "Твой профиль понравился кое-кому.";
-                notification[1] = database.profileData(sender.getId());
+                notification[1] = database.profileData(user.getId());
                 notification[2] = "Напиши, хочешь ли ты начать общение с эти человеком(да/нет)?.";
-                notification[13] = sender.getPhotoID();
-                notificator.notifyFriend(database.getUser(sender.getSuggestedFriendID()).getPlatform(), sender.getSuggestedFriendID(), database.getUser(sender.getSuggestedFriendID()).getUsername(), notification);
+                notification[13] = database.getProfile(user.getId()).getPhotoID();
+                notificator.notifyFriend(user.getSuggestedFriendID(), notification);
                 reply[0] = "Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!";
             }
         }
         else if (message.equalsIgnoreCase("нет") || message.equals("\uD83D\uDC4E")){
-            database.addConnection(sender.getId(), sender.getSuggestedFriendID(), false);
+            database.addConnection(user.getId(), user.getSuggestedFriendID(), false);
             reply[0] = "Очень жаль, в следующий раз постараюсь лучше :(";
         }
         else {
             reply[0] = "Введи да или нет.";
             return;
         }
-        sender.setSuggestedFriendID(null);
-        sender.setGlobalState(GlobalState.COMMAND);
+        user.setSuggestedFriendID(null);
+        user.setGlobalState(GlobalState.COMMAND);
     }
 }

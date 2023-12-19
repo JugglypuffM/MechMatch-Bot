@@ -18,13 +18,14 @@ public enum GlobalState {
      */
     MATCHES("MATCHES"),
     MATCHING("MATCHING"),
-    PENDING("PENDING");
+    PENDING("PENDING"),
+    SIGN_IN("SIGN_IN"),
+    SIGN_UP("SIGN_UP");
     final String value;
     GlobalState(String m_value){
         this.value = m_value;
     }
-    @Override
-    public String toString() {
+    public String stringRepresentation() {
         return value;
     }
 }
