@@ -2,6 +2,7 @@ package bots;
 
 import bots.platforms.Platform;
 import database.main.Database;
+import database.entities.Account;
 import logic.MessageProcessor;
 import org.slf4j.Logger;
 
@@ -19,7 +20,7 @@ public class BotDriver {
     public BotDriver(Database m_database){
         this.database = m_database;
     }
-    public String[] handleUpdate(String id, String username, String message, Platform platform, boolean hasPhoto){
+    public String[] handleUpdate(String platformId, String username, String message, Platform platform, boolean hasPhoto){
         if (this.processor == null){
             logger.error("MessageProcessor was not set up");
             return new String[24];
@@ -29,16 +30,20 @@ public class BotDriver {
             reply[0] = "Длинна сообщения слишком большая, введите не более 500 символов.";
         }
         else if (hasPhoto){
-            reply = processor.processPhoto(id, message);
+            reply = processor.processPhoto(platformId, platform, message);
         }else {
-            reply = processor.processMessage(id, message);
-            if (reply[0].equals("требуются данные")){
-                reply = processor.processMessage(id, "data" + username + "|" + platform.toString());
+            reply = processor.processMessage(platformId, platform, message);
+            if (reply[0].startsWith("data")){
+                Account account = database.getAccountWithLogin(reply[0].substring(4));
+                account.setPlatformUsername(username, platform);
+                account.setPlatformId(platformId, platform);
+                database.updateAccount(account);
+                reply = processor.processMessage(platformId, platform, message);
             }
         }
         return reply;
     }
-    public void send(Bot bot, String id, String username, String message, String[] reply){
+    public void send(Bot bot, String platformId, String username, String message, String[] reply){
         for (int i = 0; i < 12; i++){
             if (reply[i] != null){
                 logger.info("-----------------------------------------------------------------------\n");
@@ -47,14 +52,14 @@ public class BotDriver {
                 DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                 Date date = new Date();
                 logger.info(dateFormat.format(date));
-                logger.info(id);
+                logger.info(platformId);
                 logger.info(username);
                 logger.info("Message: " + message);
                 if (reply[i+12] != null){
                     logger.info("Has photo: TRUE");
                     logger.info(reply[i]);
                     logger.info(reply[i+12]);
-                    if(bot.executePhoto(id, reply[i], reply[i+12])){
+                    if(bot.executePhoto(platformId, reply[i], reply[i+12])){
                         logger.info("Message sent successfully");
                     }else {
                         logger.error("Message send fail");
@@ -63,7 +68,7 @@ public class BotDriver {
                 else {
                     logger.info("Has photo: FALSE");
                     logger.info(reply[i]);
-                    if(bot.executeText(id, reply[i])){
+                    if(bot.executeText(platformId, reply[i])){
                         logger.info("Message sent successfully");
                     }else {
                         logger.error("Message send fail");

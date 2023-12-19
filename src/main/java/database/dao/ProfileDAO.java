@@ -1,43 +1,43 @@
 package database.dao;
 
-
 import database.hibernate.HibernateSessionFactory;
-import database.models.Connection;
-import database.models.User;
+import database.entities.Profile;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.util.List;
 
-/**
- * Data Access Object for {@link User} and {@link Connection}.
- */
-public class UserDAO implements DAO<User, String>{
+public class ProfileDAO implements DAO<Profile, Integer>{
     private final HibernateSessionFactory sessionFactory;
-    public UserDAO(HibernateSessionFactory hsf){
+    public ProfileDAO(HibernateSessionFactory hsf){
         this.sessionFactory = hsf;
     }
-    public void create(User user) {
+
+    @Override
+    public void create(Profile profile) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
-        session.persist(user);
+        session.persist(profile);
         tx1.commit();
         session.close();
     }
-    public User read(String id) {
-        return sessionFactory.getSessionFactory().openSession().get(User.class, id);
+    @Override
+    public Profile read(Integer id) {
+        return sessionFactory.getSessionFactory().openSession().get(Profile.class, id);
     }
-    public void update(User user) {
+    @Override
+    public void update(Profile profile) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
-        session.merge(user);
+        session.merge(profile);
         tx1.commit();
         session.close();
     }
-    public void delete(User user) {
+    @Override
+    public void delete(Profile profile) {
         Session session = sessionFactory.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
-        session.remove(user);
+        session.remove(profile);
         tx1.commit();
         session.close();
     }
@@ -45,7 +45,7 @@ public class UserDAO implements DAO<User, String>{
      * Get list of users, who already filled profiles.
      * @return list of users
      */
-    public List<User> getProfileFilledUsers(){
-        return sessionFactory.getSessionFactory().openSession().createQuery("From User WHERE profileFilled").list();
+    public List<Profile> getProfileFilledAccounts(){
+        return sessionFactory.getSessionFactory().openSession().createQuery("From Profile WHERE profileFilled").list();
     }
 }

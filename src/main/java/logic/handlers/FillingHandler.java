@@ -1,7 +1,9 @@
-package logic.commandHandlers;
+package logic.handlers;
 
+import bots.platforms.Platform;
 import database.main.Database;
-import database.models.User;
+import database.entities.Account;
+import database.entities.Profile;
 import logic.states.GlobalState;
 import logic.states.LocalState;
 import logic.states.StateFSM;
@@ -34,47 +36,47 @@ public class FillingHandler implements Handler{
                 /deleteProfile - полностью удалить профиль
                """;
     }
-    public void handleMessage(User sender, String[] reply, String message) {
-        switch (sender.getLocalState()) {
+    public void handleMessage(Account user, Profile profile, String[] reply, String message, Platform platform) {
+        switch (user.getLocalState()) {
             case START -> {
                 reply[0] = "А теперь перейдем к заполнению анкеты.";
                 reply[1] = "Введи свое имя";
-                sender.setLocalState(LocalState.NAME);
+                user.setLocalState(LocalState.NAME);
             }
             case FINISH -> {
                 if (message.equalsIgnoreCase("да")) {
-                    database.addToFPL(sender.getId());
+                    database.addToFPL(user.getId());
                     reply[0] = "Отлично, теперь можно переходить к использованию.";
                     reply[1] = giveHelp();
-                    sender.setGlobalState(GlobalState.COMMAND);
+                    user.setGlobalState(GlobalState.COMMAND);
                 } else if (message.equalsIgnoreCase("нет")) {
                     reply[0] = "Что хочешь изменить?";
                     reply[1] = "Вот список полей доступных для изменения:" +
-                            " \n1 - Имя(" + sender.getName() +
-                            ")\n2 - Возраст(" + sender.getAge() +
-                            ")\n3 - Пол(" + sender.getSex() +
-                            ")\n4 - Город(" + sender.getCity() +
-                            ")\n5 - Информация о себе(" + sender.getInformation() +
-                            ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
-                            ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
-                            ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
-                            ")\n9 - Город собеседника(" + sender.getExpectedCity() +
+                            " \n1 - Имя(" + profile.getName() +
+                            ")\n2 - Возраст(" + profile.getAge() +
+                            ")\n3 - Пол(" + profile.getSex() +
+                            ")\n4 - Город(" + profile.getCity() +
+                            ")\n5 - Информация о себе(" + profile.getInformation() +
+                            ")\n6 - Нижний порог возраста собеседника(" + profile.getMinExpectedAge() +
+                            ")\n7 - Верхний порог возраста собеседника(" + profile.getMaxExpectedAge() +
+                            ")\n8 - Пол собеседника(" + profile.getExpectedSex() +
+                            ")\n9 - Город собеседника(" + profile.getExpectedCity() +
                             ")\n10 - Фото";
-                    sender.setGlobalState(GlobalState.PROFILE_EDIT);
-                    sender.setLocalState(LocalState.START);
+                    user.setGlobalState(GlobalState.PROFILE_EDIT);
+                    user.setLocalState(LocalState.START);
                 } else {
                     reply[0] = "Пожалуйста, напиши либо да, либо нет";
                 }
             }
             default -> {
-                Boolean result = sender.setField(message);
+                Boolean result = database.setField(profile, message);
                 if (result == null){
                     reply[0] = "Кажется ты меня обманываешь.";
                 }else if (result) {
-                    reply[0] = stateFSM.getRightReplies().get(sender.getLocalState());
-                    sender.setLocalState(stateFSM.getNextDict().get(sender.getLocalState()));
+                    reply[0] = stateFSM.getRightReplies().get(user.getLocalState());
+                    user.setLocalState(stateFSM.getNextDict().get(user.getLocalState()));
                 }else {
-                    reply[0] = stateFSM.getWrongReplies().get(sender.getLocalState());
+                    reply[0] = stateFSM.getWrongReplies().get(user.getLocalState());
                 }
             }
         }

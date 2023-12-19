@@ -34,7 +34,7 @@
 - Чтобы использовать свою базу данных нужно заполнить PG_DEFAULT HOST и PORT
 
 #### Настройка базы данных
-Создать базу `mechmatchdb` данных PostgreSQL и необходимые таблицы(в `src/main/java/database/init` файлы `matches_init.sql` и `users_init.sql`)
+Создать базу `mechmatchdb` данных PostgreSQL и необходимые таблицы(в `src/main/java/database/init` файлы `matches_init.sql` и `clients_init.sql`)
 
 
 ### Docker

@@ -1,6 +1,9 @@
 package bots.telegrammBot;
 
+import bots.platforms.Platform;
+import database.entities.Client;
 import database.main.Database;
+import database.entities.Account;
 import logic.states.GlobalState;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -23,6 +26,8 @@ public class ButtonsHandler {
     private final ArrayList<KeyboardRow> matchesProfilesKeyboard;
     private final ArrayList<KeyboardRow> likeKeyboard;
     private final ArrayList<KeyboardRow> simpleKeyboard;
+    private final ArrayList<KeyboardRow> loginKeyboard;
+    private final ArrayList<KeyboardRow> exitKeyboard;
     public ButtonsHandler(Database m_database){
         this.database = m_database;
 
@@ -107,35 +112,60 @@ public class ButtonsHandler {
         row1.add(new KeyboardButton("Да"));
         row1.add(new KeyboardButton("Нет"));
         this.simpleKeyboard.add(row1);
+
+        this.loginKeyboard = new ArrayList<>();
+        row1 = new KeyboardRow();
+        row1.add(new KeyboardButton("Войти"));
+        row2 = new KeyboardRow();
+        row2.add(new KeyboardButton("Зарегистрироваться"));
+        this.loginKeyboard.add(row1);
+        this.loginKeyboard.add(row2);
+
+        this.exitKeyboard = new ArrayList<>();
+        row1 = new KeyboardRow();
+        row1.add(new KeyboardButton("Отменить"));
+        this.exitKeyboard.add(row1);
     }
-    public void setKeyboard(String id, SendMessage sendMessage, SendPhoto sendPhoto){
+    public void setKeyboard(String telegramId, SendMessage sendMessage, SendPhoto sendPhoto){
         ReplyKeyboard replyKeyboard;
-        switch (database.getUser(id).getGlobalState()){
-            default -> replyKeyboard = new ReplyKeyboardRemove(true);
-            case COMMAND -> replyKeyboard = new ReplyKeyboardMarkup(commandKeyboard);
-            case PROFILE_FILL, PROFILE_EDIT -> {
-                switch (database.getUser(id).getLocalState()){
-                    default -> replyKeyboard = new ReplyKeyboardRemove(true);
-                    case START -> {
-                        if (database.getUser(id).getGlobalState() == GlobalState.PROFILE_FILL){
-                            replyKeyboard = new ReplyKeyboardMarkup(fillStartKeyboard);
-                        }else {
-                            replyKeyboard = new ReplyKeyboardMarkup(editStartKeyboard);
+        Account account = database.getAccountWithPlatformId(telegramId, Platform.TELEGRAM);
+        if (account == null){
+            Client sender = database.getClient(telegramId);
+            if (sender.getGlobalState() == GlobalState.COMMAND){
+                replyKeyboard = new ReplyKeyboardMarkup(loginKeyboard);
+            }
+            else {
+                replyKeyboard = new ReplyKeyboardMarkup(exitKeyboard);
+            }
+        }
+        else {
+            switch (account.getGlobalState()){
+                default -> replyKeyboard = new ReplyKeyboardRemove(true);
+                case COMMAND -> replyKeyboard = new ReplyKeyboardMarkup(commandKeyboard);
+                case PROFILE_FILL, PROFILE_EDIT -> {
+                    switch (account.getLocalState()){
+                        default -> replyKeyboard = new ReplyKeyboardRemove(true);
+                        case START -> {
+                            if (account.getGlobalState() == GlobalState.PROFILE_FILL){
+                                replyKeyboard = new ReplyKeyboardMarkup(fillStartKeyboard);
+                            }else {
+                                replyKeyboard = new ReplyKeyboardMarkup(editStartKeyboard);
+                            }
                         }
+                        case SEX -> replyKeyboard = new ReplyKeyboardMarkup(sexKeyboard);
+                        case ESEX -> replyKeyboard = new ReplyKeyboardMarkup(esexKeyboard);
+                        case FINISH -> replyKeyboard = new ReplyKeyboardMarkup(simpleKeyboard);
                     }
-                    case SEX -> replyKeyboard = new ReplyKeyboardMarkup(sexKeyboard);
-                    case ESEX -> replyKeyboard = new ReplyKeyboardMarkup(esexKeyboard);
-                    case FINISH -> replyKeyboard = new ReplyKeyboardMarkup(simpleKeyboard);
                 }
-            }
-            case MATCHES -> {
-                switch (database.getUser(id).getLocalState()){
-                    default -> replyKeyboard = new ReplyKeyboardRemove();
-                    case CHOICE -> replyKeyboard = new ReplyKeyboardMarkup(matchesChooseKeyboard);
-                    case PROFILES -> replyKeyboard = new ReplyKeyboardMarkup(matchesProfilesKeyboard);
+                case MATCHES -> {
+                    switch (account.getLocalState()){
+                        default -> replyKeyboard = new ReplyKeyboardRemove();
+                        case CHOICE -> replyKeyboard = new ReplyKeyboardMarkup(matchesChooseKeyboard);
+                        case PROFILES -> replyKeyboard = new ReplyKeyboardMarkup(matchesProfilesKeyboard);
+                    }
                 }
+                case MATCHING, PENDING -> replyKeyboard = new ReplyKeyboardMarkup(likeKeyboard);
             }
-            case MATCHING, PENDING -> replyKeyboard = new ReplyKeyboardMarkup(likeKeyboard);
         }
         if (sendMessage == null){
             sendPhoto.setReplyMarkup(replyKeyboard);

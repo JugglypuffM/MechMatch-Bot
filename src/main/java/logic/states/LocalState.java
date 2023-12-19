@@ -16,13 +16,14 @@ public enum LocalState {
     CHOICE("CHOICE"),
     PROFILES("PROFILES"),
     EDIT("EDIT"),
-    DELETE("DELETE");
+    DELETE("DELETE"),
+    LOGIN("LOGIN"),
+    PASSWORD("PASSWORD");
     final String value;
     LocalState(String m_value){
         this.value = m_value;
     }
-    @Override
-    public String toString() {
+    public String stringRepresentation() {
         return value;
     }
 }

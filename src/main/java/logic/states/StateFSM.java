@@ -119,6 +119,8 @@ public class StateFSM {
         globalStateMap.put("MATCHES", GlobalState.MATCHES);
         globalStateMap.put("MATCHING", GlobalState.MATCHING);
         globalStateMap.put("PENDING", GlobalState.PENDING);
+        globalStateMap.put("SIGN_IN", GlobalState.SIGN_IN);
+        globalStateMap.put("SIGN_UP", GlobalState.SIGN_UP);
 
         this.localStateMap = new HashMap<>();
         localStateMap.put("START", LocalState.START);
@@ -137,6 +139,9 @@ public class StateFSM {
         localStateMap.put("PROFILES", LocalState.PROFILES);
         localStateMap.put("EDIT", LocalState.EDIT);
         localStateMap.put("DELETE", LocalState.DELETE);
+        localStateMap.put("LOGIN", LocalState.LOGIN);
+        localStateMap.put("PASSWORD", LocalState.PASSWORD);
+
     }
 
     public Map<String, LocalState> getStateDict(){

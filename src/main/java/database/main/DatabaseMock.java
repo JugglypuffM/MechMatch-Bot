@@ -1,7 +1,10 @@
 package database.main;
 
-import database.models.Connection;
-import database.models.User;
+import bots.platforms.Platform;
+import database.entities.Connection;
+import database.entities.Account;
+import database.entities.Profile;
+import database.entities.Client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,52 +12,70 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class crated to store users in memory using {@link DatabaseMock#userDict} dictionary.
+ * Class crated to mock database service dictionary.
  */
 public class DatabaseMock implements Database {
     /**
-     * Dictionary of users, where user id is key and the instance of {@link User} is value
+     * Dictionary of users, where user id is key and the instance of {@link Client} is value
      */
-    private final Map<String, User> userDict = new HashMap<>();
+    private final Map<String, Client> clientDict = new HashMap<>();
     /**
      * Dictionary of connections, where connection id is key and the instance of {@link Connection} is value
      */
     private final Map<Integer, Connection> connectionDict = new HashMap<>();
     /**
+     * Dictionary of accounts, where account id is key and the instance of {@link Account} is value
+     */
+    private final Map<Integer, Account> accountDict = new HashMap<>();
+    /**
+     * Dictionary of profiles, where profile id is key and the instance of {@link Profile} is value
+     */
+    private final Map<Integer, Profile> profileDict = new HashMap<>();
+    /**
      * Auto incrementing on every new connection id
      */
     private Integer lastConnectionID = 0;
     /**
+     * Auto incrementing on every new account id
+     */
+    private Integer lastAcountID = 0;
+    /**
      * List of users with fully filled profiles id's
      */
-    private final List<String> filledProfilesList = new ArrayList<>();
+    private final List<Integer> filledProfilesList = new ArrayList<>();
 
-    public void addUser(String id, String username, String platform) {
-        User user = new User(id, username, platform);
-        userDict.put(id, user);
+    @Override
+    public void addClient(String id, String platform) {
+        Client client = new Client(id, platform);
+        clientDict.put(id, client);
     }
 
-    public User getUser(String id) {
-        if (!userDict.containsKey(id)){
+    @Override
+    public Client getClient(String platformId) {
+        if (!clientDict.containsKey(platformId)){
             return null;
         }
-        return userDict.get(id);
+        return clientDict.get(platformId);
     }
 
-    public void updateUser(User user) {
-        if (!userDict.containsKey(user.getId())) return;
-        userDict.put(user.getId(), user);
+    @Override
+    public void updateClient(Client client) {
+        if (!clientDict.containsKey(client.getPlatformId())) return;
+        clientDict.put(client.getPlatformId(), client);
     }
 
-    public void deleteUser(String id) {
-        userDict.remove(id);
+    @Override
+    public void deleteClient(String id) {
+        clientDict.remove(id);
     }
 
-    public void addConnection(String userID, String friendID, Boolean isLiked) {
+    @Override
+    public void addConnection(Integer userID, Integer friendID, Boolean isLiked) {
         connectionDict.put(lastConnectionID, new Connection(lastConnectionID, userID, friendID, isLiked));
         lastConnectionID++;
     }
 
+    @Override
     public Connection getConnection(int id) {
         if (!connectionDict.containsKey(id)){
             return null;
@@ -62,17 +83,20 @@ public class DatabaseMock implements Database {
         return connectionDict.get(id);
     }
 
+    @Override
     public void updateConnection(Connection connection) {
         if (!connectionDict.containsKey(connection.getId())) return;
         connectionDict.put(connection.getId(), connection);
     }
 
+    @Override
     public void deleteConnection(int id) {
         connectionDict.remove(id);
     }
 
-    public List<String> getAllConnectedUserIds(String id) {
-        List<String> result = new ArrayList<>();
+    @Override
+    public List<Integer> getAllConnectedUserIds(Integer id) {
+        List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
             if (connection.getUserID().equals(id)){
                 result.add(connection.getFriendID());
@@ -81,7 +105,8 @@ public class DatabaseMock implements Database {
         return result;
     }
 
-    public List<Integer> getAllConnectionsWith(String id) {
+    @Override
+    public List<Integer> getAllConnectionsWith(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
             if (connection.getUserID().equals(id)){
@@ -91,7 +116,8 @@ public class DatabaseMock implements Database {
         return result;
     }
 
-    public List<Integer> getPendingOf(String id) {
+    @Override
+    public List<Integer> getPendingOf(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
             if (connection.getUserID().equals(id) && (connection.getLiked() == null)){
@@ -101,7 +127,8 @@ public class DatabaseMock implements Database {
         return result;
     }
 
-    public List<Integer> getLikesOf(String id) {
+    @Override
+    public List<Integer> getLikesOf(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
             if (connection.getLiked() == null){
@@ -114,7 +141,8 @@ public class DatabaseMock implements Database {
         return result;
     }
 
-    public List<Integer> getDislikesOf(String id) {
+    @Override
+    public List<Integer> getDislikesOf(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
             if (connection.getLiked() == null){
@@ -127,35 +155,101 @@ public class DatabaseMock implements Database {
         return result;
     }
 
-    public void deleteAllConnectionsWith(String id) {
+    @Override
+    public void deleteAllConnectionsWith(Integer id) {
         for (Integer i: getAllConnectionsWith(id)){
             connectionDict.remove(i);
         }
     }
 
-    public List<String> getFilledProfilesList(String id) {
-        List<String> tmpList = new ArrayList<>(filledProfilesList);
+    @Override
+    public void addAccount(String login) {
+        accountDict.put(lastAcountID, new Account(lastAcountID, login));
+        lastAcountID++;
+    }
+
+    @Override
+    public Account getAccount(Integer id) {
+        if (!accountDict.containsKey(id)) return null;
+        return accountDict.get(id);
+    }
+
+    @Override
+    public void updateAccount(Account account) {
+        if (!accountDict.containsKey(account.getId())) return;
+        accountDict.put(account.getId(), account);
+    }
+
+    @Override
+    public void deleteAccount(Integer id) {
+        if (!accountDict.containsKey(id)) return;
+        accountDict.remove(id);
+    }
+
+    @Override
+    public void addProfile(Integer id) {
+        profileDict.put(id, new Profile(id));
+    }
+
+    @Override
+    public Profile getProfile(Integer id) {
+        return profileDict.get(id);
+    }
+
+    @Override
+    public void updateProfile(Profile profile) {
+        if (!profileDict.containsKey(profile.getId())) return;
+        profileDict.put(profile.getId(), profile);
+    }
+
+    @Override
+    public void deleteProfile(Integer id) {
+        if (!profileDict.containsKey(id)) return;
+        profileDict.remove(id);
+    }
+
+    @Override
+    public Account getAccountWithPlatformId(String platformId, Platform platform) {
+        for (Account account: accountDict.values()){
+            if (account.getPlatformId(platform).equals(platformId)) return account;
+        }
+        return null;
+    }
+
+    @Override
+    public Account getAccountWithLogin(String login) {
+        for (Account account: accountDict.values()){
+            if (account.getLogin().equals(login)) return account;
+        }
+        return null;
+    }
+
+    @Override
+    public List<Integer> getFilledProfilesList(Integer id) {
+        List<Integer> tmpList = new ArrayList<>(filledProfilesList);
         tmpList.remove(id);
         return tmpList;
     }
 
-    public String profileData(String id) {
-        User user = getUser(id);
-        return "Имя: " + user.getName() +
-                "\nВозраст: " + user.getAge() +
-                "\nПол: " + user.getSex() +
-                "\nГород: " + user.getCity() +
-                "\nИнформация о себе: " + user.getInformation() +
-                "\nДиапазон возраста собеседника: " + user.getMinExpectedAge() + " - " + user.getMaxExpectedAge() +
-                "\nПол собеседника: " + user.getExpectedSex() +
-                "\nГород собеседника: " + user.getExpectedCity();
+    @Override
+    public String profileData(Integer id) {
+        Profile profile = getProfile(id);
+        return "Имя: " + profile.getName() +
+                "\nВозраст: " + profile.getAge() +
+                "\nПол: " + profile.getSex() +
+                "\nГород: " + profile.getCity() +
+                "\nИнформация о себе: " + profile.getInformation() +
+                "\nДиапазон возраста собеседника: " + profile.getMinExpectedAge() + " - " + profile.getMaxExpectedAge() +
+                "\nПол собеседника: " + profile.getExpectedSex() +
+                "\nГород собеседника: " + profile.getExpectedCity();
     }
 
     /**
      * Add given user id to filled profiles list
      * @param id string representation of user id
      */
-    public void addToFPL(String id){
+    @Override
+    public void addToFPL(Integer id){
         filledProfilesList.add(id);
     }
 
@@ -163,7 +257,8 @@ public class DatabaseMock implements Database {
      * Delete given user id from filled profiles list
      * @param id string representation of user id
      */
-    public void deleteFromFPL(String id){
+    @Override
+    public void deleteFromFPL(Integer id){
         filledProfilesList.remove(id);
     }
 }

@@ -10,11 +10,11 @@ ALTER SEQUENCE public.matches_id_seq
 
 CREATE TABLE IF NOT EXISTS public.matches
 (
-    userid text COLLATE pg_catalog."default",
-    friendid text COLLATE pg_catalog."default",
-    id bigint NOT NULL DEFAULT nextval('matches_id_seq'::regclass),
-    isliked boolean,
-    CONSTRAINT matches_pkey PRIMARY KEY (id)
+    userid integer,
+    friendid integer,
+    id bigint default nextval('matches_id_seq'::regclass) not null
+        primary key,
+    isliked boolean
 )
 
 TABLESPACE pg_default;

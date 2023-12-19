@@ -1,7 +1,9 @@
-package logic.commandHandlers;
+package logic.handlers;
 
+import bots.platforms.Platform;
 import database.main.Database;
-import database.models.User;
+import database.entities.Account;
+import database.entities.Profile;
 import logic.states.GlobalState;
 import logic.states.LocalState;
 
@@ -36,10 +38,10 @@ public class CommandHandler implements Handler{
                 /deleteProfile - полностью удалить профиль
                """;
     }
-    public void handleMessage(User sender, String[] reply, String message) {
+    public void handleMessage(Account user, Profile profile, String[] reply, String message, Platform platform) {
         switch (message.toLowerCase()){
             default:
-                if (database.getUser(sender.getId()).isProfileFilled()){
+                if (database.getProfile(user.getId()).isProfileFilled()){
                     reply[0] = giveHelp();
                     break;
                 }
@@ -48,102 +50,103 @@ public class CommandHandler implements Handler{
                         Перед началом хочется тебя предупредить, что бот никак не идентифицирует пользователя по документам, поэтому будь осторожен!\s
                         Отправь любое сообщение, чтобы подтвердить прочтение предупреждения.
                         """;
-                sender.setGlobalState(GlobalState.PROFILE_FILL);
-                sender.setLocalState(LocalState.START);
+                user.setGlobalState(GlobalState.PROFILE_FILL);
+                user.setLocalState(LocalState.START);
                 break;
             case "/help", "описание команд":
                 reply[0] = giveHelp();
                 break;
             case "/changeprofile", "заполнить заново":
-                database.deleteFromFPL(sender.getId());
+                database.deleteFromFPL(user.getId());
                 reply[0] = "Сейчас тебе придется пройти процедуру заполнения анкеты заново. Напиши что-нибудь, если готов.";
-                sender.setMaxExpectedAge("120");
-                sender.setGlobalState(GlobalState.PROFILE_FILL);
-                sender.setLocalState(LocalState.START);
+                profile.setMaxExpectedAge("120");
+                user.setGlobalState(GlobalState.PROFILE_FILL);
+                user.setLocalState(LocalState.START);
                 break;
             case "/editprofile", "изменить профиль":
-                database.deleteFromFPL(sender.getId());
+                database.deleteFromFPL(user.getId());
                 reply[0] = "Что хочешь изменить?";
                 reply[1] = "Вот список полей доступных для изменения:" +
-                        " \n1 - Имя(" + sender.getName() +
-                        ")\n2 - Возраст(" + sender.getAge() +
-                        ")\n3 - Пол(" + sender.getSex() +
-                        ")\n4 - Город(" + sender.getCity() +
-                        ")\n5 - Информация о себе(" + sender.getInformation() +
-                        ")\n6 - Нижний порог возраста собеседника(" + sender.getMinExpectedAge() +
-                        ")\n7 - Верхний порог возраста собеседника(" + sender.getMaxExpectedAge() +
-                        ")\n8 - Пол собеседника(" + sender.getExpectedSex() +
-                        ")\n9 - Город собеседника(" + sender.getExpectedCity() +
+                        " \n1 - Имя(" + profile.getName() +
+                        ")\n2 - Возраст(" + profile.getAge() +
+                        ")\n3 - Пол(" + profile.getSex() +
+                        ")\n4 - Город(" + profile.getCity() +
+                        ")\n5 - Информация о себе(" + profile.getInformation() +
+                        ")\n6 - Нижний порог возраста собеседника(" + profile.getMinExpectedAge() +
+                        ")\n7 - Верхний порог возраста собеседника(" + profile.getMaxExpectedAge() +
+                        ")\n8 - Пол собеседника(" + profile.getExpectedSex() +
+                        ")\n9 - Город собеседника(" + profile.getExpectedCity() +
                         ")\n10 - Фото";
-                reply[13] = sender.getPhotoID();
-                sender.setGlobalState(GlobalState.PROFILE_EDIT);
-                sender.setLocalState(LocalState.START);
+                reply[13] = profile.getPhotoID();
+                user.setGlobalState(GlobalState.PROFILE_EDIT);
+                user.setLocalState(LocalState.START);
                 break;
             case "/match", "подбор собеседника":
-                User friend;
-                List<String> fpl = database.getFilledProfilesList(sender.getId());
+                Account friend;
+                List<Integer> fpl = database.getFilledProfilesList(user.getId());
                 int tmpNum = 0;
                 reply[0] = "Не нашлось никого, кто соответствует твоей уникальности ;(";
                 while (tmpNum < fpl.size()) {
-                    friend = database.getUser(fpl.get(tmpNum));
-                    boolean senderSexMatch = (sender.getExpectedSex().equalsIgnoreCase("без разницы")) || (friend.getSex().equals(sender.getExpectedSex()));
-                    boolean friendSexMatch = (friend.getExpectedSex().equalsIgnoreCase("без разницы")) || (sender.getSex().equals(friend.getExpectedSex()));
-                    boolean senderCityMatch = (sender.getExpectedCity().equalsIgnoreCase("любой")) || (friend.getCity().equalsIgnoreCase(sender.getExpectedCity()));
-                    boolean friendCityMatch = (friend.getExpectedCity().equalsIgnoreCase("любой")) || (sender.getCity().equalsIgnoreCase(friend.getExpectedCity()));
-                    boolean senderAgeMatch = (friend.getAge() <= sender.getMaxExpectedAge()) && (friend.getAge() >= sender.getMinExpectedAge());
-                    boolean friendAgeMatch = (sender.getAge() <= friend.getMaxExpectedAge()) && (sender.getAge() >= friend.getMinExpectedAge());
-                    List<String> friendDislikes = new ArrayList<>();
+                    friend = database.getAccount(fpl.get(tmpNum));
+                    boolean userSexMatch = (profile.getExpectedSex().equalsIgnoreCase("без разницы")) || (profile.getSex().equals(profile.getExpectedSex()));
+                    boolean friendSexMatch = (profile.getExpectedSex().equalsIgnoreCase("без разницы")) || (profile.getSex().equals(profile.getExpectedSex()));
+                    boolean userCityMatch = (profile.getExpectedCity().equalsIgnoreCase("любой")) || (profile.getCity().equalsIgnoreCase(profile.getExpectedCity()));
+                    boolean friendCityMatch = (profile.getExpectedCity().equalsIgnoreCase("любой")) || (profile.getCity().equalsIgnoreCase(profile.getExpectedCity()));
+                    boolean userAgeMatch = (profile.getAge() <= profile.getMaxExpectedAge()) && (profile.getAge() >= profile.getMinExpectedAge());
+                    boolean friendAgeMatch = (profile.getAge() <= profile.getMaxExpectedAge()) && (profile.getAge() >= profile.getMinExpectedAge());
+                    List<Integer> friendDislikes = new ArrayList<>();
                     for (Integer i: database.getDislikesOf(friend.getId())){
                         friendDislikes.add(database.getConnection(i).getFriendID());
                     }
-                    if (senderSexMatch && senderCityMatch && senderAgeMatch &&
+                    if (userSexMatch && userCityMatch && userAgeMatch &&
                             friendSexMatch && friendCityMatch && friendAgeMatch &&
-                            !database.getAllConnectedUserIds(sender.getId()).contains(friend.getId()) &&
-                            !friendDislikes.contains(sender.getId()) &&
-                            !(Objects.equals(friend.getSuggestedFriendID(), sender.getId())) &&
-                            sender.getPlatform().equals(friend.getPlatform())) {
+                            !database.getAllConnectedUserIds(user.getId()).contains(friend.getId()) &&
+                            !friendDislikes.contains(user.getId()) &&
+                            !(Objects.equals(friend.getSuggestedFriendID(), user.getId()))) {
                         reply[0] = database.profileData(friend.getId());
                         reply[1] = "Напиши, понравился ли тебе пользователь(да/нет).";
-                        reply[12] = database.getUser(fpl.get(tmpNum)).getPhotoID();
-                        sender.setSuggestedFriendID(friend.getId());
-                        sender.setGlobalState(GlobalState.MATCHING);
+                        reply[12] = database.getProfile(fpl.get(tmpNum)).getPhotoID();
+                        user.setSuggestedFriendID(friend.getId());
+                        user.setGlobalState(GlobalState.MATCHING);
                         break;
                     }
                     tmpNum++;
                 }
                 break;
             case "/myprofile", "мой профиль":
-                reply[0] = database.profileData(sender.getId());
-                reply[12] = sender.getPhotoID();
+                reply[0] = database.profileData(user.getId());
+                reply[12] = profile.getPhotoID();
                 break;
             case "/mymatches", "просмотренные профили":
-                if (database.getAllConnectionsWith(sender.getId()).isEmpty()){
+                if (database.getAllConnectionsWith(user.getId()).isEmpty()){
                     reply[0] = "Просмотренных профилей пока что нет ;(\nПопробуй ввести /match";
                     return;
                 }
                 reply[0] = "Какой список профилей вывести(лайки/дизлайки)?";
                 reply[1] = "Также из этих списков можно будет удалить профиль по номеру на странице. " +
                         "А если удаление не требуется, то просто напиши \"выйти\"";
-                sender.setGlobalState(GlobalState.MATCHES);
-                sender.setLocalState(LocalState.CHOICE);
+                user.setGlobalState(GlobalState.MATCHES);
+                user.setLocalState(LocalState.CHOICE);
                 break;
             case "/deleteprofile", "удалить профиль":
                 reply[0] = "Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!";
                 reply[1] = "Если ты действительно этого хочешь, то введи свое имя пользователя(то что с собачкой)";
-                sender.setGlobalState(GlobalState.PROFILE_EDIT);
-                sender.setLocalState(LocalState.DELETE);
-                database.deleteFromFPL(sender.getId());
+                user.setGlobalState(GlobalState.PROFILE_EDIT);
+                user.setLocalState(LocalState.DELETE);
+                database.deleteFromFPL(user.getId());
                 break;
             case "/pending", "ожидающие ответа":
-                if(database.getPendingOf(sender.getId()).isEmpty()){
+                if(database.getPendingOf(user.getId()).isEmpty()){
                     reply[0] = "Нет профилей, ожидающих твоего ответа.";
                     return;
                 }
-                reply[0] = database.profileData(database.getConnection(database.getPendingOf(sender.getId()).get(0)).getFriendID());
+                reply[0] = database.profileData(database.getConnection(database.getPendingOf(user.getId()).get(0)).getFriendID());
                 reply[1] = "Напиши, хочешь ли ты начать общение с эти человеком(да/нет)?.";
-                reply[12] = database.getUser(database.getConnection(database.getPendingOf(sender.getId()).get(0)).getFriendID()).getPhotoID();
-                sender.setGlobalState(GlobalState.PENDING);
+                reply[12] = database.getProfile(database.getConnection(database.getPendingOf(user.getId()).get(0)).getFriendID()).getPhotoID();
+                user.setGlobalState(GlobalState.PENDING);
                 break;
         }
+        database.updateAccount(user);
+        database.updateProfile(profile);
     }
 }

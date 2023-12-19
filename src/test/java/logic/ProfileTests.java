@@ -1,32 +1,17 @@
 package logic;
 
-import database.models.User;
-import logic.states.GlobalState;
-import logic.states.LocalState;
+import database.entities.Profile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class UserTests {
-    /**
-     * Test of user initialization
-     */
-    @Test
-    public void initUserTest(){
-        User user = new User("0", "stats", "TELEGRAM");
-        Assertions.assertEquals("0", user.getId());
-        Assertions.assertEquals("stats", user.getUsername());
-        Assertions.assertEquals(user.getGlobalState(), GlobalState.COMMAND);
-        Assertions.assertEquals(user.getLocalState(), LocalState.START);
-        Assertions.assertEquals(0, user.getMinExpectedAge());
-        Assertions.assertEquals(999, user.getMaxExpectedAge());
-    }
+public class ProfileTests {
     /**
      * Test of sex verification.
      * Tests if there are only two acceptable options.
      */
     @Test
     public void sexVerificationTest(){
-        User user = new User("0", "stas", "TELEGRAM");
+        Profile user = new Profile(0);
         String lastSex = user.getSex();
         Assertions.assertFalse(user.setSex("asdfasdf"));
         Assertions.assertEquals(lastSex, user.getSex());
@@ -45,7 +30,7 @@ public class UserTests {
      */
     @Test
     public void ageVerificationTest(){
-        User user = new User("0", "stas", "TELEGRAM");
+        Profile user = new Profile(0);
         int lastAge = user.getAge();
         Assertions.assertFalse(user.setAge("13"));
         Assertions.assertFalse(user.setAge("-23"));
@@ -64,7 +49,10 @@ public class UserTests {
 
     @Test
     public void sexValidation(){
-        User user = new User("0", "stas", "TELEGRAM");
-        System.out.println(user.validateSex("Татьяна", "парень"));
+        Profile user = new Profile(0);
+        Assertions.assertTrue(user.validateSex("Татьяна", "девушка"));
+        Assertions.assertFalse(user.validateSex("Татьяна", "парень"));
+        Assertions.assertTrue(user.validateSex("Станислав", "парень"));
+        Assertions.assertFalse(user.validateSex("Станислав", "девушка"));
     }
 }
