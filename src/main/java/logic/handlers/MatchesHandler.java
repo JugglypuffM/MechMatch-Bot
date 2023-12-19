@@ -48,7 +48,7 @@ public class MatchesHandler implements Handler{
                         friendLikes.add(database.getConnection(j).getFriendID());
                     }
                     if (friendLikes.contains(user.getId())){
-                        reply[2+i] = reply[2+i] + "\n" + database.getUserUsernames(user.getId());
+                        reply[2+i] = reply[2+i] + "\n" + database.getUserUsernames(idList.get(i+page*10));
                     }
                 }
                 reply[14+i] = database.getProfile(idList.get(i+page*10)).getPhotoID();
