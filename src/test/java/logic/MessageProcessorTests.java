@@ -225,13 +225,19 @@ public class MessageProcessorTests {
         processor.processMessage("1", platform, "/editProfile");
         processor.processMessage("1", platform, "8");
         processor.processMessage("1", platform, "парень");
-        Assertions.assertEquals(processor.processMessage("1", platform, "/myProfile")[0], processor.processMessage("0", platform, "/match")[0]);
-        Assertions.assertEquals("Введи да или нет.", processor.processMessage("0", platform, "дварыера")[0]);
-        Assertions.assertEquals("Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!", processor.processMessage("0", platform, "да")[0]);
+        Assertions.assertEquals(processor.processMessage("1", platform, "/myProfile")[0],
+                processor.processMessage("0", platform, "/match")[0]);
+        Assertions.assertEquals("Введи да или нет.", processor.processMessage("0",
+                platform, "дварыера")[0]);
+        Assertions.assertEquals("Я уведомил этого пользователя, что он тебе приглянулся :)\n" +
+                "Если он ответит взаимностью, то вы сможете перейти к общению!",
+                processor.processMessage("0", platform, "да")[0]);
+        Assertions.assertEquals(processor.processMessage("0", platform, "/myProfile")[0],
+                processor.processMessage("1", platform, "/pending")[0]);
         Assertions.assertEquals("Введи да или нет.", processor.processMessage("1", platform, "дварыера")[0]);
         String[] reply = processor.processMessage("1", platform, "да");
         Assertions.assertEquals("Ура! Теперь вы можете перейти к общению.", reply[0]);
-        Assertions.assertEquals("Вот имена этого пользователя на разных платформах:\nTELEGRAM - stas\n", reply[1]);
+        Assertions.assertEquals("Вот имена этого пользователя на разных платформах:\nTELEGRAM - @stas\n", reply[1]);
     }
 
     /**
@@ -250,6 +256,7 @@ public class MessageProcessorTests {
         processor.processMessage("1", platform, "парень");
         Assertions.assertEquals(processor.processMessage("1", platform, "/myProfile")[0], processor.processMessage("0", platform, "/match")[0]);
         Assertions.assertEquals("Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!", processor.processMessage("0", platform, "да")[0]);
+        processor.processMessage("1", platform, "/pending");
         String[] reply = processor.processMessage("1", platform, "нет");
         Assertions.assertEquals("Хорошо, больше ты этого человека не увидишь. Если только не решишь удалить его из списка не понравившихся профилей.", reply[0]);
     }
@@ -287,9 +294,14 @@ public class MessageProcessorTests {
         processor.processMessage("1", platform, "8");
         processor.processMessage("1", platform, "парень");
         processor.processMessage("0", platform, "/match");
-        Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(", processor.processMessage("1", platform, "/match")[0]);
-        Assertions.assertEquals("Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!", processor.processMessage("0", platform, "да")[0]);
-        Assertions.assertEquals("Ура! Теперь вы можете перейти к общению.", processor.processMessage("1", platform, "да")[0]);
+        Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(",
+                processor.processMessage("1", platform, "/match")[0]);
+        Assertions.assertEquals("Я уведомил этого пользователя, что он тебе приглянулся :)\n" +
+                "Если он ответит взаимностью, то вы сможете перейти к общению!",
+                processor.processMessage("0", platform, "да")[0]);
+        processor.processMessage("1", platform, "/pending");
+        Assertions.assertEquals("Ура! Теперь вы можете перейти к общению.",
+                processor.processMessage("1", platform, "да")[0]);
     }
     /**
      * Test of /myMatches command
@@ -308,6 +320,7 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Просмотренных профилей пока что нет ;(\nПопробуй ввести /match", processor.processMessage("0", platform, "/myMatches")[0]);
         processor.processMessage("0", platform, "/match");
         processor.processMessage("0", platform, "да");
+        processor.processMessage("1", platform, "/pending");
         processor.processMessage("1", platform, "да");
         Assertions.assertEquals("Какой список профилей вывести(лайки/дизлайки)?", processor.processMessage("0", platform, "/myMatches")[0]);
         Assertions.assertEquals("Такого списка нет, введи либо \"лайки\", либо \"дизлайки\". Или \"выйти\", если передумал.", processor.processMessage("0", platform, "ыважлпдлавп")[0]);
@@ -317,7 +330,7 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Профили на странице 1:", reply[0]);
         Assertions.assertEquals("Профиль 1:\n" + processor.processMessage("1", platform, "/myProfile")[0] +
                 "\nВот имена этого пользователя на разных платформах:\n" +
-                "TELEGRAM - stas\n", reply[2]);
+                "TELEGRAM - @stas\n", reply[2]);
         Assertions.assertEquals("Больше страниц нет.", processor.processMessage("0", platform, "далее")[0]);
         Assertions.assertEquals("Это первая страница.", processor.processMessage("0", platform, "назад")[0]);
         Assertions.assertEquals("Введи \"далее\" или \"назад\" для смены страниц, \"выйти\" для выхода или номер профиля, который хочешь удалить.", processor.processMessage("0", platform, "выфжадвыьфа")[0]);
@@ -325,7 +338,6 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Профиль успешно удален из списка.", processor.processMessage("0", platform, "1")[0]);
         Assertions.assertEquals("Просмотренных профилей пока что нет ;(\nПопробуй ввести /match", processor.processMessage("0", platform, "/myMatches")[0]);
     }
-
     /**
      * User deletion command test
      */
