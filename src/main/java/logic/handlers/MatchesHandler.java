@@ -116,7 +116,7 @@ public class MatchesHandler implements Handler{
                     }
                     case "далее", "назад" -> {
                         if (message.equalsIgnoreCase("далее")) {
-                            if (user.getProfilesPage() < getIdList(user).size() / 10) {
+                            if (user.getProfilesPage() < getIdList(user).size()/10 + 1) {
                                 user.setProfilesPage(user.getProfilesPage() + 1);
                             } else {
                                 reply[0] = "Больше страниц нет.";

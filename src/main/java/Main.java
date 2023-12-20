@@ -22,6 +22,7 @@ public class Main {
             Logger.getRootLogger().error("Failed to initialize File Appender.", e);
         }
         Database database = new DatabaseService();
+        database.getAccount(1);
         BotDriver driver = new BotDriver(database);
         MessageProcessor processor = new MessageProcessor(database, driver);
         driver.setProcessor(processor);
