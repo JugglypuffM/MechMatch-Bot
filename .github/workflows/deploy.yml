@@ -44,10 +44,9 @@ jobs:
             cd ${{ secrets.PROJECT_FOLDER }};
             git checkout master;
             git pull;
-            sudo docker stop app db;
-            sudo docker rm app db;
-            sudo docker rmi bot-app bot-db;
-            sudo docker compose -p bot up -d;
+            sudo docker compose -p bot build
+            sudo docker compose -p bot up -d
+            sudo docker system prune --force
   deploy-test:
     needs: test
     runs-on: ubuntu-latest
@@ -63,13 +62,11 @@ jobs:
             cd ${{ secrets.PROJECT_FOLDER }};
             git checkout CI-CD;
             git pull;
-            sudo docker stop app db;
-            sudo docker rm app db;
-            sudo docker rmi bot-app bot-db;
-            sudo docker compose -p bot up -d;
+            sudo docker compose -p bot build
+            sudo docker compose -p bot up -d
+            sudo docker system prune --force
             git checkout master;
             git pull;
-            sudo docker stop app db;
-            sudo docker rm app db;
-            sudo docker rmi bot-app bot-db;
-            sudo docker compose -p bot up -d;
+            sudo docker compose -p bot build
+            sudo docker compose -p bot up -d
+            sudo docker system prune --force
