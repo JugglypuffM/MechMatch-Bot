@@ -41,15 +41,10 @@ public class MatchingHandler implements Handler{
                 String[] notification = new String[24];
                 database.addConnection(user.getId(), user.getSuggestedFriendID(), true);
                 database.addConnection(user.getSuggestedFriendID(), user.getId(), null);
-                Account friend = database.getAccount(user.getSuggestedFriendID());
-                friend.setGlobalState(GlobalState.PENDING);
-                database.updateAccount(friend);
-                notification[0] = "Твой профиль понравился кое-кому.";
-                notification[1] = database.profileData(user.getId());
-                notification[2] = "Напиши, хочешь ли ты начать общение с эти человеком(да/нет)?.";
-                notification[13] = database.getProfile(user.getId()).getPhotoID();
+                notification[0] = "Твой профиль понравился кое-кому, проверь список пользователей, ожидающих ответа.";
                 notificator.notifyFriend(user.getSuggestedFriendID(), notification);
-                reply[0] = "Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!";
+                reply[0] = "Я уведомил этого пользователя, что он тебе приглянулся :)\n" +
+                           "Если он ответит взаимностью, то вы сможете перейти к общению!";
             }
         }
         else if (message.equalsIgnoreCase("нет") || message.equals("\uD83D\uDC4E")){
