@@ -44,9 +44,9 @@ jobs:
             cd ${{ secrets.PROJECT_FOLDER }};
             git checkout master;
             git pull;
-            sudo docker compose -p bot build
-            sudo docker compose -p bot up -d
-            sudo docker system prune --force
+            sudo docker compose -p bot build;
+            sudo docker compose -p bot up -d;
+            sudo docker system prune --force;
   deploy-test:
     needs: test
     runs-on: ubuntu-latest
@@ -62,11 +62,5 @@ jobs:
             cd ${{ secrets.PROJECT_FOLDER }};
             git checkout CI-CD;
             git pull;
-            sudo docker compose -p bot build
-            sudo docker compose -p bot up -d
-            sudo docker system prune --force
-            git checkout master;
-            git pull;
-            sudo docker compose -p bot build
-            sudo docker compose -p bot up -d
-            sudo docker system prune --force
+            sudo docker compose -p bot build;
+            sudo docker system prune --force;
