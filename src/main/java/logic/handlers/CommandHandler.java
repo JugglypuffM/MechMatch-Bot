@@ -83,37 +83,17 @@ public class CommandHandler implements Handler{
                 user.setLocalState(LocalState.START);
                 break;
             case "/match", "подбор собеседника":
-                Account friend;
-                Profile friendProfile;
-                List<Integer> fpl = database.getFilledProfilesList(user.getId());
-                int tmpNum = 0;
-                reply[0] = "Не нашлось никого, кто соответствует твоей уникальности ;(";
-                while (tmpNum < fpl.size()) {
-                    friend = database.getAccount(fpl.get(tmpNum));
-                    friendProfile = database.getProfile(fpl.get(tmpNum));
-                    boolean userSexMatch = (profile.getExpectedSex().equalsIgnoreCase("без разницы")) || (friendProfile.getSex().equals(profile.getExpectedSex()));
-                    boolean friendSexMatch = (friendProfile.getExpectedSex().equalsIgnoreCase("без разницы")) || (profile.getSex().equals(friendProfile.getExpectedSex()));
-                    boolean userCityMatch = (profile.getExpectedCity().equalsIgnoreCase("любой")) || (friendProfile.getCity().equalsIgnoreCase(profile.getExpectedCity()));
-                    boolean friendCityMatch = (friendProfile.getExpectedCity().equalsIgnoreCase("любой")) || (profile.getCity().equalsIgnoreCase(friendProfile.getExpectedCity()));
-                    boolean userAgeMatch = (friendProfile.getAge() <= profile.getMaxExpectedAge()) && (friendProfile.getAge() >= profile.getMinExpectedAge());
-                    boolean friendAgeMatch = (profile.getAge() <= friendProfile.getMaxExpectedAge()) && (profile.getAge() >= friendProfile.getMinExpectedAge());
-                    List<Integer> friendDislikes = new ArrayList<>();
-                    for (Integer i: database.getDislikesOf(friend.getId())){
-                        friendDislikes.add(database.getConnection(i).getFriendID());
-                    }
-                    if (userSexMatch && userCityMatch && userAgeMatch &&
-                            friendSexMatch && friendCityMatch && friendAgeMatch &&
-                            !database.getAllConnectedUserIds(user.getId()).contains(friend.getId()) &&
-                            !friendDislikes.contains(user.getId()) &&
-                            !(Objects.equals(friend.getSuggestedFriendID(), user.getId()))) {
-                        reply[0] = database.profileData(friend.getId());
-                        reply[1] = "Напиши, понравился ли тебе пользователь(да/нет).";
-                        reply[12] = database.getProfile(fpl.get(tmpNum)).getPhotoID();
-                        user.setSuggestedFriendID(friend.getId());
-                        user.setGlobalState(GlobalState.MATCHING);
-                        break;
-                    }
-                    tmpNum++;
+                Integer suggestedFriendId = database.getNewFriendId(user.getId());
+                if (suggestedFriendId == -1){
+                    reply[0] = "Пока нет никого, кто соответствует твоей уникальности ;(";
+                }
+                else {
+                    Account friend = database.getAccount(suggestedFriendId);
+                    reply[0] = database.profileData(friend.getId());
+                    reply[1] = "Напиши, понравился ли тебе пользователь(да/нет).";
+                    reply[12] = database.getProfile(friend.getId()).getPhotoID();
+                    user.setSuggestedFriendID(friend.getId());
+                    user.setGlobalState(GlobalState.MATCHING);
                 }
                 break;
             case "/myprofile", "мой профиль":
@@ -133,7 +113,7 @@ public class CommandHandler implements Handler{
                 break;
             case "/deleteprofile", "удалить профиль":
                 reply[0] = "Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!";
-                reply[1] = "Если ты действительно этого хочешь, то введи свое имя пользователя(то что с собачкой)";
+                reply[1] = "Если ты действительно этого хочешь, то введи свой логин(да-да, тебе придется поискать его в переписке:))";
                 user.setGlobalState(GlobalState.PROFILE_EDIT);
                 user.setLocalState(LocalState.DELETE);
                 database.deleteFromFPL(user.getId());
