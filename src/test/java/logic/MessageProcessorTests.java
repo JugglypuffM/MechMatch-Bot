@@ -35,7 +35,7 @@ public class MessageProcessorTests {
         processor.processMessage(platformId,  platform,"password");
         Account account = database.getAccountWithLogin(login);
         account.setPlatformId(platformId, platform);
-        account.setPlatformUsername("stas", platform);
+        account.setPlatformUsername("stas" + platformId, platform);
         database.updateAccount(account);
     }
     /**
@@ -53,8 +53,8 @@ public class MessageProcessorTests {
         processor.processMessage(platformId,  platform,"просто круд");
         processor.processMessage(platformId,  platform,"17");
         processor.processMessage(platformId,  platform,"23");
-        processor.processMessage(platformId,  platform,"Девушка");
-        processor.processMessage(platformId,  platform,"Екатеринбург");
+        processor.processMessage(platformId,  platform,"без разницы");
+        processor.processMessage(platformId,  platform,"любой");
         processor.processPhoto(platformId,  platform,"Екатеринбург");
         processor.processMessage(platformId,  platform,"да");
     }
@@ -67,11 +67,11 @@ public class MessageProcessorTests {
         this.database = new DatabaseMock();
         this.processor = new MessageProcessor(database, null);
         processor.processMessage(platformId,  platform,"/register");
-        processor.processMessage(platformId,  platform,"stas");
+        processor.processMessage(platformId,  platform,"stas0");
         processor.processMessage(platformId,  platform,"password");
-        Account account = database.getAccountWithLogin("stas");
+        Account account = database.getAccountWithLogin("stas0");
         account.setPlatformId(platformId, platform);
-        account.setPlatformUsername("stas", platform);
+        account.setPlatformUsername("stas0", platform);
         database.updateAccount(account);
         processor.processMessage(platformId,  platform,"/start");
         processor.processMessage(platformId,  platform,"Стас");
@@ -82,8 +82,8 @@ public class MessageProcessorTests {
         processor.processMessage(platformId,  platform,"просто круд");
         processor.processMessage(platformId,  platform,"17");
         processor.processMessage(platformId,  platform,"23");
-        processor.processMessage(platformId,  platform,"Девушка");
-        processor.processMessage(platformId,  platform,"Екатеринбург");
+        processor.processMessage(platformId,  platform,"без разницы");
+        processor.processMessage(platformId,  platform,"любой");
         processor.processPhoto(platformId,  platform,"Екатеринбург");
     }
     /**
@@ -101,8 +101,8 @@ public class MessageProcessorTests {
                 Город: Екатеринбург
                 Информация о себе: просто круд
                 Диапазон возраста собеседника: 17 - 23
-                Пол собеседника: девушка
-                Город собеседника: Екатеринбург""", reply[0]);
+                Пол собеседника: без разницы
+                Город собеседника: любой""", reply[0]);
         Assertions.assertEquals("Екатеринбург", reply[12]);
     }
 
@@ -122,8 +122,8 @@ public class MessageProcessorTests {
                 5 - Информация о себе(просто круд)
                 6 - Нижний порог возраста собеседника(17)
                 7 - Верхний порог возраста собеседника(23)
-                8 - Пол собеседника(девушка)
-                9 - Город собеседника(Екатеринбург)
+                8 - Пол собеседника(без разницы)
+                9 - Город собеседника(любой)
                 10 - Фото""", reply[1]);
         processor.processMessage(platformId,  platform,"2");
         processor.processMessage(platformId,  platform,"18");
@@ -147,8 +147,8 @@ public class MessageProcessorTests {
                 Город: Екатеринбург
                 Информация о себе: просто круд
                 Диапазон возраста собеседника: 17 - 23
-                Пол собеседника: девушка
-                Город собеседника: Екатеринбург""", processor.processMessage(platformId,  platform,"/myProfile")[0]);
+                Пол собеседника: без разницы
+                Город собеседника: любой""", processor.processMessage(platformId,  platform,"/myProfile")[0]);
     }
 
     /**
@@ -208,7 +208,10 @@ public class MessageProcessorTests {
         processor.processMessage(platformId,  platform,"да");
         registerAccount("stas1", "1", Platform.TELEGRAM, processor);
         fillProfile("1", platform, processor);
-        Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(", processor.processMessage("0",  platform,"/match")[0]);
+        processor.processMessage("1", platform, "/editProfile");
+        processor.processMessage("1", platform, "8");
+        processor.processMessage("1", platform, "девушка");
+        Assertions.assertEquals("Пока нет никого, кто соответствует твоей уникальности ;(", processor.processMessage("0",  platform,"/match")[0]);
     }
 
     /**
@@ -219,12 +222,6 @@ public class MessageProcessorTests {
         processor.processMessage(platformId,  platform,"да");
         registerAccount("stas1", "1", Platform.TELEGRAM, processor);
         fillProfile("1", platform, processor);
-        processor.processMessage("0", platform, "/editProfile");
-        processor.processMessage("0", platform, "8");
-        processor.processMessage("0", platform, "парень");
-        processor.processMessage("1", platform, "/editProfile");
-        processor.processMessage("1", platform, "8");
-        processor.processMessage("1", platform, "парень");
         Assertions.assertEquals(processor.processMessage("1", platform, "/myProfile")[0],
                 processor.processMessage("0", platform, "/match")[0]);
         Assertions.assertEquals("Введи да или нет.", processor.processMessage("0",
@@ -237,7 +234,7 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Введи да или нет.", processor.processMessage("1", platform, "дварыера")[0]);
         String[] reply = processor.processMessage("1", platform, "да");
         Assertions.assertEquals("Ура! Теперь вы можете перейти к общению.", reply[0]);
-        Assertions.assertEquals("Вот имена этого пользователя на разных платформах:\nTELEGRAM - @stas\n", reply[1]);
+        Assertions.assertEquals("Вот имена этого пользователя на разных платформах:\nTELEGRAM - @stas0\n", reply[1]);
     }
 
     /**
@@ -248,12 +245,6 @@ public class MessageProcessorTests {
         processor.processMessage(platformId, platform, "да");
         registerAccount("stas1", "1", Platform.TELEGRAM, processor);
         fillProfile("1", platform, processor);
-        processor.processMessage("0", platform, "/editProfile");
-        processor.processMessage("0", platform, "8");
-        processor.processMessage("0", platform, "парень");
-        processor.processMessage("1", platform, "/editProfile");
-        processor.processMessage("1", platform, "8");
-        processor.processMessage("1", platform, "парень");
         Assertions.assertEquals(processor.processMessage("1", platform, "/myProfile")[0], processor.processMessage("0", platform, "/match")[0]);
         Assertions.assertEquals("Я уведомил этого пользователя, что он тебе приглянулся :)\nЕсли он ответит взаимностью, то вы сможете перейти к общению!", processor.processMessage("0", platform, "да")[0]);
         processor.processMessage("1", platform, "/pending");
@@ -269,12 +260,6 @@ public class MessageProcessorTests {
         processor.processMessage(platformId, platform, "да");
         registerAccount("stas1", "1", Platform.TELEGRAM, processor);
         fillProfile("1", platform, processor);
-        processor.processMessage("0", platform, "/editProfile");
-        processor.processMessage("0", platform, "8");
-        processor.processMessage("0", platform, "парень");
-        processor.processMessage("1", platform, "/editProfile");
-        processor.processMessage("1", platform, "8");
-        processor.processMessage("1", platform, "парень");
         Assertions.assertEquals(processor.processMessage("1", platform, "/myProfile")[0], processor.processMessage("0", platform, "/match")[0]);
         Assertions.assertEquals("Очень жаль, в следующий раз постараюсь лучше :(", processor.processMessage("0", platform, "нет")[0]);
     }
@@ -287,14 +272,8 @@ public class MessageProcessorTests {
         processor.processMessage(platformId, platform, "да");
         registerAccount("stas1", "1", Platform.TELEGRAM, processor);
         fillProfile("1", platform, processor);
-        processor.processMessage("0", platform, "/editProfile");
-        processor.processMessage("0", platform, "8");
-        processor.processMessage("0", platform, "парень");
-        processor.processMessage("1", platform, "/editProfile");
-        processor.processMessage("1", platform, "8");
-        processor.processMessage("1", platform, "парень");
-        processor.processMessage("0", platform, "/match");
-        Assertions.assertEquals("Не нашлось никого, кто соответствует твоей уникальности ;(",
+        processor.processMessage(platformId, platform, "/match");
+        Assertions.assertEquals("Пока нет никого, кто соответствует твоей уникальности ;(",
                 processor.processMessage("1", platform, "/match")[0]);
         Assertions.assertEquals("Я уведомил этого пользователя, что он тебе приглянулся :)\n" +
                 "Если он ответит взаимностью, то вы сможете перейти к общению!",
@@ -302,6 +281,21 @@ public class MessageProcessorTests {
         processor.processMessage("1", platform, "/pending");
         Assertions.assertEquals("Ура! Теперь вы можете перейти к общению.",
                 processor.processMessage("1", platform, "да")[0]);
+    }
+    @Test
+    public void repeatedLikeTest(){
+        processor.processMessage(platformId, platform, "да");
+        registerAccount("stas1", "1", Platform.TELEGRAM, processor);
+        fillProfile("1", platform, processor);
+        processor.processMessage(platformId, platform, "/match");
+        processor.processMessage(platformId, platform, "да");
+        processor.processMessage("1", platform, "/pending");
+        processor.processMessage("1", platform, "да");
+        processor.processMessage("1", platform, "/myMatches");
+        processor.processMessage("1", platform, "лайки");
+        processor.processMessage("1", platform, "1");
+        processor.processMessage("1", platform, "/match");
+        Assertions.assertEquals("Вы уже отвечали друг другу взаимностью, продолжайте общение!", processor.processMessage("1", platform, "да")[0]);
     }
     /**
      * Test of /myMatches command
@@ -330,7 +324,7 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Профили на странице 1:", reply[0]);
         Assertions.assertEquals("Профиль 1:\n" + processor.processMessage("1", platform, "/myProfile")[0] +
                 "\nВот имена этого пользователя на разных платформах:\n" +
-                "TELEGRAM - @stas\n", reply[2]);
+                "TELEGRAM - @stas1\n", reply[2]);
         Assertions.assertEquals("Больше страниц нет.", processor.processMessage("0", platform, "далее")[0]);
         Assertions.assertEquals("Это первая страница.", processor.processMessage("0", platform, "назад")[0]);
         Assertions.assertEquals("Введи \"далее\" или \"назад\" для смены страниц, \"выйти\" для выхода или номер профиля, который хочешь удалить.", processor.processMessage("0", platform, "выфжадвыьфа")[0]);
@@ -347,7 +341,7 @@ public class MessageProcessorTests {
         Assertions.assertEquals("Ты уверен, что хочешь этого? Все твои данные удалятся, в том числе и список понравившихся тебе людей!", processor.processMessage(platformId, platform, "/deleteProfile")[0]);
         Assertions.assertEquals("Введено неверное значение, процедура удаления прекращена.", processor.processMessage(platformId, platform, "stas1")[0]);
         processor.processMessage(platformId, platform, "/deleteProfile");
-        Assertions.assertEquals("Профиль успешно удален.", processor.processMessage(platformId, platform, "stas")[0]);
+        Assertions.assertEquals("Профиль успешно удален.", processor.processMessage(platformId, platform, "stas0")[0]);
         Assertions.assertEquals("Похоже ты еще не авторизован, поэтому тебе доступны только команды:\n    /login - войти в существующую учетную запись\n    /register - создать новую учетную запись\n    /cancel - доступна после отправки одной из вышеперечисленных команд, отменяет процедуру и возвращает обратно в это меню\n", processor.processMessage(platformId, platform, "/start")[0]);
     }
 }
