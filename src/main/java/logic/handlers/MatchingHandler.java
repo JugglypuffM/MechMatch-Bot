@@ -28,6 +28,8 @@ public class MatchingHandler implements Handler{
         if (message.equals("/stop") || message.equals("Остановить")){
             reply[0] = "Подбор собеседника прекращен.";
             user.setSuggestedFriendID(null);
+            user.setGlobalState(GlobalState.COMMAND);
+            return;
         }
         List<Integer> friendLikes = new ArrayList<>();
         for (Integer i: database.getLikesOf(user.getSuggestedFriendID())){
