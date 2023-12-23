@@ -130,7 +130,7 @@ public interface Database {
             if (user.getPlatformUsername(platform) != null){
                 if (platform == Platform.TELEGRAM){
                     result.append(platform.stringRepresentation()).append(" - @").
-                            append(user.getPlatformUsername(platform).replace("_", "\\_")).append("\n");
+                            append(user.getPlatformUsername(platform)).append("\n");
                 }else {
                     result.append(platform.stringRepresentation()).append(" - ").
                             append(user.getPlatformUsername(platform)).append("\n");
