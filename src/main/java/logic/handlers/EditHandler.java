@@ -30,8 +30,7 @@ public class EditHandler implements Handler{
             reply[0] = stateFSM.getEditReplies().get(user.getLocalState());
         }
         else if (user.getLocalState() == LocalState.DELETE){
-            if (message.equals(user.getPlatformUsername(platform)) ||
-                    message.equals("@" + user.getPlatformUsername(platform))){
+            if (message.equals(user.getLogin())){
                 reply[0] = "Профиль успешно удален.";
                 database.updateClient(new Client(user.getPlatformId(platform), platform.stringRepresentation()));
                 database.deleteAccount(user.getId());
