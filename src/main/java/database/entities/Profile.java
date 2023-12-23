@@ -192,7 +192,8 @@ public class Profile {
         try {
             response = httpclient.execute(httppost);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
+            return true;
         }
         HttpEntity entity = response.getEntity();
         String result = "none";
