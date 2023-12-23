@@ -98,8 +98,19 @@ public class DatabaseMock implements Database {
     public List<Integer> getAllConnectedUserIds(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
-            if (connection.getUserID().equals(id)){
+            if (connection.getUserID().equals(id) && !connection.getDeleted()){
                 result.add(connection.getFriendID());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<Integer> getAllDeletedWith(Integer id) {
+        List<Integer> result = new ArrayList<>();
+        for (Connection connection: connectionDict.values()){
+            if (connection.getUserID().equals(id) && connection.getDeleted()){
+                result.add(connection.getId());
             }
         }
         return result;
@@ -109,7 +120,7 @@ public class DatabaseMock implements Database {
     public List<Integer> getAllConnectionsWith(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
-            if (connection.getUserID().equals(id)){
+            if (connection.getUserID().equals(id) && !connection.getDeleted()){
                 result.add(connection.getId());
             }
         }
@@ -130,7 +141,7 @@ public class DatabaseMock implements Database {
     public List<Integer> getPendingOf(Integer id) {
         List<Integer> result = new ArrayList<>();
         for (Connection connection: connectionDict.values()){
-            if (connection.getUserID().equals(id) && (connection.getLiked() == null)){
+            if (connection.getUserID().equals(id) && (connection.getLiked() == null) && !connection.getDeleted()){
                 result.add(connection.getId());
             }
         }
@@ -144,7 +155,7 @@ public class DatabaseMock implements Database {
             if (connection.getLiked() == null){
                 continue;
             }
-            if (connection.getUserID().equals(id) && (connection.getLiked())){
+            if (connection.getUserID().equals(id) && (connection.getLiked()) && !(connection.getDeleted())){
                 result.add(connection.getId());
             }
         }
@@ -158,7 +169,7 @@ public class DatabaseMock implements Database {
             if (connection.getLiked() == null){
                 continue;
             }
-            if (connection.getUserID().equals(id) && (!connection.getLiked())){
+            if (connection.getUserID().equals(id) && (!connection.getLiked()) && !connection.getDeleted()){
                 result.add(connection.getId());
             }
         }

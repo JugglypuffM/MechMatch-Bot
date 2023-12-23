@@ -54,13 +54,19 @@ public class ConnectionDAO implements DAO<Connection, Integer>{
         tx1.commit();
         session.close();
     }
+    public List<Connection> getDeletedWith(Integer id) {
+        Session session = sessionFactory.getSessionFactory().openSession();
+        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and deleted is true)");
+        query.setParameter("paramid", id);
+        return query.list();
+    }
     /**
      * Get list with connections of given user with other users
      * @return connections list
      */
     public List<Connection> getConnectionsWith(Integer id) {
         Session session = sessionFactory.getSessionFactory().openSession();
-        Query<Connection> query = session.createQuery("From Connection where userID = :paramid");
+        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and deleted is false)");
         query.setParameter("paramid", id);
         return query.list();
     }
@@ -76,19 +82,19 @@ public class ConnectionDAO implements DAO<Connection, Integer>{
      */
     public List<Connection> getPendingOf(Integer id){
         Session session = sessionFactory.getSessionFactory().openSession();
-        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is null ) order by id asc" );
+        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is null and deleted is false) order by id asc" );
         query.setParameter("paramid", id);
         return query.list();
     }
     public List<Connection> getLikesOf(Integer id){
         Session session = sessionFactory.getSessionFactory().openSession();
-        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is true ) order by id asc");
+        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is true and deleted is false) order by id asc");
         query.setParameter("paramid", id);
         return query.list();
     }
     public List<Connection> getDislikesOf(Integer id){
         Session session = sessionFactory.getSessionFactory().openSession();
-        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is false ) order by id asc");
+        Query<Connection> query = session.createQuery("From Connection where (userID = :paramid and isLiked is false and deleted is false) order by id asc");
         query.setParameter("paramid", id);
         return query.list();
     }

@@ -1,6 +1,7 @@
 package logic.handlers;
 
 import bots.platforms.Platform;
+import database.entities.Connection;
 import database.entities.Profile;
 import database.main.Database;
 import database.entities.Account;
@@ -9,6 +10,7 @@ import logic.states.GlobalState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Matching procedure handler.
@@ -23,12 +25,35 @@ public class MatchingHandler implements Handler{
         this.notificator = m_notificator;
     }
     public void handleMessage(Account user, Profile profile, String[] reply, String message, Platform platform) {
+        if (message.equals("/stop") || message.equals("Остановить")){
+            reply[0] = "Подбор собеседника прекращен.";
+            user.setSuggestedFriendID(null);
+            user.setGlobalState(GlobalState.COMMAND);
+            return;
+        }
         List<Integer> friendLikes = new ArrayList<>();
         for (Integer i: database.getLikesOf(user.getSuggestedFriendID())){
             friendLikes.add(database.getConnection(i).getFriendID());
         }
+        boolean connectionExists = false;
+        Connection connection = null;
+        for (Integer cid: database.getAllDeletedWith(user.getId())){
+            connection = database.getConnection(cid);
+            if(connection.getUserID().equals(user.getId()) &&
+                    connection.getFriendID().equals(user.getSuggestedFriendID())){
+                connectionExists = true;
+                break;
+            }
+        }
         if (message.equalsIgnoreCase("да") || message.equals("❤️")){
-            if (friendLikes.contains(user.getId())){
+            if (connectionExists){
+                connection.setDeleted(false);
+                connection.setIsLiked(true);
+                database.updateConnection(connection);
+                reply[0] = "Вы уже отвечали друг другу взаимностью, продолжайте общение!";
+                reply[1] = database.getUserUsernames(user.getSuggestedFriendID());
+            }
+            else if (friendLikes.contains(user.getId())){
                 String[] notification = new String[24];
                 database.addConnection(user.getId(), user.getSuggestedFriendID(), true);
                 notification[0] = "Ура! Тебе ответили взаимностью, можно переходить к общению.";
@@ -44,11 +69,17 @@ public class MatchingHandler implements Handler{
                 notification[0] = "Твой профиль понравился кое-кому, проверь список пользователей, ожидающих ответа.";
                 notificator.notifyFriend(user.getSuggestedFriendID(), notification);
                 reply[0] = "Я уведомил этого пользователя, что он тебе приглянулся :)\n" +
-                           "Если он ответит взаимностью, то вы сможете перейти к общению!";
+                        "Если он ответит взаимностью, то вы сможете перейти к общению!";
             }
         }
         else if (message.equalsIgnoreCase("нет") || message.equals("\uD83D\uDC4E")){
-            database.addConnection(user.getId(), user.getSuggestedFriendID(), false);
+            if (connectionExists){
+                connection.setDeleted(false);
+                connection.setIsLiked(false);
+                database.updateConnection(connection);
+            }
+            else
+                database.addConnection(user.getId(), user.getSuggestedFriendID(), false);
             reply[0] = "Очень жаль, в следующий раз постараюсь лучше :(";
         }
         else {
@@ -56,6 +87,17 @@ public class MatchingHandler implements Handler{
             return;
         }
         user.setSuggestedFriendID(null);
-        user.setGlobalState(GlobalState.COMMAND);
+        Integer suggestedFriendId = database.getNewFriendId(user.getId());
+        if (suggestedFriendId == -1){
+            reply[1] = "Больше не нашлось никого, кто соответствует твоей уникальности ;(";
+            user.setGlobalState(GlobalState.COMMAND);
+        }
+        else {
+            Account friend = database.getAccount(suggestedFriendId);
+            reply[1] = database.profileData(friend.getId());
+            reply[2] = "Напиши, понравился ли тебе пользователь(да/нет).";
+            reply[13] = database.getProfile(friend.getId()).getPhotoID();
+            user.setSuggestedFriendID(friend.getId());
+        }
     }
 }

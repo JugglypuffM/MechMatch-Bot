@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS public.matches
     friendid integer,
     id bigint default nextval('matches_id_seq'::regclass) not null
         primary key,
-    isliked boolean
+    isliked boolean,
+    deleted boolean
 )
 
 TABLESPACE pg_default;

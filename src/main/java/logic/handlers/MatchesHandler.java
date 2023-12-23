@@ -1,6 +1,7 @@
 package logic.handlers;
 
 import bots.platforms.Platform;
+import database.entities.Connection;
 import database.entities.Profile;
 import database.main.Database;
 import database.entities.Account;
@@ -85,7 +86,6 @@ public class MatchesHandler implements Handler{
                         return;
                     }
                 }
-
                 user.setProfilesPage(1);
                 getTenProfiles(user, reply, getIdList(user));
                 user.setLocalState(LocalState.PROFILES);
@@ -106,7 +106,9 @@ public class MatchesHandler implements Handler{
                                 return;
                             }
                             toDelete = toDelete - 1;
-                            database.deleteConnection(connectionIDs.get(toDelete));
+                            Connection connection = database.getConnection(connectionIDs.get(toDelete));
+                            connection.setDeleted(true);
+                            database.updateConnection(connection);
                             reply[0] = "Профиль успешно удален из списка.";
                             user.setProfilesList(null);
                             user.setGlobalState(GlobalState.COMMAND);
