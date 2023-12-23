@@ -81,6 +81,16 @@ public class DatabaseService implements Database {
         }
         return connections;
     }
+
+    @Override
+    public List<Integer> getAllDeletedWith(Integer id) {
+        List<Integer> connections = new ArrayList<>();
+        for (Connection connection: connectionDAO.getDeletedWith(id)){
+            connections.add(connection.getId());
+        }
+        return connections;
+    }
+
     @Override
     public List<Integer> getAllConnectionsWith(Integer id){
         List<Integer> connections = new ArrayList<>();

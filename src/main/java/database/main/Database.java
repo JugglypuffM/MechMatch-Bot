@@ -8,6 +8,7 @@ import database.entities.Client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public interface Database {
     void addClient(String id, String platform);
@@ -50,6 +51,7 @@ public interface Database {
      * @return list of id's
      */
     List<Integer> getAllConnectedUserIds(Integer id);
+    List<Integer> getAllDeletedWith(Integer id);
     List<Integer> getAllConnectionsWith(Integer id);
     /**
      * Get connections with given user, which were not set to like or dislike
@@ -136,6 +138,35 @@ public interface Database {
             }
         }
         return result.toString();
+    }
+    default Integer getNewFriendId(Integer id){
+        Account friend, user = getAccount(id);
+        Profile friendProfile, profile = getProfile(id);
+        List<Integer> fpl = getFilledProfilesList(user.getId());
+        int tmpNum = 0;
+        while (tmpNum < fpl.size()) {
+            friend = getAccount(fpl.get(tmpNum));
+            friendProfile = getProfile(fpl.get(tmpNum));
+            boolean userSexMatch = (profile.getExpectedSex().equalsIgnoreCase("без разницы")) || (friendProfile.getSex().equals(profile.getExpectedSex()));
+            boolean friendSexMatch = (friendProfile.getExpectedSex().equalsIgnoreCase("без разницы")) || (profile.getSex().equals(friendProfile.getExpectedSex()));
+            boolean userCityMatch = (profile.getExpectedCity().equalsIgnoreCase("любой")) || (friendProfile.getCity().equalsIgnoreCase(profile.getExpectedCity()));
+            boolean friendCityMatch = (friendProfile.getExpectedCity().equalsIgnoreCase("любой")) || (profile.getCity().equalsIgnoreCase(friendProfile.getExpectedCity()));
+            boolean userAgeMatch = (friendProfile.getAge() <= profile.getMaxExpectedAge()) && (friendProfile.getAge() >= profile.getMinExpectedAge());
+            boolean friendAgeMatch = (profile.getAge() <= friendProfile.getMaxExpectedAge()) && (profile.getAge() >= friendProfile.getMinExpectedAge());
+            List<Integer> friendDislikes = new ArrayList<>();
+            for (Integer i: getDislikesOf(friend.getId())){
+                friendDislikes.add(getConnection(i).getFriendID());
+            }
+            if (userSexMatch && userCityMatch && userAgeMatch &&
+                    friendSexMatch && friendCityMatch && friendAgeMatch &&
+                    !getAllConnectedUserIds(user.getId()).contains(friend.getId()) &&
+                    !friendDislikes.contains(user.getId()) &&
+                    !(Objects.equals(friend.getSuggestedFriendID(), user.getId()))) {
+                return friend.getId();
+            }
+            tmpNum++;
+        }
+        return -1;
     }
     /**
      * Get filledProfilesList.
