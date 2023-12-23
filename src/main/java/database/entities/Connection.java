@@ -14,17 +14,20 @@ public class Connection {
     private Integer id;
     private Integer userID, friendID;
     private Boolean isLiked;
+    private boolean deleted;
     public Connection(){}
     public Connection(Integer id, Integer userID, Integer friendID, Boolean isLiked) {
         this.id = id;
         this.userID = userID;
         this.friendID = friendID;
         this.isLiked = isLiked;
+        this.deleted = false;
     }
     public Connection(Integer userID, Integer friendID, Boolean isLiked) {
         this.userID = userID;
         this.friendID = friendID;
         this.isLiked = isLiked;
+        this.deleted = false;
     }
 
     public int getId() {
@@ -36,12 +39,16 @@ public class Connection {
     public Integer getFriendID() {
         return friendID;
     }
-
     public Boolean getLiked() {
         return isLiked;
     }
-
     public void setIsLiked(Boolean m_isLiked) {
         this.isLiked = m_isLiked;
+    }
+    public Boolean getDeleted() {
+        return deleted;
+    }
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 }
