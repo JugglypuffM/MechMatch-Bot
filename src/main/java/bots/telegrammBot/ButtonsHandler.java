@@ -20,6 +20,7 @@ public class ButtonsHandler {
     private final ArrayList<KeyboardRow> commandKeyboard;
     private final ArrayList<KeyboardRow> sexKeyboard;
     private final ArrayList<KeyboardRow> esexKeyboard;
+    private final ArrayList<KeyboardRow> ecityKeyboard;
     private final ArrayList<KeyboardRow> fillStartKeyboard;
     private final ArrayList<KeyboardRow> editStartKeyboard;
     private final ArrayList<KeyboardRow> matchesChooseKeyboard;
@@ -61,6 +62,11 @@ public class ButtonsHandler {
         row2.add(new KeyboardButton("Без разницы"));
         this.esexKeyboard.add(row1);
         this.esexKeyboard.add(row2);
+
+        this.ecityKeyboard = new ArrayList<>();
+        row1 = new KeyboardRow();
+        row1.add(new KeyboardButton("Любой"));
+        this.ecityKeyboard.add(row1);
 
         this.fillStartKeyboard = new ArrayList<>();
         row1 = new KeyboardRow();
@@ -105,7 +111,10 @@ public class ButtonsHandler {
         row1 = new KeyboardRow();
         row1.add(new KeyboardButton("❤️"));
         row1.add(new KeyboardButton("\uD83D\uDC4E"));
+        row2 = new KeyboardRow();
+        row2.add(new KeyboardButton("Остановить"));
         this.likeKeyboard.add(row1);
+        this.likeKeyboard.add(row2);
 
         this.simpleKeyboard = new ArrayList<>();
         row1 = new KeyboardRow();
@@ -154,6 +163,7 @@ public class ButtonsHandler {
                         }
                         case SEX -> replyKeyboard = new ReplyKeyboardMarkup(sexKeyboard);
                         case ESEX -> replyKeyboard = new ReplyKeyboardMarkup(esexKeyboard);
+                        case ECITY -> replyKeyboard = new ReplyKeyboardMarkup(ecityKeyboard);
                         case FINISH -> replyKeyboard = new ReplyKeyboardMarkup(simpleKeyboard);
                     }
                 }
