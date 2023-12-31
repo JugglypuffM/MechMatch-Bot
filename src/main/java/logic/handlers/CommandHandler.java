@@ -4,6 +4,7 @@ import bots.platforms.Platform;
 import database.main.Database;
 import database.entities.Account;
 import database.entities.Profile;
+import logic.notificator.Notificator;
 import logic.states.GlobalState;
 import logic.states.LocalState;
 
@@ -18,8 +19,10 @@ import java.util.Objects;
  */
 public class CommandHandler implements Handler{
     private final Database database;
-    public CommandHandler(Database m_database){
+    private final Notificator notificator;
+    public CommandHandler(Database m_database, Notificator notificator){
         this.database = m_database;
+        this.notificator = notificator;
     }
     /**
      * Simple help method
@@ -127,6 +130,16 @@ public class CommandHandler implements Handler{
                 reply[1] = "Напиши, хочешь ли ты начать общение с эти человеком(да/нет)?.";
                 reply[12] = database.getProfile(database.getConnection(database.getPendingOf(user.getId()).get(0)).getFriendID()).getPhotoID();
                 user.setGlobalState(GlobalState.PENDING);
+                break;
+            case "/happyny":
+                if (!user.getPlatformId(Platform.TELEGRAM).equals("533324691"))
+                    return;
+                String[] notification = new String[24];
+                for (Integer i: database.getFilledProfilesList(user.getId())){
+                    notification[0] = "С новым годом!";
+                    notificator.notifyFriend(i, notification);
+                }
+                reply[0] = "Уведомление отправлено!";
                 break;
         }
         database.updateAccount(user);

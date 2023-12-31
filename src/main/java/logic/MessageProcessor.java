@@ -29,7 +29,7 @@ public class MessageProcessor {
     public MessageProcessor(Database m_database, BotDriver m_driver){
         this.database = m_database;
         Notificator notificator = new Notificator(m_driver);
-        this.caseCommand = new CommandHandler(m_database);
+        this.caseCommand = new CommandHandler(m_database, notificator);
         this.caseProfileFill = new FillingHandler(m_database, stateFSM);
         this.caseProfileEdit = new EditHandler(m_database, stateFSM);
         this.caseMatches = new MatchesHandler(m_database);
